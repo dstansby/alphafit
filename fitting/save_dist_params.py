@@ -27,7 +27,7 @@ def save_fits(fits, probe, year, doy, dim, fdir):
     fits.to_hdf(saveloc, 'fits', mode='w', format='f')
 
 
-def main():
+def do_fitting(pltfigs=False):
     probe = '2'
 
     # Loop through time
@@ -158,4 +158,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    do_fitting()
