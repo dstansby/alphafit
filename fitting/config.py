@@ -9,7 +9,9 @@ def get_dirs():
     config = configparser.ConfigParser()
     config.read('config.ini')
     if not os.path.isfile('config.ini'):
-        raise FileNotFoundError('Could not find a config.ini file')
+        raise FileNotFoundError('Could not find a config.ini file. '
+                                'Try renaming the config.ini.template file to '
+                                'config.ini in the corefit/fitting directory')
 
     output_dir = config['data_dirs']['output_dir']
 
