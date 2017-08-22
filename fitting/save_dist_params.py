@@ -135,7 +135,6 @@ def do_fitting(pltfigs=False):
                 fitlist_3D = []
                 # Loop through individual times
                 for time, dist_3D in dists_3D.groupby(level='Time'):
-                    print(time)
                     params = distparams.loc[time].copy()
 
                     if len(params.shape) > 1:
