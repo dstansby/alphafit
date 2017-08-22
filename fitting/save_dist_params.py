@@ -54,7 +54,8 @@ def do_fitting(pltfigs=False):
 
                 # Load 4Hz magnetic field data
                 try:
-                    mag4hz = helios.mag_4hz(probe, starttime, endtime)
+                    mag4hz = helios.mag_4hz(probe, starttime, endtime,
+                                            verbose=False, try_download=False)
 
                     # Deal with the flipped 4Hz data on Helios 2
                     if probe == '2':
@@ -67,7 +68,8 @@ def do_fitting(pltfigs=False):
 
                 # Also load 6s data as backup
                 try:
-                    mag6s = helios.mag_ness(probe, starttime, endtime)
+                    mag6s = helios.mag_ness(probe, starttime, endtime,
+                                            verbose=False, try_download=False)
                 except Exception as err:
                     print(str(err))
                     mag6s = None
