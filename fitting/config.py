@@ -1,3 +1,6 @@
+# Script to read in output directory configuration file
+#
+# David Stansby 2017
 import os
 import configparser
 

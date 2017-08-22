@@ -1,4 +1,6 @@
 # Script to convert hdf files to csv files
+#
+# David Stansby 2017
 import os
 import pandas as pd
 import numpy as np

@@ -1,8 +1,6 @@
-# save_dist_params.py
+# Script to save fit parameters from fitting processes
 #
-#   Script to save fit parameters from fitting processes
-#
-#   David Stansby 2016-17
+# David Stansby 2017
 import os
 from datetime import datetime, timedelta
 

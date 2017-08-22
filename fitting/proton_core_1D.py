@@ -1,8 +1,6 @@
-# oneD_dists.py
+# Script to process 1D ion distribution functions
 #
-#   Script to process 1D ion distribution functions
-#
-#   David Stansby 2016-17
+# David Stansby 2017
 import numpy as np
 import pandas as pd
 from datetime import datetime
