@@ -129,7 +129,8 @@ def main():
                 # Do 3D fit
                 try:
                     fit_3D = ions_3D.iondistfitting(dist_3D, params, fit_1D,
-                                                    mag4hz, mag6s, time, I1a, I1b, pltfigs)
+                                                    mag4hz, mag6s, time,
+                                                    I1a, I1b, pltfigs)
                     if pltfigs:
                         import matplotlib.pyplot as plt
                         plt.show()
@@ -142,7 +143,8 @@ def main():
                         raise
 
                 # Add orbital information
-                for var in ['r_sun', 'clong', 'clat', 'carrot', 'earth_he_angle']:
+                for var in ['r_sun', 'clong', 'clat',
+                            'carrot', 'earth_he_angle']:
                     fit_3D[var] = params[var]
                 fitlist_3D.append(fit_3D)
             # End of a single day, put each day into its own DataFrame
