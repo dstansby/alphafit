@@ -44,10 +44,8 @@ def do_fitting(pltfigs=False):
                 continue
             endtime = starttime + timedelta(hours=24) -\
                 timedelta(microseconds=1)
-            pltfigs = False
             # Uncomment next line to start from a specific datetime
-            starttime = starttime + timedelta(hours=14, minutes=55, seconds=0)
-            pltfigs = True
+            # starttime = starttime + timedelta(hours=14, minutes=55, seconds=0)
 
             # Load corresponding magnetic field
             try:
