@@ -1,7 +1,8 @@
+from datetime import timedelta as dt
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from datetime import timedelta as dt
 
 import heliopy.plot.particles as partplt
 import heliopy.vector.transformations as heliotrans
@@ -128,12 +129,17 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         axs2[0].set_title(title)
 
         plt.sca(axs2[0])
-        partplt.contour2d(vpar, vperp,
-                          np.concatenate((dist['pdf'].values,
-                                          dist['pdf'].values)) / dist['pdf'].max(), levels=levels, showbins=True)
+        partplt.contour2d(
+            vpar, vperp,
+            np.concatenate((dist['pdf'].values,
+                            dist['pdf'].values)) / dist['pdf'].max(),
+            levels=levels, showbins=True)
         plt.sca(axs2[1])
-        fitted_bimax = perp_par_maxwellian(output['n_p'], output['vth_p_perp'], output['vth_p_par'], vperp, vpar)
-        partplt.contour2d(vpar, vperp, fitted_bimax / np.max(fitted_bimax), levels=levels)
+        fitted_bimax = perp_par_maxwellian(
+            output['n_p'], output['vth_p_perp'], output['vth_p_par'],
+            vperp, vpar)
+        partplt.contour2d(vpar, vperp, fitted_bimax / np.max(fitted_bimax),
+                          levels=levels)
 
         for ax2 in axs2:
             ax2.set_aspect('equal', 'datalim')

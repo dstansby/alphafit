@@ -1,12 +1,14 @@
-'''
-Output stats from helios distribution fitting
-'''
-import matplotlib.pyplot as plt
-import heliopy.data.helios as helios
-from datetime import datetime, timedelta
+# Output stats from helios distribution fitting
+#
+# David Stansby 2017
 import os
+from datetime import datetime, timedelta
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+
+import heliopy.data.helios as helios
 
 fitparamlist = []
 starttime = datetime(1974, 1, 1, 0, 0, 0)
@@ -25,29 +27,11 @@ params_3D = pd.concat(params_3D)
 
 ndists = params_3D.shape[0]
 
-'''
-def summarystr(code, string):
-    n = (params_1D['status'] == code).sum()
-    return str(n) + '\t' + string + '\t' + '(' + str(100 * n / ndists)[:4] + '%)'
-
-
-print('\n')
-print('1D Summary')
-print('=======')
-
-ndists = params_3D.shape[0]
-print(ndists, 'total points')
-print(summarystr(1, 'successful fits'))
-print(summarystr(5, '< 6 points'))
-print(summarystr(7, 'No I1a\t'))
-print(summarystr(8, 'No I1b\t'))
-print(summarystr(9, 'Corrupted'))
-'''
-
 
 def summarystr(code, string):
     n = (params_3D['Status'] == code).sum()
-    return str(n) + '\t' + string + '\t' + '(' + str(100 * n / ndists)[:4] + '%)'
+    return (str(n) + '\t' + string + '\t' +
+            '(' + str(100 * n / ndists)[:4] + '%)')
 
 
 print('\n')
@@ -56,7 +40,8 @@ print('=======')
 print(ndists, 'total points')
 print('\n')
 n = (params_3D['Status'] == 1).sum() + (params_3D['Status'] == 2).sum()
-print(str(n) + '\t' + 'successful fits' + '\t' + '(' + str(100 * n / ndists)[:4] + '%)')
+print(str(n) + '\t' + 'successful fits' + '\t' +
+      '(' + str(100 * n / ndists)[:4] + '%)')
 print(summarystr(1, 'including n/T'))
 print(summarystr(2, 'no B data'))
 print(summarystr(4, 'v out of range'))

@@ -1,12 +1,14 @@
-'''
-Output stats from helios distribution fitting
-'''
-import matplotlib.pyplot as plt
-import heliopy.data.helios as helios
+# Output statistics from helios distribution fitting
+#
+# David Stansby 2017
 from datetime import datetime, timedelta
 import os
+
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
+import heliopy.data.helios as helios
 
 fig, [ax1, ax2] = plt.subplots(2, 1, sharex=True)
 for probe in ['1', '2']:
@@ -22,7 +24,8 @@ for probe in ['1', '2']:
             if month == 12:
                 year += 1
                 month = 0
-            endtime = datetime(year, month + 1, 1, 0, 0, 0) - timedelta(seconds=1)
+            endtime = (datetime(year, month + 1, 1, 0, 0, 0) -
+                       timedelta(seconds=1))
 
             print(starttime)
             ndays = (endtime - starttime).days + 1
@@ -39,9 +42,11 @@ for probe in ['1', '2']:
             n_fit.append((params_3D['Status'] == 1).sum())
             n_nomag.append((params_3D['Status'] == 2).sum())
 
-    ax1.plot(times, (np.array(n_fit) + np.array(n_nomag)) / np.array(maxpoints), label='Helios ' + probe)
-    ax2.plot(times, np.array(n_fit) / np.array(n_dists), label='Helios ' + probe)
-    # ax2.plot(times, np.array(n_nomag) / np.array(n_dists), label='Helios ' + probe)
+    ax1.plot(times, ((np.array(n_fit) + np.array(n_nomag)) /
+                     np.array(maxpoints)),
+             label='Helios ' + probe)
+    ax2.plot(times, np.array(n_fit) / np.array(n_dists),
+             label='Helios ' + probe)
 
 ax1.set_ylabel(r'fraction of all possible distributions fitted')
 ax1.set_ylim(0, 1)

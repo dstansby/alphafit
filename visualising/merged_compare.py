@@ -1,13 +1,15 @@
-'''
-Compare merged data set with our fitted data set
-'''
-import matplotlib.pyplot as plt
-import heliopy.data.helios as helios
-from heliopy import config
+# Compare merged data set with our corefit data set
+#
+# David Stansby 2017
 from datetime import datetime, timedelta
 import os
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+
+import heliopy.data.helios as helios
+from heliopy import config
 
 probe = '2'
 starttime = datetime(1978, 3, 1, 0, 0, 0)
@@ -82,10 +84,14 @@ merge = pd.concat([merged, params_3D], axis=1)
 
 # Number density and velocity
 fig, axs = plt.subplots(2, 2)
-scatter(merge['np1'], merge['n_p'], axs[0, 0], r'Merged $n_{p}$', r'3D $n_{p}$')
-scatter(merge['vp1r'], merge['vp_x'], axs[0, 1], r'Merged $v_{r}$', r'3D $v_{r}$')
-scatter(merge['vp1t'], merge['vp_y'], axs[1, 0], r'Merged $v_{t}$', r'3D $v_{t}$')
-scatter(-merge['vp1n'], merge['vp_z'], axs[1, 1], r'Merged $v_{n}$', r'3D $v_{n}$')
+scatter(merge['np1'], merge['n_p'], axs[0, 0],
+        r'Merged $n_{p}$', r'3D $n_{p}$')
+scatter(merge['vp1r'], merge['vp_x'], axs[0, 1],
+        r'Merged $v_{r}$', r'3D $v_{r}$')
+scatter(merge['vp1t'], merge['vp_y'], axs[1, 0],
+        r'Merged $v_{t}$', r'3D $v_{t}$')
+scatter(-merge['vp1n'], merge['vp_z'], axs[1, 1],
+        r'Merged $v_{n}$', r'3D $v_{n}$')
 fig.tight_layout()
 
 # Temperature
@@ -110,7 +116,8 @@ ndists = params_3D.shape[0]
 
 def summarystr(code, string):
     n = (params_3D['Status'] == code).sum()
-    return str(n) + '\t' + string + '\t' + '(' + str(100 * n / ndists)[:4] + '%)'
+    return (str(n) + '\t' + string + '\t' +
+            '(' + str(100 * n / ndists)[:4] + '%)')
 
 
 ngoodfits = (params_3D['Status'] == 1).sum()
