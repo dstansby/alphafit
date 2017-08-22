@@ -63,7 +63,8 @@ def do_fitting(pltfigs=False):
                         mag4hz['Bz'] *= -1
 
                 except Exception as err:
-                    print(str(err))
+                    if str(err) != 'No raw 4Hz mag data available':
+                        print(str(err))
                     mag4hz = None
 
                 # Also load 6s data as backup
@@ -71,11 +72,11 @@ def do_fitting(pltfigs=False):
                     mag6s = helios.mag_ness(probe, starttime, endtime,
                                             verbose=False, try_download=False)
                 except Exception as err:
-                    print(str(err))
+                    if 'No 6s mag data avaialble' not in str(err):
+                        print(str(err))
                     mag6s = None
 
                 # Load a days worth of ion distribution functions
-                print('Loading dists')
                 try:
                     dists_3D = helios.ion_dists(probe,
                                                 starttime, endtime,
