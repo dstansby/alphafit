@@ -103,7 +103,8 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     E_bins = dist.index.get_level_values('E_bin').values
     dist_starttime = starttime + timedelta(seconds=int(np.min(E_bins)))
     dist_endtime = starttime + timedelta(seconds=int(np.max(E_bins)) + 1)
-    print('Distribution measured between', dist_starttime, '-->', dist_endtime)
+    print('Fitting distribution measured from',
+          dist_starttime, '-->', dist_endtime)
 
     # Distribution function in s**3 / cm**6
     df = dist['pdf'].values
