@@ -143,9 +143,6 @@ def do_fitting(pltfigs=False):
                         fit_3D = ions_3D.iondistfitting(
                             dist_3D, params, fit_1D,
                             mag4hz, mag6s, time, I1a, I1b, pltfigs)
-                        if pltfigs:
-                            import matplotlib.pyplot as plt
-                            plt.show()
                     except RuntimeError as err:
                         if str(err) == 'No mag data available':
                             print(str(err))
@@ -153,6 +150,10 @@ def do_fitting(pltfigs=False):
                             continue
                         else:
                             raise
+
+                    if pltfigs:
+                        import matplotlib.pyplot as plt
+                        plt.show()
 
                     # Add orbital information
                     for var in ['r_sun', 'clong', 'clat',
