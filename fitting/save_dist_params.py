@@ -76,6 +76,13 @@ def do_fitting(pltfigs=False):
                         print(str(err))
                     mag6s = None
 
+                # If no magnetic field data available
+                if mag4hz is None and mag6s is None:
+                    # TODO: append some code to output
+                    print('No mag data available for'
+                          'probe {} year {} doy {}'.format(probe, year, doy))
+                    continue
+
                 # Load a days worth of ion distribution functions
                 try:
                     dists_3D = helios.ion_dists(probe,
@@ -142,17 +149,9 @@ def do_fitting(pltfigs=False):
                     fitlist_1D.append(fit_1D)
 
                     # Do 3D fit
-                    try:
-                        fit_3D = ions_3D.iondistfitting(
-                            dist_3D, params, fit_1D,
-                            mag4hz, mag6s, time, I1a, I1b, pltfigs)
-                    except RuntimeError as err:
-                        if str(err) == 'No mag data available':
-                            print(str(err))
-                            # TODO: append some code to output
-                            continue
-                        else:
-                            raise
+                    fit_3D = ions_3D.iondistfitting(
+                        dist_3D, params, fit_1D,
+                        mag4hz, mag6s, time, I1a, I1b, pltfigs)
 
                     if pltfigs:
                         import matplotlib.pyplot as plt
