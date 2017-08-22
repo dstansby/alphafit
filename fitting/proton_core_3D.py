@@ -120,8 +120,8 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
 
     # If no 4Hz data, and 6s data available
     if magempty and (mag6s is not None):
-        mag = mag6s[np.logical_and(mag6s.index.values > dist_starttime,
-                                   mag6s.index.values < dist_endtime)]
+        mag = mag6s[np.logical_and(mag6s.index > dist_starttime,
+                                   mag6s.index < dist_endtime)]
         magempty = mag.empty
         # No 4Hz or 6s data
         if magempty:
