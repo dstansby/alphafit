@@ -26,7 +26,6 @@ for year in range(1976, 1981):
         except Exception as err:
             print('No data available')
             continue
-        data = data.set_index('Time')
         # Convert all bad error codes to error code 3
         data.loc[data['Status'] > 2, 'Status'] = 3
         data = data.rename(columns={'Instrument': 'Ion instrument'})

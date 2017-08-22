@@ -164,13 +164,14 @@ def do_fitting(pltfigs=False):
                 # End of a single day, put each day into its own DataFrame
                 fits_1D = pd.DataFrame(fitlist_1D)
                 fits_3D = pd.DataFrame(fitlist_3D)
+                if fits_3D.empty:
+                    continue
+
+                fits_3D = fits_3D.set_index('Time', drop=True)
+                save_fits(fits_3D, probe, year, doy, '3', fdir)
 
                 # Save 1D fits
                 save_fits(fits_1D, probe, year, doy, '1', fdir)
-
-                # Save 3D fits
-                if not fits_3D.empty:
-                    save_fits(fits_3D, probe, year, doy, '3', fdir)
 
 
 if __name__ == '__main__':
