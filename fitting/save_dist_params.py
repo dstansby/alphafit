@@ -52,10 +52,11 @@ def do_fitting(pltfigs=False):
                 # Uncomment next line to start from a specific datetime
                 # starttime = datetime()
 
-                # Load corresponding magnetic field
+                # Load 4Hz magnetic field data
                 try:
                     mag4hz = helios.mag_4hz(probe, starttime, endtime)
 
+                    # Deal with the flipped 4Hz data on Helios 2
                     if probe == '2':
                         mag4hz['By'] *= -1
                         mag4hz['Bz'] *= -1
@@ -100,23 +101,29 @@ def do_fitting(pltfigs=False):
                 I1bs = dists_1D['b']
                 I1as['v'] = I1as.index.get_level_values('v')
                 I1bs['v'] = I1bs.index.get_level_values('v')
-                # Throw away zero values
+
+                # Throw away zero distribution function values
                 I1as = I1as[I1as['df'] != 0]
                 I1bs = I1bs[I1bs['df'] != 0]
+
                 # Re-order 3D index levels
                 dists_3D = dists_3D.reorder_levels(
                     ['Time', 'E_bin', 'El', 'Az'], axis=0)
                 dists_3D = dists_3D[dists_3D['counts'] != 1]
+
                 # A handful of files seem to have some garbage counts in them
                 dists_3D = dists_3D[dists_3D['counts'] < 32768]
+
                 # Throw away high and low energy bins
+                # (which contain just noise)
                 dists_3D = dists_3D[
                     dists_3D.index.get_level_values('E_bin') > 3]
                 dists_3D = dists_3D[
                     dists_3D.index.get_level_values('E_bin') < 32]
-                # Loop through times
+
                 fitlist_1D = []
                 fitlist_3D = []
+                # Loop through individual times
                 for time, dist_3D in dists_3D.groupby(level='Time'):
                     print(time)
                     params = distparams.loc[time].copy()
@@ -129,7 +136,6 @@ def do_fitting(pltfigs=False):
                     # Do 1D fit
                     fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
                                                   plotfigs=pltfigs)
-
                     fitlist_1D.append(fit_1D)
 
                     # Do 3D fit
