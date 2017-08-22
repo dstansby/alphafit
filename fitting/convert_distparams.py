@@ -2,15 +2,14 @@
 import os
 import pandas as pd
 import numpy as np
+from config import get_dirs
 
-from heliopy import config as helioconfig
-data_dir = helioconfig['DEFAULT']['download_dir']
-helios_dir = os.path.join(data_dir, 'helios')
+output_dir = get_dirs()
 
 
 probe = '2'
 for year in range(1976, 1981):
-    fdir = os.path.join(helios_dir, 'helios' + probe, 'fits', str(year))
+    fdir = os.path.join(output_dir, 'helios' + probe, 'fits', str(year))
     if not os.path.exists(os.path.join(fdir, 'csv')):
         os.makedirs(os.path.join(fdir, 'csv'))
     for doy in range(1, 367):

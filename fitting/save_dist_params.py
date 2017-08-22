@@ -16,9 +16,9 @@ from heliopy import config as helioconfig
 from helpers import doy2dtime
 import proton_core_1D as ions_1D
 import proton_core_3D as ions_3D
+from config import get_dirs
 
-data_dir = helioconfig['DEFAULT']['download_dir']
-helios_dir = os.path.join(data_dir, 'helios')
+output_dir = get_dirs()
 
 
 def save_fits(fits, probe, year, doy, dim, fdir):
@@ -35,7 +35,7 @@ def main():
     # Loop through time
     for year in range(1976, 1978):
         # Make directory to save fits
-        fdir = os.path.join(helios_dir, 'helios' + probe, 'fits', str(year))
+        fdir = os.path.join(output_dir, 'helios' + probe, 'fits', str(year))
         if not os.path.exists(fdir):
             os.makedirs(fdir)
 

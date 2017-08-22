@@ -1,0 +1,3 @@
+[data_dirs]
+# Directory to output fitted parameters to
+output_dir =
