@@ -110,27 +110,27 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     vs = dist[['vx', 'vy', 'vz']].values / 1e3
 
     if mag4hz is None:
-        magempty = True
+        mag4hzempty = True
     else:
         # Get magnetic field whilst distribution was built up
         mag = mag4hz[np.logical_and(mag4hz.index > dist_starttime,
                                     mag4hz.index < dist_endtime)]
-        magempty = mag.empty
+        mag4hzempty = mag.empty
+        # 4Hz data available
+        if not mag4hzempty:
+            output['B instrument'] = 1
 
     # If no 4Hz data, and 6s data available
-    if magempty and (mag6s is not None):
+    if mag4hzempty and (mag6s is not None):
         mag = mag6s[np.logical_and(mag6s.index > dist_starttime,
                                    mag6s.index < dist_endtime)]
-        magempty = mag.empty
+        magempty = mag.empty and mag4hzempty
         # No 4Hz or 6s data
         if magempty:
             output['B instrument'] = -1
         # No 4hz, but 6s available
         else:
             output['B instrument'] = 2
-    # 4Hz data available
-    else:
-        output['B instrument'] = 1
 
     if not magempty:
         # Check magnetic field is static enough
