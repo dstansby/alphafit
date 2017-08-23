@@ -131,7 +131,7 @@ def do_fitting(pltfigs=False):
                 dists_3D = dists_3D[
                     dists_3D.index.get_level_values('E_bin') < 32]
 
-                fitlist_1D = []
+                # fitlist_1D = []
                 fitlist_3D = []
                 # Loop through individual times
                 for time, dist_3D in dists_3D.groupby(level='Time'):
@@ -145,7 +145,7 @@ def do_fitting(pltfigs=False):
                     # Do 1D fit
                     fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
                                                   plotfigs=pltfigs)
-                    fitlist_1D.append(fit_1D)
+                    # fitlist_1D.append(fit_1D)
 
                     # Do 3D fit
                     fit_3D = ions_3D.iondistfitting(
@@ -162,7 +162,7 @@ def do_fitting(pltfigs=False):
                         fit_3D[var] = params[var]
                     fitlist_3D.append(fit_3D)
                 # End of a single day, put each day into its own DataFrame
-                fits_1D = pd.DataFrame(fitlist_1D)
+                # fits_1D = pd.DataFrame(fitlist_1D)
                 fits_3D = pd.DataFrame(fitlist_3D)
                 if fits_3D.empty:
                     continue
@@ -171,7 +171,7 @@ def do_fitting(pltfigs=False):
                 save_fits(fits_3D, probe, year, doy, '3', fdir)
 
                 # Save 1D fits
-                save_fits(fits_1D, probe, year, doy, '1', fdir)
+                # save_fits(fits_1D, probe, year, doy, '1', fdir)
 
 
 if __name__ == '__main__':
