@@ -198,7 +198,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     if (((fitparams[1] < 5) or
          (fitparams[2] < 5)) and
             not magempty):
-        return return_nans(12, starttime, instrument)
+        return return_nans(13, starttime, instrument)
 
     def process_fitparams(fitparams, species):
         v = fitparams[3:6]
