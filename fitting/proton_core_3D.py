@@ -124,7 +124,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         magempty = mag.empty
         # No 4Hz or 6s data
         if magempty:
-            output['B instrument'] = np.nan
+            output['B instrument'] = -1
         # No 4hz, but 6s available
         else:
             output['B instrument'] = 2
