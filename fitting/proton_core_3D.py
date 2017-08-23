@@ -27,28 +27,26 @@ statusdict = {1: 'Fitting successful',
               12: 'Less than 3 angular bins available in either direction',
               13: 'Temperature physically unrealistic'}
 
+# List of keys that must be present in output
+keys = ['n_p', 'vth_p_perp', 'vth_p_par', 'Tp_perp', 'Tp_par',
+        'vp_x', 'vp_y', 'vp_z',
+        'Time', 'Status', 'Ion instrument', 'B instrument',
+        'Bx', 'By', 'Bz', 'sigma B']
+
 
 def return_nans(status, time, instrument):
-    '''Return np.nan for all parameters apart from "Time" and "status"'''
+    '''
+    Return np.nan for all parameters apart from "Time", "Status",
+    and "Ion instrument"
+    '''
     assert type(status) == int, 'Status code must be an integer'
-    fitparams = {'n_p': np.nan,
-                 'vth_p_perp': np.nan,
-                 'vth_p_par': np.nan,
-                 'Tp_perp': np.nan,
-                 'Tp_par': np.nan,
-                 'vp_x': np.nan,
-                 'vp_y': np.nan,
-                 'vp_z': np.nan,
-
-                 'Time': time,
-                 'Status': status,
-                 'Instrument': instrument,
-
-                 'B instrument': np.nan,
-                 'Bx': np.nan,
-                 'By': np.nan,
-                 'Bz': np.nan,
-                 'sigma B': np.nan}
+    fitparams = {}
+    for key in keys:
+        if key not in ['Time', 'Status', 'Instrument']:
+            fitparams[key] = np.nan
+    fitparams['Time'] = time
+    fitparams['Status'] = status
+    fitparams['Ion instrument'] = instrument
     return fitparams
 
 
@@ -72,7 +70,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     '''
     output = {}
     instrument = int(params['ion_instrument'])
-    output['Instrument'] = instrument
+    output['Ion instrument'] = instrument
     # Return if the 1D fit thinks there are two distributions functions in
     # one file
     if fit_1D['status'] == 9:
@@ -261,7 +259,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         status = 1
     output.update({'Time': starttime,
                    'Status': status,
-                   'Instrument': instrument})
+                   'Ion instrument': instrument})
 
     #########################
     # Fitting finishes here #
@@ -272,4 +270,9 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         # from plot_fitted_dist import plot_dist
         # plot_dist(starttime, dist, params, pd.Series(output), I1a, I1b)
 
+    outputkeys = list(output.keys())
+    if sorted(outputkeys) != sorted(keys):
+        print(sorted(outputkeys))
+        print(sorted(keys))
+        raise RuntimeError('Output keys different from expected keys')
     return output

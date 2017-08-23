@@ -28,7 +28,6 @@ for year in range(1976, 1981):
             continue
         # Convert all bad error codes to error code 3
         data.loc[data['Status'] > 2, 'Status'] = 3
-        data = data.rename(columns={'Instrument': 'Ion instrument'})
         # Convert B instrument column to int
         data.loc[data['Status'] > 1, 'B instrument'] = -1
         data['B instrument'] = data['B instrument'].astype(int)
