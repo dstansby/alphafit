@@ -119,21 +119,21 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         # 4Hz data available
         if not mag4hzempty:
             output['B instrument'] = 1
+            magempty = False
 
-    # If no 4Hz data, and 6s data available
-    if mag4hzempty and (mag6s is not None):
+    # If no 4Hz data and no 6s data available
+    if mag4hzempty and (mag6s is None):
+        magempty = True
+    elif mag4hzempty and (mag6s is not None):
         mag = mag6s[np.logical_and(mag6s.index > dist_starttime,
                                    mag6s.index < dist_endtime)]
-        magempty = mag.empty and mag4hzempty
+        magempty = mag.empty
         # No 4Hz or 6s data
-        if magempty:
-            output['B instrument'] = -1
-        # No 4hz, but 6s available
-        else:
+        if not magempty:
             output['B instrument'] = 2
 
     if not magempty:
-        # Check magnetic field is static enough
+        # TODO: Check magnetic field is static enough
         mag = mag[['Bx', 'By', 'Bz']].values
         # Use average magnetic field
         B = np.mean(mag, axis=0)
@@ -148,6 +148,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         # Rotate velocities into field aligned co-ordinates
         vprime = np.dot(R, vs.T).T
     else:
+        output['B instrument'] = -1
         output['Bx'] = np.nan
         output['By'] = np.nan
         output['Bz'] = np.nan
