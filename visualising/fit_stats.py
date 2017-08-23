@@ -14,10 +14,6 @@ fitparamlist = []
 starttime = datetime(1974, 1, 1, 0, 0, 0)
 endtime = starttime + timedelta(days=11 * 365)
 
-'''
-print('Loading 1D...')
-params_1D = helios.ion_fitparams_1D(probe, starttime, endtime)
-'''
 params_3D = []
 print('Loading 3D...')
 for probe in ['1', '2']:
