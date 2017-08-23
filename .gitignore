@@ -1,5 +1,6 @@
 *__pycache__*
 config.ini
+*.lprof
 
 *.log
 *.out
