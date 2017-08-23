@@ -76,28 +76,38 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     if fit_1D['status'] == 9:
         return return_nans(9, starttime, instrument)
 
+    # Return if any of the counts are less than zero (indicates corruped file)
     if (dist['counts'] < 0).any():
         return return_nans(9, starttime, instrument)
-    # Get rid of energies higher than energies in the I1a 1D distribution
+    # Get rid of velocities higher than 100*velocities in the
+    # I1a 1D distribution
     dist = dist[dist['|v|'] <= I1a['v'].max() * 1e3]
 
     # Return if not enought points to do fitting
     if dist.shape[0] <= 6:
         return return_nans(5, starttime, instrument)
 
-    phi_bins = len(dist.index.get_level_values('Az').unique())
-    theta_bins = len(dist.index.get_level_values('El').unique())
-    if phi_bins < 3 or theta_bins < 3:
+    # Work out number of angular bins in each direction
+    n_phi_bins = len(dist.index.get_level_values('Az').unique())
+    n_theta_bins = len(dist.index.get_level_values('El').unique())
+    # If less than a 3x3 grid, return
+    if n_phi_bins < 3 or n_theta_bins < 3:
         return return_nans(12, starttime, instrument)
 
-    # Return if the minimum velocity in the I1a/I3 distribution is not below
-    # the peak in I1b (assumed to be the proton peak)
+    # Return if the minimum velocity in the 3D distribution is not below
+    # the velocity of the peak in I1b (assumed to be the proton peak)
     vs_3D = dist['|v|'] / 1e3
     if len(I1a) != 0:
         if vs_3D.min() > I1a['df'].argmax():
             return return_nans(10, starttime, instrument)
 
     # Estimate the times during which the distribution was measured
+    #
+    # Assumes that the timestamp in the distribution is when measurement was
+    # started
+    #
+    # Also assume that bins were measured from low to high velocities. See
+    # the blue books for more information
     E_bins = dist.index.get_level_values('E_bin').values
     dist_starttime = starttime + timedelta(seconds=int(np.min(E_bins)))
     dist_endtime = starttime + timedelta(seconds=int(np.max(E_bins)) + 1)
@@ -153,18 +163,18 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         output['By'] = np.nan
         output['Bz'] = np.nan
         output['sigma B'] = np.nan
-        # If no magnetic field, still get a number density and velocities
+        # If no magnetic field, we can still get velocities
         vprime = vs
 
     # Initial proton parameter guesses
     # Take maximum of distribution function for amplitude
     Ap_guess = np.max(df)
-    # Take average ion velocity for v_p
+    # Take numerical ion velocity moment for v_p
     vp_guess = [np.sum(df * vprime[:, 0]) / np.sum(df),
                 np.sum(df * vprime[:, 1]) / np.sum(df),
                 np.sum(df * vprime[:, 2]) / np.sum(df)]
     # Take proton temperature in distribution parameters for T_p (par and perp)
-    # If no guess, or guess < 10km/s or guess > 60km/s take 50km/s for guess
+    # If no guess, or guess < 10km/s or guess > 100km/s take 40km/s for guess
     vthp_guess = helioplas.temp2vth(fit_1D['T_p'], const.m_p)
     if (not np.isfinite(vthp_guess)) or vthp_guess < 10 or vthp_guess > 100:
         vthp_guess = 40
@@ -172,9 +182,9 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
                vp_guess[0], vp_guess[1], vp_guess[2])
 
     # Residuals to minimize
-    def resid(args, vprime, df):
+    def resid(maxwell_params, vprime, df):
         fit = bi_maxwellian_3D(vprime[:, 0], vprime[:, 1],
-                               vprime[:, 2], *args[:6])
+                               vprime[:, 2], *maxwell_params)
         return df - fit
 
     fitout = opt.leastsq(resid, guesses, args=(vprime, df),
@@ -189,12 +199,14 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         return return_nans(6, starttime, instrument)
 
     # Return if number density is physically unreasonable
-    # (> or < 10 times the peak in the distribution function)
+    # (> 20 or < 0.1 times the peak in the distribution function)
     if (((fitparams[0] > 20 * np.max(df)) or
          (fitparams[0] < 0.1 * np.max(df))) and
             not magempty):
         return return_nans(11, starttime, instrument)
 
+    # If thermal velocities are less than 5km/s throw away
+    # TODO: Check me
     if (((fitparams[1] < 5) or
          (fitparams[2] < 5)) and
             not magempty):
@@ -234,10 +246,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         # Convert to 1 / cm**3
         n *= 1e-6
         fit_dict.update({'n_' + species: n})
-        '''
-        if n < 0:
-            return return_nans(11, starttime, instrument)
-        '''
+
         # Remove spacecraft abberation
         # Velocities here are all in km/s
         v_x = v[0] + params['helios_vr']
@@ -249,7 +258,8 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
 
         return fit_dict
 
-    fit_dict = process_fitparams(fitparams[:6], 'p')
+    # Put outputted fit parameters into a dictionary
+    fit_dict = process_fitparams(fitparams, 'p')
     if isinstance(fit_dict, int):
         return return_nans(fit_dict, starttime, instrument)
     output.update(fit_dict)
@@ -271,6 +281,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         # from plot_fitted_dist import plot_dist
         # plot_dist(starttime, dist, params, pd.Series(output), I1a, I1b)
 
+    # Check the keys in output dictionary
     outputkeys = list(output.keys())
     if sorted(outputkeys) != sorted(keys):
         print(sorted(outputkeys))
