@@ -2,8 +2,10 @@ This folder contains the code that generates the corefit dataset from the
 original distribution function files.
 
 The following steps can be used to download the code, original data files, and
-required dependencies:
+required dependencies.
 
+Downloading and installing software
+-----------------------------------
 1. Download a copy of this repository
 2. Install [python](https://www.python.org/)
 3. Install the required python dependencies by running
