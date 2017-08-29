@@ -28,10 +28,8 @@ def save_fits(fits, probe, year, doy, dim, fdir):
 
 
 def do_fitting(pltfigs=False):
-    probes = ['1', '2']
-
     # Loop through each probe
-    for probe in probes:
+    for probe in ['1', '2']:
         # Loop through years
         for year in range(1974, 1986):
             # Make directory to save fits
