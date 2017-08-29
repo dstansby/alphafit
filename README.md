@@ -12,4 +12,5 @@ to the old merged data set
 The code was written by myself (David Stansby). The majority of it was written
 during a 2 week visit to UC Berkeley (USA) hosted by Chadi Salem. Thanks to
 Chadi Salem, Tim Horbury, and Lorenzo Matteini for useful discussions and
-advice concerning distribution functions and the Helios mission.
+advice concerning distribution functions and the Helios mission. Thanks to
+Steve Schwartz and Tony Allen for help with .cdf files.
