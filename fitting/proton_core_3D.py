@@ -155,6 +155,18 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     if not magempty:
         # TODO: Check magnetic field is static enough
         mag = mag[['Bx', 'By', 'Bz']].values
+
+        # Check magnetic field is static enough whilst distribution is
+        # measured
+        #
+        # If any two magnetic field vectors are more than 90 degrees apart,
+        # return
+        mag_normed = mag / np.linalg.norm(mag, axis=1)[:, None]
+        # Calculate every possible dot product
+        dotprods = np.einsum('ji,ki->jk', mag_normed, mag_normed)
+        if np.any(dotprods < np.cos(np.deg2rad(90))):
+            return return_nans(3, starttime, instrument)
+
         # Use average magnetic field
         B = np.mean(mag, axis=0)
         sigmaB = np.std(mag, axis=0)
