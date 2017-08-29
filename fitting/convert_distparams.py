@@ -26,7 +26,10 @@ for probe in ['1', '2']:
             except Exception as err:
                 print('No data available')
                 continue
-            # Convert all bad error codes to error code 3
+            # Convert non-stationary B status to status 1 (as it has velocity
+            # but no temps/number densities)
+            data.loc[data['Status'] == 3, 'Status'] = 1
+            # Convert all other bad error codes to error code 3
             data.loc[data['Status'] > 2, 'Status'] = 3
             # Convert B instrument column to int
             data['B instrument'] = data['B instrument'].astype(int)
