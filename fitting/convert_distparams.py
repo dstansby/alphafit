@@ -34,10 +34,10 @@ for probe in ['1', '2']:
             # Convert B instrument column to int
             data['B instrument'] = data['B instrument'].astype(int)
 
-            data = data[['B instrument', 'Bx', 'By', 'Bz',
+            data = data[['B instrument', 'Bx', 'By', 'Bz', 'sigma B',
                          'Ion instrument', 'Status', 'Tp_par', 'Tp_perp',
                          'carrot', 'r_sun', 'clat', 'clong', 'earth_he_angle',
-                         'n_p', 'sigma B', 'vp_x', 'vp_y', 'vp_z',
+                         'n_p', 'vp_x', 'vp_y', 'vp_z',
                          'vth_p_par', 'vth_p_perp']]
 
             def sigfigs(x, n):
