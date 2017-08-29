@@ -1,3 +1,7 @@
+# Methods to plot fitted distribution functions
+#
+# David Stansby 2017
+
 from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
@@ -7,6 +11,8 @@ import pandas as pd
 import heliopy.plot.particles as partplt
 import heliopy.vector.transformations as heliotrans
 import heliopy.data.helios as helios
+
+import helpers
 
 
 def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
@@ -22,10 +28,29 @@ def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
     return A * np.exp(-exponent)
 
 
+def perp_par_maxwellian(n, wperp, wpar, vperp, vpar):
+    out = np.exp(-((vpar / wpar)**2 +
+                   (vperp / wperp)**2))
+    out *= 2 * np.power(np.pi, 0.5) * n / (wperp * wperp * wpar)
+    return out
+
+
+def perp_par_vels(vs, bulkv, R):
+    # Get perp/parallel velocities
+    for i in range(0, 3):
+        vs[:, i] -= bulkv[i]
+    vs = np.dot(R, vs.T).T
+    vpar = vs[:, 2]
+    vperp = np.linalg.norm(vs[:, 0:2], axis=1)
+    vpar = np.concatenate((vpar, vpar))
+    vperp = np.concatenate((vperp, -vperp))
+    return vperp, vpar
+
+
 def plot_dist_time(probe, time):
     # Calls plot_dist with a given time. Uses already processed values
-    corefit = helios.ion_fitparams_3D(probe, time - dt(seconds=20),
-                                      time + dt(seconds=20))
+    corefit = helpers.load_corefit(probe, time - dt(seconds=20),
+                                   time + dt(seconds=20))
     corefit = corefit[corefit.index == time]
     if corefit.shape[0] != 1:
         raise ValueError('Could not find fitted parameters at requested time')
@@ -151,20 +176,4 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     ax[2].set_xlabel(r'$v_{r}$' + ' (km/s)')
 
 
-def perp_par_maxwellian(n, wperp, wpar, vperp, vpar):
-    out = np.exp(-((vpar / wpar)**2 +
-                   (vperp / wperp)**2))
-    out *= 2 * np.power(np.pi, 0.5) * n / (wperp * wperp * wpar)
-    return out
-
-
-def perp_par_vels(vs, bulkv, R):
-    # Get perp/parallel velocities
-    for i in range(0, 3):
-        vs[:, i] -= bulkv[i]
-    vs = np.dot(R, vs.T).T
-    vpar = vs[:, 2]
-    vperp = np.linalg.norm(vs[:, 0:2], axis=1)
-    vpar = np.concatenate((vpar, vpar))
-    vperp = np.concatenate((vperp, -vperp))
-    return vperp, vpar
+if __name__ == '__main__':
