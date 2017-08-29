@@ -6,3 +6,5 @@ config.ini
 *.out
 *.synctex.gz
 *.aux
+*.cdf
+*.csv
