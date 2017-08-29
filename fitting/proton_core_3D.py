@@ -42,8 +42,7 @@ def return_nans(status, time, instrument):
     assert type(status) == int, 'Status code must be an integer'
     fitparams = {}
     for key in keys:
-        if key not in ['Time', 'Status', 'Instrument']:
-            fitparams[key] = np.nan
+        fitparams[key] = np.nan
     fitparams['Time'] = time
     fitparams['Status'] = status
     fitparams['Ion instrument'] = instrument
