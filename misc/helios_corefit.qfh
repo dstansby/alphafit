@@ -17,7 +17,7 @@ Data_delimiter = ,
 !
 START_META = CDF_Generation
 Number_of_entries = 2
-Entry = Translated from ascii csv file using Qtran with qfh header Helios_Stansby_V2a
+Entry = Translated from ascii csv file using Qtran with qfh header helios_corefit.qfh
 Entry = qfh written by Steve Schwartz <s.schwartz@imperial.ac.uk>
 END_META = CDF_Generation
 !
@@ -31,10 +31,10 @@ Entry = The Helios mission consisted of two spacecraft that were used to make in
 Entry = Helios 1 was launched on December 10, 1974, and Helios 2 on January 15, 1976. The orbits of the Helios 1 and 2 spacecraft had periods of 190 and 187 days, aphelia of 0.99 and 0.98 AU, and perihelia of 0.31 and 0.29 AU, respectively.
 END_META = MISSION_DESCRIPTION
 
-START_META     = MISSION_TIME_SPAN 
-    VALUE_TYPE = ISO_TIME_RANGE 
+START_META     = MISSION_TIME_SPAN
+    VALUE_TYPE = ISO_TIME_RANGE
     ENTRY      = 1974-12-10T00:00:00Z/1985-02-18T23:59:59Z
-END_META       = MISSION_TIME_SPAN 
+END_META       = MISSION_TIME_SPAN
 
 START_META = MISSION_REFERENCES
 Number_of_entries = 2
