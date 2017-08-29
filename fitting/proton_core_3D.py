@@ -152,6 +152,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         if not magempty:
             output['B instrument'] = 2
 
+    wobbly_B = False
     if not magempty:
         # TODO: Check magnetic field is static enough
         mag = mag[['Bx', 'By', 'Bz']].values
@@ -167,6 +168,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         if np.any(dotprods < np.cos(np.deg2rad(90))):
             # Set magempty to True will still give velocities
             magempty = True
+            wobbly_B = True
 
     if not magempty:
         # Use average magnetic field
@@ -288,7 +290,9 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
         return return_nans(fit_dict, starttime, instrument)
     output.update(fit_dict)
 
-    if magempty:
+    if magempty and wobbly_B:
+        status = 3
+    elif magempty:
         status = 2
     else:
         status = 1
