@@ -1,0 +1,390 @@
+!@.qfd@QIE V_4.0.19 [Dec 2016]
+!------------------- QSAS ASCII File -------------------|
+! Free width data entries separated by delimiters       |
+!                                                       |
+! ASCII Format                                          |
+! Native C ordering, last index varies fastest          |
+! Blank lines are ignored                               |
+! "!" escapes rest of line as comment                   |
+!-------------------------------------------------------|
+File_type = d
+FILE_NAME = Helios_Stansby_V2a.qfh
+!
+!
+Attribute_delimiter = ,
+Data_delimiter = ,
+!
+!
+START_META = CDF_Generation
+Number_of_entries = 2
+Entry = Translated from ascii csv file using Qtran with qfh header Helios_Stansby_V2a
+Entry = qfh written by Steve Schwartz <s.schwartz@imperial.ac.uk>
+END_META = CDF_Generation
+!
+START_META = MISSION
+Entry = Helios
+END_META = MISSION
+
+START_META = MISSION_DESCRIPTION
+Number_of_entries = 2
+Entry = The Helios mission consisted of two spacecraft that were used to make in-situ observations of the inner heliosphere.
+Entry = Helios 1 was launched on December 10, 1974, and Helios 2 on January 15, 1976. The orbits of the Helios 1 and 2 spacecraft had periods of 190 and 187 days, aphelia of 0.99 and 0.98 AU, and perihelia of 0.31 and 0.29 AU, respectively.
+END_META = MISSION_DESCRIPTION
+
+START_META     = MISSION_TIME_SPAN 
+    VALUE_TYPE = ISO_TIME_RANGE 
+    ENTRY      = 1974-12-10T00:00:00Z/1985-02-18T23:59:59Z
+END_META       = MISSION_TIME_SPAN 
+
+START_META = MISSION_REFERENCES
+Number_of_entries = 2
+Entry = Helios data archive: http://helios-data.ssl.berkeley.edu/
+Entry = Paper describing plasma instrumentation and initial mission results: http://onlinelibrary.wiley.com/doi/10.1029/JA087iA01p00052/abstract
+END_META = MISSION_REFERENCES
+
+START_META = MISSION_CAVEATS
+Entry = TBD
+END_META = MISSION_CAVEATS
+
+START_META = OBSERVATORY
+Entry = Helios 1 or 2
+END_META = OBSERVATORY
+
+START_META = DATASET_ID
+Entry = Helios proton core parameters from 3D bi-Maxwellian fits
+END_META = DATASET_ID
+
+START_META = DATASET_DESCRIPTION
+Number_of_entries = 4
+Entry = Plasma moments and magnetic field from Helios.
+Entry = Moments from 3D velocity-space fits carried out by David Stansby, Imperial College London, with help from Chadi Salem (UCL Berkeley), Tim Horbury (Imperial College), and Lorenzo Matteini (LESIA Paris)
+Entry = The fits were done using bi-Maxwellian distribution functions and the fit parameters characterise the proton core population of the solar wind.
+Entry = Original data was taken from 3D distribution function files.
+END_META = DATASET_DESCRIPTION
+
+START_META = DATASET_CAVEATS
+Entry = TBD
+END_META = DATASET_CAVEATS
+
+START_META = CONTACT_COORDINATES
+Number_of_entries = 2
+Entry = David Stansby <david.stansby14@imperial.ac.uk>
+Entry = Tim Horbury <t.horbury@imperial.ac.uk>
+END_META = CONTACT_COORDINATES
+
+START_META = ACKNOWLEDGEMENT
+Entry = Please acknowledge Helios instrument teams and David Stansby in any publication.
+END_META = ACKNOWLEDGEMENT
+
+START_META = VERSION_NUMBER
+Entry = Version 1.0
+END_META = VERSION_NUMBER
+
+START_META = GENERATION_DATE
+Entry = Generated August 2017
+END_META = GENERATION_DATE
+!
+!  Data variables !!!!!!!!!!!!!!!!!!
+!
+START_VARIABLE = time_tags_Helios
+VALUE_TYPE = ISO_TIME
+PARAMETER_TYPE = Support_Data
+CATDESC = UTC start time of 40.5s integration period, apparently truncated to whole seconds.
+UNITS = s
+SI_CONVERSION = 1>s
+DELTA_PLUS = 40.5
+DELTA_MINUS = 0
+SIGNIFICANT_DIGITS = 24
+FILLVAL = 1900-01-01 00:00:00
+FIELDNAM = Helios Time
+LABLAXIS = UTC
+END_VARIABLE = time_tags_Helios
+
+START_VARIABLE = B_inst
+VALUE_TYPE = INT
+PARAMETER_TYPE = Support_Data
+CATDESC = Helios magnetic field instrument. A value of 0 means no magnetic field data available, 1 means E3 magnetometer data used, 2 means E2 magnetometer data used.
+UNITS = Unitless
+SI_CONVERSION = 1>unitless
+SIGNIFICANT_DIGITS = 8
+FILLVAL = -1
+FIELDNAM = Helios B instrument
+LABLAXIS = B instr
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+END_VARIABLE = B_inst
+
+START_VARIABLE = Helios_magnetic_field
+SIZES = 3
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios magnetic field data averaged over the interval during which the ion distribution function was measured. See the variable 'B_inst' to determine which magnetometer the values are taken from.
+UNITS = nT
+SI_CONVERSION = 1.e-9>T
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios magnetic field
+LABLAXIS = B
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+LABEL_1 = lab_b_rtn
+TENSOR_ORDER = 1
+COORDINATE_SYSTEM = RTN>Heliocentric Ecliptic RTN at Spacecraft
+REPRESENTATION_1 = rep_xyz
+END_VARIABLE = Helios_magnetic_field
+
+START_VARIABLE = I_inst
+VALUE_TYPE = INT
+PARAMETER_TYPE = Support_Data
+CATDESC = Instrument that measured the original velocity distribution function. A value of 1 means the I1a instrument, 2 means the I1b instrument.
+UNITS = Unitless
+SI_CONVERSION = 1>unitless
+SIGNIFICANT_DIGITS = 8
+FILLVAL = -1
+FIELDNAM = Helios ion instrument
+LABLAXIS = Ion instr
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+END_VARIABLE = I_inst
+
+START_VARIABLE = STATUS
+VALUE_TYPE = INT
+PARAMETER_TYPE = Support_Data
+CATDESC = Bi-maxwellian fit status. A value of 1 means a successful fit, 2 means a successful fit without available magnetic field data, 3 means fitting to the distribution function failed.
+UNITS = Unitless
+SI_CONVERSION = 1>unitless
+SIGNIFICANT_DIGITS = 8
+FILLVAL = -1
+FIELDNAM = Helios status
+LABLAXIS = Helios status
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+END_VARIABLE = STATUS
+
+START_VARIABLE = TP_PAR
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios parallel proton core temperature from bi-Maxwellian fits to 3D distribution functions
+UNITS = K
+SI_CONVERSION = 1.0>K
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios Tp_par
+LABLAXIS = Tp_para
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Log
+DISPLAYTYPE = Time_Series
+END_VARIABLE = TP_PAR
+
+START_VARIABLE = TP_PERP
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios perpendicular proton core temperature from bi-Maxwellian fits to 3D distribution functions
+UNITS = K
+SI_CONVERSION = 1.0>K
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios Tp_perp
+LABLAXIS = Tp_perp
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Log
+DISPLAYTYPE = Time_Series
+END_VARIABLE = TP_PERP
+
+START_VARIABLE = CARROT
+VALUE_TYPE = INT
+PARAMETER_TYPE = Support_Data
+CATDESC = Helios Carrington Rotation
+UNITS = Unitless
+SI_CONVERSION = 1>unitless
+SIGNIFICANT_DIGITS = 4
+FILLVAL = -1
+FIELDNAM = Helios Carrington Rotation
+LABLAXIS = Carrington Rot
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+END_VARIABLE = CARROT
+
+START_VARIABLE = Helios_position
+SIZES = 3
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios position in heliocentric r, carrington lat and long
+UNITS = units_r_rlp
+SI_CONVERSION = siconv_r_rlp
+SIGNIFICANT_DIGITS = 17
+FILLVAL = NaN
+FIELDNAM = Helios pos
+LABLAXIS = Helios Carrington Pos
+LABEL_1 = lab_r_rlp
+!FRAME = vector>gse_xyz
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+TENSOR_ORDER = 1
+COORDINATE_SYSTEM = CAR>Heliocentric Carrington coordinates
+REPRESENTATION_1 = rep_rlp
+END_VARIABLE = Helios_position
+
+START_VARIABLE = EARTH_HEL_ANGLE
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Angle between Sun-Earth and Sun-Helios position vectors, measured in the direction of the Earth's orbit around the Sun
+UNITS = deg
+SI_CONVERSION = 1.0>degree
+SIGNIFICANT_DIGITS = 17
+FILLVAL = NaN
+FIELDNAM = Earth-Helios angle
+LABLAXIS = Earth-Hel angle
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+END_VARIABLE = EARTH_HEL_ANGLE
+
+START_VARIABLE = NP
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios proton core density from bi-Maxwellian fits to 3D distribution functions
+UNITS = cm^-3
+SI_CONVERSION = 1.0e6>m^-3
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios np
+LABLAXIS = np
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+END_VARIABLE = NP
+
+START_VARIABLE = SIGMA_B
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios std dev of B
+UNITS = nT
+SI_CONVERSION = 1.0e-9>T
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios sigma_B
+LABLAXIS = sigma_B
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Log
+DISPLAYTYPE = Time_Series
+END_VARIABLE = SIGMA_B
+
+START_VARIABLE = Helios_proton_velocity
+SIZES = 3
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios proton core velocity from bi-Maxwellian fits to 3D distribution functions
+UNITS = km/s
+SI_CONVERSION = 1000>m s^-1
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios proton velocity
+LABLAXIS = Vp
+DEPEND_0 = time_tags_Helios
+SCALETYP = Linear
+DISPLAYTYPE = Time_Series
+LABEL_1 = lab_v_rtn
+TENSOR_ORDER = 1
+COORDINATE_SYSTEM = RTN>Heliocentric Ecliptic RTN at Spacecraft
+REPRESENTATION_1 = rep_xyz
+END_VARIABLE = Helios_proton_velocity
+
+START_VARIABLE = VTH_P_PAR
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios parallel proton core thermal speed from bi-Maxwellian fits to 3D distribution functions
+UNITS = km/s
+SI_CONVERSION = 1000>m s^-1
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios Vth_p_par
+LABLAXIS = Vth_p_par
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Log
+DISPLAYTYPE = Time_Series
+END_VARIABLE = VTH_P_PAR
+
+START_VARIABLE = VTH_P_PERP
+VALUE_TYPE = DOUBLE
+PARAMETER_TYPE = Data
+CATDESC = Helios perpendicular proton core thermal speed from bi-Maxwellian fits to 3D distribution functions
+UNITS = km/s
+SI_CONVERSION = 1000>m s^-1
+SIGNIFICANT_DIGITS = 6
+FILLVAL = NaN
+FIELDNAM = Helios Vth_p_perp
+LABLAXIS = Vth_p_perp
+FRAME = scalar>na
+DEPEND_0 = time_tags_Helios
+SCALETYP = Log
+DISPLAYTYPE = Time_Series
+END_VARIABLE = VTH_P_PERP
+
+START_VARIABLE=rep_xyz
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "x", "y", "z"
+END_VARIABLE = rep_xyz
+
+START_VARIABLE=rep_rlp
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "r", "l", "p"
+END_VARIABLE = rep_xyz
+
+START_VARIABLE=lab_b_rtn
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "Br", "Bt", "Bn"
+END_VARIABLE = lab_b_rtn
+
+START_VARIABLE=lab_r_rlp
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "r", "lat", "long"
+END_VARIABLE = lab_r_rlp
+
+START_VARIABLE=siconv_r_rlp
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "1.49598e+11>m", "1>degree", "1>degree"
+END_VARIABLE = siconv_r_rlp
+
+START_VARIABLE=lab_v_rtn
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "Vp_r", "Vp_t", "Vp_n"
+END_VARIABLE = lab_v_rtn
+
+START_VARIABLE=units_r_rlp
+PARAMETER_TYPE = Support_data
+VALUE_TYPE = CHAR
+SIZES = 3
+DATA = "AU", "deg", "deg"
+END_VARIABLE = units_r_rlp
+
+!Start_data = 00 ! unknown number of records
+START_AFTER = "Time"
