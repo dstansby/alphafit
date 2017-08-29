@@ -1,7 +1,6 @@
 # Methods to plot fitted distribution functions
 #
 # David Stansby 2017
-
 from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
@@ -9,7 +8,6 @@ import numpy as np
 import pandas as pd
 
 import heliopy.plot.particles as partplt
-import heliopy.vector.transformations as heliotrans
 import heliopy.data.helios as helios
 
 import helpers
@@ -66,7 +64,7 @@ def plot_dist_time(probe, time):
 
 def plot_dist(time, dist, params, output, I1a, I1b):
     magempty = np.any(output[['Bx', 'By', 'Bz']] == np.nan)
-    R = heliotrans.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
+    R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios 2 ' + str(time)
     fig, ax = plt.subplots(3, 1, sharex=True)
@@ -121,7 +119,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         modvs = modvs.flatten()
         thetas = thetas.flatten()
         phis = phis.flatten()
-        vx, vy, vz = heliotrans.sph2cart(modvs, thetas, phis)
+        vx, vy, vz = helpers.sph2cart(modvs, thetas, phis)
         v = np.array([vx, vy, vz]).T
         # Transform into rotated frame
         v = np.dot(R, v.T).T
@@ -177,3 +175,21 @@ def plot_dist(time, dist, params, output, I1a, I1b):
 
 
 if __name__ == '__main__':
+    import argparse
+    from datetime import datetime
+    import matplotlib.pyplot as plt
+    description = ('Plot a single Helios 3D ion distribution '
+                   'along with fitted distribution.')
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('probe', metavar='p', type=str, nargs=1,
+                        help='Helios probe')
+    parser.add_argument('date', metavar='d', type=str, nargs=1,
+                        help='Date - must be formatted as YYYY/MM/DD')
+    parser.add_argument('time', metavar='t', type=str, nargs=1,
+                        help='Time - must be formatted as HH:MM:SS')
+
+    args = parser.parse_args()
+    date = datetime.strptime(args.date[0] + ' ' + args.time[0],
+                             '%Y/%m/%d %H:%M:%S')
+    plot_dist_time(args.probe[0], date)
+    plt.show()
