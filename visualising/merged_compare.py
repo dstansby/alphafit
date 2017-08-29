@@ -21,9 +21,9 @@ def plot_status(ax, params, key):
     ax.plot(params[key], marker='o', linewidth=0)
 
 
-params_3D = helios.ion_fitparams_3D(probe, starttime, endtime)
-
-merged = helios.merged(probe, starttime, endtime, try_download=False)
+params_3D = helpers.load_corefit(probe, starttime, endtime)
+merged = helios.merged(probe, starttime, endtime,
+                       try_download=False, verbose=False)
 
 fig, axs = plt.subplots(3, 1, sharex=True)
 axs[0].plot(merged['Tp1'], label='Merged T')
