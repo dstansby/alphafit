@@ -46,6 +46,7 @@ def return_nans(status, time, instrument):
     fitparams['Time'] = time
     fitparams['Status'] = status
     fitparams['Ion instrument'] = instrument
+    fitparams['B instrument'] = -1
     return fitparams
 
 
