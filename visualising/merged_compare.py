@@ -2,17 +2,18 @@
 #
 # David Stansby 2017
 from datetime import datetime, timedelta
-import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-import heliopy.data.helios as helios
-from heliopy import config
+from heliopy.data import helios
 
-probe = '2'
-starttime = datetime(1978, 3, 1, 0, 0, 0)
+import helpers
+
+# Set probe and dates to compare here
+probe = '1'
+starttime = datetime(1974, 12, 1, 0, 0, 0)
 endtime = starttime + timedelta(days=31)
 
 
