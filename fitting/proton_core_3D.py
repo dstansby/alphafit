@@ -109,8 +109,18 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     # Also assume that bins were measured from low to high velocities. See
     # the blue books for more information
     E_bins = dist.index.get_level_values('E_bin').values
-    dist_starttime = starttime + timedelta(seconds=int(np.min(E_bins)))
-    dist_endtime = starttime + timedelta(seconds=int(np.max(E_bins)) + 1)
+    # Energy bin in which the peak of the distribution was measured
+    peak_Ebin = int(dist['pdf'].argmax()[1])
+    min_Ebin = int(np.min(E_bins))
+    max_Ebin = int(np.max(E_bins))
+    # Take 3 energy bins either side of the peak distribution function
+    min_dist_Ebin = peak_Ebin - max(peak_Ebin - 3, min_Ebin)
+    max_dist_Ebin = peak_Ebin + max(peak_Ebin + 3, max_Ebin)
+
+    dist_peaktime = starttime + timedelta(seconds=peak_Ebin)
+    dist_starttime = starttime + timedelta(seconds=min_dist_Ebin)
+    dist_endtime = starttime + timedelta(seconds=max_dist_Ebin + 1)
+
     print('Fitting distribution measured from',
           dist_starttime, '-->', dist_endtime)
 
