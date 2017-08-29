@@ -36,7 +36,25 @@ The directory structure in your download location should look like
 /data/storage/directory/helios/E1_experiment/helios_raw/helios_1/...
 ```
 Once the `helios/E1_experiemnt` directory is created, the `helios_raw` directory
-can be downloaded directly from the ftp server.
+can be downloaded directly from the ftp server. If you only want to regenerate
+specific days of data, you only need to download the relavent files and not the
+entire dataset.
+
+4. Download the 4Hz magnetic field data from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E2_experiment/Data_Cologne_Nov2016_bestdata/HR/
+The directory structure in your download location should look like
+```bash
+/data/storage/directory/helios/E2_experiment/Data_Cologne_Nov2016_bestdata/HR/helios_1/...
+```
+
+5. Download the 6s magnetic field data from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E3_experiment/
+The directory structure in your download location should look like
+```bash
+/data/storage/directory/helios/E3_experiment/helios1_6sec_ness/...
+```
+
+**The distribution function files, 4Hz magnetic field data, and 6s magnetic field
+are all needed to regenerate the corefit dataset**
+
 
 Regenerating the corefit dataset
 --------------------------------
