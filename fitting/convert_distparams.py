@@ -34,6 +34,7 @@ for probe in ['1', '2']:
             # Convert B instrument column to int
             data['B instrument'] = data['B instrument'].astype(int)
 
+            # Re-order dataframe
             data = data[['B instrument', 'Bx', 'By', 'Bz', 'sigma B',
                          'Ion instrument', 'Status', 'Tp_par', 'Tp_perp',
                          'carrot', 'r_sun', 'clat', 'clong', 'earth_he_angle',
