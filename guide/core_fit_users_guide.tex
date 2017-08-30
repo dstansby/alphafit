@@ -1,0 +1,146 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{titling}
+\usepackage{titlesec}
+
+\hypersetup{%
+    pdfborder = {0 0 0}
+}
+
+% Change heading fonts
+\renewcommand{\maketitlehooka}{\sffamily}
+\titleformat*{\section}{\Large\bfseries\sffamily}
+\titleformat*{\subsection}{\Large\sffamily}
+\titleformat*{\subsubsection}{\large\sffamily}
+
+% Put lines under figure captions
+\usepackage{caption}
+\DeclareCaptionFormat{myformat}{#1#2#3\hrulefill}
+\captionsetup[table]{format=myformat}
+
+\begin{document}
+
+\title{Helios \texttt{corefit} data product user guide}
+\author{David Stansby \\
+\href{mailto:david.stansby14@imperial.ac.uk}{david.stansby14@imperial.ac.uk}}
+\date{}
+\maketitle
+
+%%%%
+\section{Introduction}
+This document describes the Helios \texttt{corefit} data product. This is a new data set which contains estimates of number density, velocity, and temperatures of the proton core population created from systematic fitting of all the original Helios 3D distribution functions.
+
+%%%%
+\section{Data availability}
+The data set is freely available at PUT DOI LINK HERE. If you are using the data in a publication, please cite this doi. Data are split by probe, year, and day of year, with data for each day contained in a single .csv file with a header row. Table \ref{tab:variables} summarises the variables present in the data product.
+
+The original 3D ion distribution function data are available at \url{ftp://apollo.ssl.berkeley.edu/pub/helios-data/E1_experiment/helios_raw/}. The source code used to read in and fit the distribution functions is available at PUT SOURCE CODE URL HERE.
+
+\begin{table}
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+		\hline
+		Parameter 					& Parameter label	& Units			& Note 				\\ \hline \hline \hline
+		Time						 	& Time			& 				& 			\\ \hline
+		Fitting status					& status			& 				& 1	\\ \hline
+		Instrument		 			& Instrument		& 				& 2	\\ \hline
+		Magnetic field instrument			& B instrument		&				& 3	\\ \hline \hline
+		Proton number density 			& n\_p			& $cm^{-3}$		&	\\ \hline
+		Proton $x$ velocity		 		& vp\_x			& $km\cdot s^{-1}$	& \\ \hline
+		Proton $y$ velocity		 		& vp\_y			& $km\cdot s^{-1}$	& \\ \hline
+		Proton $z$ velocity		 		& vp\_z			& $km\cdot s^{-1}$	&\\ \hline
+		Proton perpendicular thermal speed 	& vth\_p\_perp		& $km\cdot s^{-1}$	&\\ \hline
+		Proton parallel thermal speed 		& vth\_p\_par		& $km\cdot s^{-1}$	&\\ \hline
+		Proton perpendicular temperature	& Tp\_perp		& Kelvin			&	\\ \hline
+		Proton parallel temperature	 	& Tp\_par			& Kelvin			&	\\ \hline \hline
+		$B_{x}$						& Bx				& nT				& 	\\ \hline
+		$B_{y}$						& By				& nT				& 	\\ \hline
+		$B_{z}$						& Bz				& nT				& 	\\ \hline
+		Magnetic field standard deviation	& sigma B			& nT				& 4	\\ \hline \hline
+		Sun-spacecraft distance			& r\_sun			& AU				&\\ \hline
+		Carrington longitude				& clong			& Degrees		&	\\ \hline
+		Carrington latitude				& clat			& Degrees		&	\\ \hline
+		Carrington rotation number		& carrot			&				&	\\ \hline
+		Spacecraft-Earth angle			& earth\_he\_angle	& Degrees		&	\\ \hline
+	\end{tabular}
+	\caption{Description of variables present in the \texttt{core\_fit} data product.}	
+	\label{tab:variables}
+	\small
+	\begin{enumerate}
+		\item Successful fit flags take the following values: 1: successful fit; 2: successful fit, no magnetic field data available; 3: failed fit
+		\item Ion instrument flags take the following values: 1: I1a ion instrument data;  2: I3 ion instrument data
+		\item Magnetic field instrument flags take the following values: 1: E3 magnetometer data used;  2: E2 magnetometer data used
+		\item Magnetic field standard deviation is calculated as $\sqrt{\sigma^{2}_{Bx} + \sigma^{2}_{By} + \sigma^{2}_{Bz}}$, with individual standard deviations taken over the interval that the ion distribution function was measured
+	\end{enumerate}
+\end{table}
+
+%%%%
+\section{Fitting method}
+The parameters in the \texttt{corefit} product are generated from fitting bi-Maxwellian functions to the original 3D ion distribution functions. Each distribution is fitted using the following process:
+\begin{enumerate}
+	\item If magnetic field data is available, an average magnetic field is calculated from values taken whilst the distribution function was measured. The distribution function is then rotated into the field aligned frame.
+	\item A 3D bi-Maxwellian fit is done of the following form (fit parameters in bold):
+	\begin{equation}
+		f_{fit} \left ( v_{\parallel}, v_{\perp 1}, v_{\perp 2} \right ) = \mathbf{A} \cdot \exp - \left \{ \left ( \frac{v_{\parallel} - \mathbf{u}_{\parallel}}{\mathbf{w}_{\parallel}} \right )^{2} + \left ( \frac{v_{\perp 1} - \mathbf{u}_{\perp 1}}{\mathbf{w}_{\perp}} \right )^{2} + \left ( \frac{v_{\perp 2} - \mathbf{u}_{\perp 2}}{\mathbf{w}_{\perp}} \right )^{2} \right \}
+	\end{equation}
+	The 6 fit parameters are amplitude ($A$), 3 velocities ($u_{\parallel}$, $u_{\perp 1}$, $u_{\perp 2}$), and 2 thermal speeds ($w_{\perp}$, $w_{\parallel}$). The fit is done using least squares minimisation of the residuals calculated from $\left (f_{data} - f_{fit}\right )$.
+	\item The number density is calculated from
+	\begin{equation}
+		n = A \cdot \pi^{3/2}w_{\perp}w_{\perp}w_{\parallel}
+	\end{equation}
+	and two temperatures from
+	\begin{equation}
+		T_{\perp / \parallel} = \frac{m_{p}w_{\perp / \parallel}^{2}}{2k_{B}}
+	\end{equation}
+\end{enumerate}
+If no magnetic field is available in step 1, steps 2 and 3 still take place, but the thermal speeds and subsequently the number density are ignored. Table \ref{tab:variable availability} summarises which variables are available in each case.
+
+\begin{table}
+	\centering
+	\begin{tabular}{ c | c | c | c }
+				& $\mathbf{B}$ available	& $\mathbf{B}$ not available	& Failed fits 	\\ \hline
+	\texttt{B\_instrument} variable value	& 1 or 2	& -1						&			\\ \hline			
+	Number of points & 1,880,138			& 387,852					& 132,000		\\ \hline		
+	\% points		& 78.3\%				& 16.1\%					& 5.6\%		\\ \hline \hline
+	Number density	& x					&						&			\\ 
+	Velocity		& x					& x						&			\\ 
+	Temperatures	& x					&						&			\\ 
+	Magnetic field	& x					&						&			\\
+	\end{tabular}
+	\caption{Summary of which fitted parameters are available depending on magnetic field availability}
+	\label{tab:variable availability}
+\end{table}
+
+Figure \ref{fig:distribution fit} shows an example of the original distribution function along with the fit.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{I3_3D_example}
+	\caption{Example of distribution function data and corresponding fit. Top panel shows reduced 2D distribution function in the RN plane of an RTN co-ordinate system. Middle panel shows reduced distribution function in the RT plane. Black dots show positions in velocity space where the distribution function was sampled. Red crosses show the bulk velocity estimate from the fit, which agree well with the data. Bottom panel shows reduced 1D distribution function in blue, with the fit in orange. The fit agrees very well with the data, and is not sensitive to the proton beam present between 900 to 1100 km/s.}
+	\label{fig:distribution fit}
+\end{figure}
+
+%%%%
+\section{Differences between \texttt{corefit} and \texttt{merged} data sets}
+The \texttt{merged} data set\footnote{Available at \url{ftp://cdaweb.gsfc.nasa.gov/pub/data/helios/helios1/merged/} and \url{ftp://cdaweb.gsfc.nasa.gov/pub/data/helios/helios2/merged/}} contains estimates of proton bulk parameters calculated from numerical moments of reduced 1D distribution functions. This means that the \texttt{merged} data does not discriminate between the proton core and proton beam population. Differences between each parameter are as follows:
+%%%
+\subsection{Number density}
+The number density in the \texttt{merged} data set contains contributions from the proton beam, so is systematically higher than the corefit number density.
+%%%
+\subsection{Velocity}
+The radial component of velocity is systematically higher in the \texttt{merged} data set compare to the corefit values, due to the presence of the proton beam. The azimuthal and polar components are not affected by this and the two data sets contain similar values.
+%%%
+\subsection{Temperature}
+The \texttt{merged} data set contains only one proton temperature value. This value was calculated from the 1D distribution function which means it contains variable contributions from the true parallel and perpendicular temperatures of the protons. The perpendicular and parallel temperatures in the \texttt{corefit} data set are therefore much more accurate estimates of the temperatures of the proton core.
+
+\section{A note on timestamps}
+The timestamps in this data set are taken directly from the timestamps given in the filenames of the individual distribution function files. The distributions were recorded with a nominal cadence of 40.5 seconds, but it is believed anything after the decimal point in the timestamp has been dropped. This means that the time difference between consecutive time stamps goes like $0, 40, 81, 121, 162...$, whereas the true time differences were $0, 40.5, 81, 121.5, 162...$.
+%%%%%
+\appendix
+\section{Acknowledgements}
+The work was primarily carried out by David Stansby, in collaboration with Chadi Salem, Lorenzo Matteini, and Tim Horbury. David Stansby is supported by STFC studentship ST/N504336/1.
+
+\end{document}
