@@ -96,19 +96,20 @@ The parameters in the \texttt{corefit} product are generated from fitting bi-Max
 		T_{\perp / \parallel} = \frac{m_{p}w_{\perp / \parallel}^{2}}{2k_{B}}
 	\end{equation}
 \end{enumerate}
-If no magnetic field is available in step 1, steps 2 and 3 still take place, but the thermal speeds and subsequently the number density are ignored. Table \ref{tab:variable availability} summarises which variables are available in each case.
+If no magnetic field is available in step 1, steps 2 and 3 still take place, but the thermal speeds and subsequently the number density are ignored. If the magnetic field varies too much during the 32 seconds needed to measure a full distribution the number density and temperatures are unreliable and thus also ignored. Table \ref{tab:variable availability} summarises which variables are available in each case.
 
 \begin{table}
 	\centering
-	\begin{tabular}{ c | c | c | c }
-				& $\mathbf{B}$ available	& $\mathbf{B}$ not available	& Failed fits 	\\ \hline
-	\texttt{B\_instrument} variable value	& 1 or 2	& -1						&			\\ \hline			
-	Number of points & 1,880,138			& 387,852					& 132,000		\\ \hline		
-	\% points		& 78.3\%				& 16.1\%					& 5.6\%		\\ \hline \hline
-	Number density	& x					&						&			\\ 
-	Velocity		& x					& x						&			\\ 
-	Temperatures	& x					&						&			\\ 
-	Magnetic field	& x					&						&			\\
+	\begin{tabular}{ c | c | c | c | c |}
+									& $\mathbf{B}$ available	& $\mathbf{B}$ varies too much	& $\mathbf{B}$ not available	& Failed fits 	\\ \hline
+	\texttt{Status} variable value		& 1						& 2							& 3							& 4			\\ \hline
+	\texttt{B\_instrument} variable value	& 1 or 2					& -1							& -1							& -1			\\ \hline			
+	Number of points 					& 1,880,138				&							& 387,852					& 132,000	\\ \hline		
+	\% points						& 78.3\%					&							& 16.1\%						& 5.6\%		\\ \hline \hline
+	Number density					& x						&							&							&			\\ 
+	Velocity							& x						& x							& x							&			\\ 
+	Temperatures						& x						&							&							&			\\ 
+	Magnetic field					& x						&							&							&			\\
 	\end{tabular}
 	\caption{Summary of which fitted parameters are available depending on magnetic field availability}
 	\label{tab:variable availability}
