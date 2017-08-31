@@ -39,6 +39,7 @@ n = (params_3D['Status'] == 1).sum() + (params_3D['Status'] == 2).sum()
 print(str(n) + '\t' + 'successful fits' + '\t' +
       '(' + str(100 * n / ndists)[:4] + '%)')
 print(summarystr(1, 'including n/T'))
+print(summarystr(3, 'wobbly B'))
 print(summarystr(2, 'no B data'))
 print(summarystr(4, 'v out of range'))
 print(summarystr(5, '< 6 points'))
