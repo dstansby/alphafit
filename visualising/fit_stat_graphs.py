@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-import heliopy.data.helios as helios
+import helpers
 
 fig, [ax1, ax2] = plt.subplots(2, 1, sharex=True)
 for probe in ['1', '2']:
@@ -32,7 +32,7 @@ for probe in ['1', '2']:
             maxpoints.append(ndays * 24 * 60 * 60 / 40.5)
             times.append(starttime + (endtime - starttime) / 2)
             try:
-                params_3D = helios.ion_fitparams_3D(probe, starttime, endtime)
+                params_3D = helpers.load_corefit(probe, starttime, endtime)
             except Exception:
                 n_fit.append(0)
                 n_nomag.append(0)
