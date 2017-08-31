@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-import heliopy.data.helios as helios
+import helpers
 
 fitparamlist = []
 starttime = datetime(1974, 1, 1, 0, 0, 0)
@@ -18,7 +18,7 @@ params_3D = []
 print('Loading 3D...')
 for probe in ['1', '2']:
     print(probe)
-    params_3D.append(helios.ion_fitparams_3D(probe, starttime, endtime))
+    params_3D.append(helpers.load_corefit(probe, starttime, endtime))
 params_3D = pd.concat(params_3D)
 
 ndists = params_3D.shape[0]
