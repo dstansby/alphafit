@@ -27,7 +27,7 @@ for probe in ['1', '2']:
             endtime = (datetime(year, month + 1, 1, 0, 0, 0) -
                        timedelta(seconds=1))
 
-            print(starttime)
+            print(starttime.date())
             ndays = (endtime - starttime).days + 1
             maxpoints.append(ndays * 24 * 60 * 60 / 40.5)
             times.append(starttime + (endtime - starttime) / 2)
