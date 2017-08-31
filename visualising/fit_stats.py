@@ -50,5 +50,5 @@ print(summarystr(11, 'n overestimated'))
 print(summarystr(12, 'anglular bins'))
 
 print('\n')
-print('I1a:', (params_3D['Instrument'] == 1).sum() / ndists)
-print('I3: ', (params_3D['Instrument'] == 2).sum() / ndists)
+print('I1a:', (params_3D['Ion instrument'] == 1).sum() / ndists)
+print('I3: ', (params_3D['Ion instrument'] == 2).sum() / ndists)
