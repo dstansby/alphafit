@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import helpers
 
-fig, [ax1, ax2] = plt.subplots(2, 1, sharex=True)
+fig, ax1 = plt.subplots()
 for probe in ['1', '2']:
     times = []
     n_fit = []
@@ -45,11 +45,8 @@ for probe in ['1', '2']:
     ax1.plot(times, ((np.array(n_fit) + np.array(n_nomag)) /
                      np.array(maxpoints)),
              label='Helios ' + probe)
-    ax2.plot(times, np.array(n_fit) / np.array(n_dists),
-             label='Helios ' + probe)
 
-ax1.set_ylabel(r'fraction of all possible distributions fitted')
+ax1.set_title(r'Fraction of maximum possible distributions fitted')
 ax1.set_ylim(0, 1)
-ax2.set_ylim(0, 1)
 ax1.legend()
 plt.show()
