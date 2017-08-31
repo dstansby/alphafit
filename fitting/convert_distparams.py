@@ -12,15 +12,16 @@ output_dir = get_dirs()
 for probe in ['1', '2']:
     for year in range(1974, 1986):
         fdir = os.path.join(output_dir, 'helios' + probe, 'fits', str(year))
-        if not os.path.exists(os.path.join(fdir, 'csv')):
-            os.makedirs(os.path.join(fdir, 'csv'))
+        csv_dir = os.path.join(output_dir, 'csv', 'helios' + probe, str(year))
+        if not os.path.exists(csv_dir):
+            os.makedirs(csv_dir)
         for doy in range(1, 367):
             print(probe, year, doy)
             hdf_fname = 'h{}_{}_{:03}_3D_fits.h5'.format(probe, year, doy)
-            csv_fname = 'h{}_{}_{:03}_3D_fits.csv'.format(probe, year, doy)
+            csv_fname = 'h{}_{}_{:03}_corefit.csv'.format(probe, year, doy)
 
             hdf_file = os.path.join(fdir, hdf_fname)
-            csv_file = os.path.join(fdir, 'csv', csv_fname)
+            csv_file = os.path.join(csv_dir, csv_fname)
             try:
                 data = pd.read_hdf(hdf_file)
             except Exception as err:
