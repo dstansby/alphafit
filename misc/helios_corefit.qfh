@@ -42,10 +42,6 @@ Entry = Helios data archive: http://helios-data.ssl.berkeley.edu/
 Entry = Paper describing plasma instrumentation and initial mission results: http://onlinelibrary.wiley.com/doi/10.1029/JA087iA01p00052/abstract
 END_META = MISSION_REFERENCES
 
-START_META = MISSION_CAVEATS
-Entry = TBD
-END_META = MISSION_CAVEATS
-
 START_META = OBSERVATORY
 Entry = Helios 1 or 2
 END_META = OBSERVATORY
@@ -62,14 +58,9 @@ Entry = The fits were done using bi-Maxwellian distribution functions and the fi
 Entry = Original data was taken from 3D distribution function files.
 END_META = DATASET_DESCRIPTION
 
-START_META = DATASET_CAVEATS
-Entry = TBD
-END_META = DATASET_CAVEATS
-
 START_META = CONTACT_COORDINATES
 Number_of_entries = 2
 Entry = David Stansby <david.stansby14@imperial.ac.uk>
-Entry = Tim Horbury <t.horbury@imperial.ac.uk>
 END_META = CONTACT_COORDINATES
 
 START_META = ACKNOWLEDGEMENT
