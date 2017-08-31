@@ -9,8 +9,9 @@ to the old merged data set
 - **guide**: contains a user's guide to the data set
 
 ### Acknowledgements
-The code was written by myself ([David Stansby](https://dstansby.github.io/about/)). The majority of it was written
-during a 2 week visit to UC Berkeley (USA) hosted by Chadi Salem. Thanks to
-Chadi Salem, Tim Horbury, and Lorenzo Matteini for useful discussions and
-advice concerning distribution functions and the Helios mission. Thanks to
-Steve Schwartz and Tony Allen for help with .cdf files.
+The code was written by myself ([David Stansby](https://dstansby.github.io/about/)). I am supported by STFC studentship number ST/N504336/1.
+
+The majority of it was written during a 2 week visit to UC Berkeley (USA) hosted by Chadi Salem.
+Thanks to Chadi Salem, Tim Horbury, and Lorenzo Matteini for useful discussions and
+advice concerning distribution functions and the Helios mission.
+Thanks to Steve Schwartz and Tony Allen for help with .cdf files.
