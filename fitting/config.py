@@ -13,7 +13,7 @@ def get_dirs():
                                 'Try renaming the config.ini.template file to '
                                 'config.ini in the corefit/fitting directory')
 
-    output_dir = config['data_dirs']['output_dir']
+    output_dir = os.path.expanduser(config['data_dirs']['output_dir'])
 
     if not os.path.isdir(output_dir):
         raise FileNotFoundError('Output directory "{}" specified in '
