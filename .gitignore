@@ -2,6 +2,7 @@
 config.ini
 *.lprof
 
+*.DS_Store
 *.log
 *.out
 *.synctex.gz
