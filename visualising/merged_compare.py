@@ -31,6 +31,7 @@ axs[0].plot(params_3D['Tp_perp'], label=r'3D $T_{\perp}$')
 axs[0].plot(params_3D['Tp_par'], label=r'3D $T_{\parallel}$')
 axs[0].legend()
 axs[0].set_yscale('log')
+axs[0].set_xlim(starttime, endtime)
 
 axs[1].plot(merged['Tp1'], label='Merged T')
 axs[1].plot((2 * params_3D['Tp_perp'] + params_3D['Tp_par']) / 3,
@@ -47,6 +48,7 @@ axs[2].set_yscale('log')
 fig, axs = plt.subplots(3, 1, sharex=True)
 axs[0].plot(merged['vp1r'], label=r'Merged $v_{r}$')
 axs[0].plot(params_3D['vp_x'], label=r'3D $v_{r}$', marker='+', markersize=1)
+axs[0].set_xlim(starttime, endtime)
 
 axs[1].plot(merged['vp1t'], label=r'Merged $v_{t}$')
 axs[1].plot(params_3D['vp_y'], label=r'3D $v_{t}$')
@@ -66,6 +68,7 @@ axs[0].set_yscale('log')
 plot_status(axs[1], params_3D, 'Status')
 axs[0].legend()
 axs[0].set_ylabel('cm' + r'$^{-3}$')
+axs[0].set_xlim(starttime, endtime)
 
 
 def scatter(x, y, ax, xlabel, ylabel):
