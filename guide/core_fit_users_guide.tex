@@ -130,13 +130,33 @@ Figure \ref{fig:distribution fit} shows an example of the original distribution 
 The \texttt{merged} data set\footnote{Available at \url{ftp://cdaweb.gsfc.nasa.gov/pub/data/helios/helios1/merged/} and \url{ftp://cdaweb.gsfc.nasa.gov/pub/data/helios/helios2/merged/}} contains estimates of proton bulk parameters calculated from numerical moments of reduced 1D distribution functions. This means that the \texttt{merged} data does not discriminate between the proton core and proton beam population. Differences between each parameter are as follows:
 %%%
 \subsection{Number density}
-The number density in the \texttt{merged} data set contains contributions from the proton beam, so is systematically higher than the \texttt{corefit} number density.
+The number density in the \texttt{merged} data set contains contributions from the proton beam, so is systematically higher than the \texttt{corefit} number density. A time series comparison is shown in figure \ref{fig:density}.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{density_comparison}
+	\caption{One day comparison of \texttt{merged} proton number density (blue) and \texttt{corefit} number density (orange). x-axis ticks are every 3 hours with the entire x-axis spanning 1 day, and formatted MM-DD HH.}
+	\label{fig:density}
+\end{figure}
+
 %%%
 \subsection{Velocity}
-The radial component of velocity is systematically higher in the \texttt{merged} data set compared to the \texttt{corefit} values, due to the presence of the proton beam. The azimuthal and polar components are not affected by this and the two data sets contain similar values.
+The radial component of velocity is systematically higher in the \texttt{merged} data set compared to the \texttt{corefit} values, due to the presence of the proton beam. The azimuthal and polar components are not affected by this and the two data sets contain similar values. A time series comparison is shown in figure \ref{fig:velocity}.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{velocity_comparison}
+	\caption{One day comparison of \texttt{merged} proton velocity (blue) and \texttt{corefit} proton velocity (orange). x-axis ticks are every 3 hours with the entire x-axis spanning 1 day, and formatted MM-DD HH.}
+	\label{fig:velocity}
+\end{figure}
+
 %%%
 \subsection{Temperature}
-The \texttt{merged} data set contains only one proton temperature value. This value was calculated from the 1D distribution function which means it contains variable contributions from the true parallel and perpendicular temperatures of the protons. The perpendicular and parallel temperatures in the \texttt{corefit} data set are therefore much more accurate estimates of the temperatures of the proton core.
+The \texttt{merged} data set contains only one proton temperature value. This value was calculated from the 1D distribution function which means it contains variable contributions from the true parallel and perpendicular temperatures of the protons. The perpendicular and parallel temperatures in the \texttt{corefit} data set are therefore much more accurate estimates of the temperatures of the proton core. A time series comparison is shown in figure \ref{fig:temperature}.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\textwidth]{temperature_comparision}
+	\caption{One day comparison of \texttt{merged} proton temperature and \texttt{corefit} proton temperatures. Top panel shows \texttt{merged} proton temperature (blue), \texttt{corefit} perpendicular temperature (orange), and \texttt{corefit} parallel temperature (green). Middle panel shows \texttt{merged} proton temperature (blue) and \texttt{corefit} proton temperature (orange). Bottom panel shows \texttt{corefit} temperature anisotropy (orange). x-axis ticks are every 3 hours with the entire x-axis spanning 1 day, and formatted MM-DD HH.}
+	\label{fig:temperature}
+\end{figure}
 
 \section{A note on timestamps}
 The timestamps in this data set were taken directly from the timestamps given in the filenames of the individual distribution function files. The distributions were originally recorded with a nominal cadence of 40.5 seconds, but it is believed anything after the decimal point in the timestamp has been dropped. This means that the time difference between consecutive time stamps goes like $0, 40, 81, 121, 162...$, whereas the true time differences were $0, 40.5, 81, 121.5, 162...$.
