@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{titling}
 \usepackage{titlesec}
+\usepackage{enumitem}
 
 % Change heading fonts
 \renewcommand{\maketitlehooka}{\sffamily}
@@ -45,9 +46,9 @@ The original 3D ion distribution function data are available on the Helios archi
 		\hline
 		Parameter 					& Parameter label	& Units			& Note 				\\ \hline \hline \hline
 		Time						 	& Time			& 				& 			\\ \hline
-		Fitting status					& status			& 				& 1	\\ \hline
-		Instrument		 			& Instrument		& 				& 2	\\ \hline
-		Magnetic field instrument			& B instrument		&				& 3	\\ \hline \hline
+		Fitting status					& status			& 				& a	\\ \hline
+		Instrument		 			& Instrument		& 				& b	\\ \hline
+		Magnetic field instrument			& B instrument		&				& c	\\ \hline \hline
 		Proton number density 			& n\_p			& $cm^{-3}$		&	\\ \hline
 		Proton $x$ velocity		 		& vp\_x			& $km\cdot s^{-1}$	& \\ \hline
 		Proton $y$ velocity		 		& vp\_y			& $km\cdot s^{-1}$	& \\ \hline
@@ -59,7 +60,7 @@ The original 3D ion distribution function data are available on the Helios archi
 		$B_{x}$						& Bx				& nT				& 	\\ \hline
 		$B_{y}$						& By				& nT				& 	\\ \hline
 		$B_{z}$						& Bz				& nT				& 	\\ \hline
-		Magnetic field standard deviation	& sigma B			& nT				& 4	\\ \hline \hline
+		Magnetic field standard deviation	& sigma B			& nT				& d	\\ \hline \hline
 		Sun-spacecraft distance			& r\_sun			& AU				&\\ \hline
 		Carrington longitude				& clong			& Degrees		&	\\ \hline
 		Carrington latitude				& clat			& Degrees		&	\\ \hline
@@ -69,7 +70,7 @@ The original 3D ion distribution function data are available on the Helios archi
 	\caption{Description of variables present in the \texttt{core\_fit} data product.}	
 	\label{tab:variables}
 	\small
-	\begin{enumerate}
+	\begin{enumerate}[label=\alph*.]
 		\item Fitting status flags take the following values: 1: successful fit; 2: successful fit, magnetic field varies too much for reliable number densities and temperatures; 3: successful fit, no magnetic field data available; 4: failed fit
 		\item Ion instrument flags take the following values: 1: I1a ion instrument data;  2: I3 ion instrument data
 		\item Magnetic field instrument flags take the following values: 1: E3 magnetometer data used;  2: E2 magnetometer data used
