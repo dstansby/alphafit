@@ -1,4 +1,4 @@
 pandas
 numpy
-heliopy
+heliopy>=0.1b4
 scipy
