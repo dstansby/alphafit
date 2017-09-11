@@ -153,6 +153,13 @@ The radial component of velocity is systematically higher in the \texttt{merged}
 %%%
 \subsection{Temperature}
 The \texttt{merged} data set contains only one proton temperature value. This value was calculated from the 1D distribution function which means it contains variable contributions from the true parallel and perpendicular temperatures of the protons. The perpendicular and parallel temperatures in the \texttt{corefit} data set are therefore much more accurate estimates of the temperatures of the proton core. A time series comparison is shown in figure \ref{fig:temperature}.
+
+The total temperature, which can be calculated from the parallel and perpendicular temperatures via.
+\begin{equation}
+	T = \frac{2T_{\perp} + T_{\parallel}}{3}
+\end{equation}
+is therefore much more accurate in the \texttt{corefit} data set. The difference between the \texttt{merged} temperature and the \texttt{corefit} temperature can be as big as a factor of 5 (see figure \ref{fig:temperature}, middle panel).
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\textwidth]{temperature_comparision}
