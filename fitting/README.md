@@ -31,29 +31,33 @@ echo "download_dir = /data/storage/directory" >> ~/.heliopy/heliopyrc
 be stored)
 
 3. Download the original distribution function files from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E1_experiment/helios_raw/
-The directory structure in your download location should look like
+The directory structure in your download location needs changing a bit,
+and should look like (1974 is an example year, 44 is an example day of year)
 ```bash
-/data/storage/directory/helios/E1_experiment/helios_raw/helios_1/...
+/data/storage/directory/helios/helios1/dist/1974/44/...
 ```
-Once the `helios/E1_experiemnt` directory is created, the `helios_raw` directory
-can be downloaded directly from the ftp server. If you only want to regenerate
-specific days of data, you only need to download the relavent files and not the
-entire dataset.
+If you only want to regenerate specific days of data, you only need to download
+the relevant files and not the entire dataset.
 
 4. Download the 4Hz magnetic field data from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E2_experiment/Data_Cologne_Nov2016_bestdata/HR/
-The directory structure in your download location should look like
+The directory structure in your download location needs changing a bit,
+and should look like
 ```bash
-/data/storage/directory/helios/E2_experiment/Data_Cologne_Nov2016_bestdata/HR/helios_1/...
+/data/storage/directory/helios/helios1/mag/4hz/
 ```
+with all the files (for helios 1) stored in this directory.
 
-5. Download the 6s magnetic field data from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E3_experiment/
-The directory structure in your download location should look like
+5. Download the 6s magnetic field data from
+ftp://apollo.ssl.berkeley.edu/pub/helios-data/E3_experiment/
+The directory structure in your download location needs changing a bit,
+and should look like (1974 is an example year, 44 is an example day of year)
 ```bash
-/data/storage/directory/helios/E3_experiment/helios1_6sec_ness/...
+/data/storage/directory/helios/helios1/6sec_ness/1974/
 ```
+with all the files (in this example for helios 1 in 1974) in this directory.
 
-**The distribution function files, 4Hz magnetic field data, and 6s magnetic field
-are all needed to regenerate the corefit dataset**
+**The distribution function files, 4Hz magnetic field data, and
+6s magnetic field are all needed to regenerate the corefit dataset**
 
 
 Regenerating the corefit dataset
