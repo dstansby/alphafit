@@ -76,7 +76,6 @@ def do_fitting(pltfigs=False):
 
                 # If no magnetic field data available
                 if mag4hz is None and mag6s is None:
-                    # TODO: append some code to output
                     print('No mag data available for '
                           'probe {} year {} doy {}'.format(probe, year, doy))
                     continue
