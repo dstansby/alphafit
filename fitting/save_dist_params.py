@@ -8,8 +8,10 @@ import pandas as pd
 import numpy as np
 
 import heliopy.data.helios as helios
-import heliopy.constants as const
 from heliopy import config as helioconfig
+
+import astropy.units as u
+import astropy.constants as const
 
 from helpers import doy2dtime
 import proton_core_1D as ions_1D
@@ -104,7 +106,10 @@ def do_fitting(pltfigs=False):
                     raise
 
                 distparams['vth_i1a'] =\
-                    np.sqrt(const.k_B * distparams['Tp_i1a'] / const.m_p) / 1e3
+                    np.sqrt(const.k_B *
+                            distparams['Tp_i1a'].values * u.K /
+                            const.m_p).to(
+                                u.km / u.s).value
 
                 # Add a velocity level to 1D dataframe
                 I1as = dists_1D['a']

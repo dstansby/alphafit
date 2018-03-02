@@ -2,3 +2,4 @@ pandas
 numpy
 heliopy>=0.1b4
 scipy
+astropy

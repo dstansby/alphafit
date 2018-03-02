@@ -4,6 +4,8 @@
 from datetime import datetime
 
 import numpy as np
+import astropy.units as u
+import astropy.constants as const
 
 
 def _columndotproduct(v1, v2):
@@ -11,6 +13,22 @@ def _columndotproduct(v1, v2):
     for i in range(v1.shape[0]):
         out[i] = np.dot(v1[int(i), :], v2[int(i), :])
     return out
+
+
+def vth2temp(vth):
+    """
+    Assumes velocities are floating point numbers in km/s.
+    """
+    return (const.m_p * ((float(vth) * (u.km / u.s))**2) /
+            (2 * const.k_B)).to(u.K).value
+
+
+def temp2vth(temp):
+    """
+    Assumes velocities are floating point numbers in km/s.
+    """
+    return np.sqrt(2 * const.k_B * float(temp) * u.K /
+                   const.m_p).to(u.km / u.s).value
 
 
 def rotationmatrixangle(axis, theta):

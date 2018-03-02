@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-import heliopy.constants as const
+import helpers
 import heliopy.data.helios as helios
-import heliopy.plasma as helioplas
 
 import scipy.optimize as opt
 
@@ -69,7 +68,7 @@ def oned_fitting(I1a, I1b, distparams, starttime, plotfigs=False):
         return return_nans(5, starttime, instrument)
 
     # Convert temperature to thermal speed
-    distparams['vth_i1a'] = helioplas.temp2vth(distparams['Tp_i1a'], const.m_p)
+    distparams['vth_i1a'] = helpers.temp2vth(distparams['Tp_i1a'])
 
     # Get maximum distribution function (assumed to be proton peak)
     maxdf_v = I1b['df'].argmax()
@@ -109,7 +108,7 @@ def oned_fitting(I1a, I1b, distparams, starttime, plotfigs=False):
                  'v_p': popt[1],
                  'vth_p': popt[2]}
 
-    fitparams['T_p'] = helioplas.vth2temp(fitparams['vth_p'], const.m_p)
+    fitparams['T_p'] = helpers.vth2temp(fitparams['vth_p'])
     fitparams['status'] = 1
     fitparams['Time'] = starttime
     fitparams['Instrument'] = instrument

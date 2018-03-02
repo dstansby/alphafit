@@ -8,8 +8,7 @@ import numpy as np
 import scipy.optimize as opt
 
 import heliopy.data.helios as HeliosImport
-import heliopy.constants as const
-import heliopy.plasma as helioplas
+import helpers
 
 from helpers import rotationmatrix
 
@@ -201,7 +200,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
                 np.sum(df * vprime[:, 2]) / np.sum(df)]
     # Take proton temperature in distribution parameters for T_p (par and perp)
     # If no guess, or guess < 10km/s or guess > 100km/s take 40km/s for guess
-    vthp_guess = helioplas.temp2vth(fit_1D['T_p'], const.m_p)
+    vthp_guess = helpers.temp2vth(fit_1D['T_p'])
     if (not np.isfinite(vthp_guess)) or vthp_guess < 10 or vthp_guess > 100:
         vthp_guess = 40
     guesses = (Ap_guess, vthp_guess, vthp_guess,
@@ -258,11 +257,10 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
 
         fit_dict = {'vth_' + species + '_perp': np.abs(fitparams[1]),
                     'vth_' + species + '_par': np.abs(fitparams[2])}
-        m = const.m_p
         fit_dict['T' + species + '_perp'] =\
-            helioplas.vth2temp(fit_dict['vth_' + species + '_perp'], m)
+            helpers.vth2temp(fit_dict['vth_' + species + '_perp'])
         fit_dict['T' + species + '_par'] =\
-            helioplas.vth2temp(fit_dict['vth_' + species + '_par'], m)
+            helpers.vth2temp(fit_dict['vth_' + species + '_par'])
         # Original distribution has units s**3 / m**6
         # Get n_p in 1 / m**3
         n = (fitparams[0] * np.power(np.pi, 1.5) *
