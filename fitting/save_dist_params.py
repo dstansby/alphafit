@@ -17,6 +17,9 @@ import proton_core_3D as ions_3D
 from config import get_dirs
 
 output_dir = get_dirs()
+probes = ['1', '2']
+years = range(1974, 1986)
+doys = range(1, 367)
 
 
 def save_fits(fits, probe, year, doy, dim, fdir):
@@ -29,9 +32,9 @@ def save_fits(fits, probe, year, doy, dim, fdir):
 
 def do_fitting(pltfigs=False):
     # Loop through each probe
-    for probe in ['1', '2']:
+    for probe in probes:
         # Loop through years
-        for year in range(1974, 1986):
+        for year in years:
             # Make directory to save fits
             fdir = os.path.join(output_dir,
                                 'helios' + probe,
@@ -41,7 +44,7 @@ def do_fitting(pltfigs=False):
                 os.makedirs(fdir)
 
             # Loop through days of the year
-            for doy in range(1, 367):
+            for doy in doys:
                 starttime = doy2dtime(year, doy)
                 if starttime.year != year:
                     continue
