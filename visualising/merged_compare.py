@@ -4,12 +4,14 @@
 from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as pltdates
 import pandas as pd
 import numpy as np
 
 from heliopy.data import helios
 
 import helpers
+from plot_fitted_dist import plot_dist_time
 
 # Set probe and dates to compare here
 probe = '1'
@@ -60,7 +62,7 @@ for i in range(0, 3):
     axs[i].set_ylabel('km/s')
     axs[i].legend()
 
-fig, axs = plt.subplots(2, 1, sharex=True)
+n_fig, axs = plt.subplots(2, 1, sharex=True)
 # axs = [axs]
 axs[0].plot(merged['np1'], label=r'Merged $n_{p}$')
 axs[0].plot(params_3D['n_p'], label=r'3D $n_{p}$')
@@ -69,6 +71,33 @@ plot_status(axs[1], params_3D, 'Status')
 axs[0].legend()
 axs[0].set_ylabel('cm' + r'$^{-3}$')
 axs[0].set_xlim(starttime, endtime)
+
+
+# Add an action to plot distribution when right-clicking
+def onclick(event):
+    if event.button == 3:
+        x = event.xdata
+        disttime = pltdates.num2date(x).replace(tzinfo=None)
+        disttime = params_3D.index[np.argmin(np.abs(params_3D.index - disttime))]
+        doy = int(disttime.strftime('%j'))
+        print(disttime)
+
+        try:
+            plot_dist_time(probe, disttime)
+        except Exception as err:
+            print(str(err))
+            event.inaxes.axvline(disttime, color='r')
+            n_fig.canvas.draw()
+            return
+        event.inaxes.axvline(disttime, color='k')
+        n_fig.canvas.draw()
+        plt.show(block=False)
+    return
+
+
+cid = n_fig.canvas.mpl_connect('button_press_event', onclick)
+plt.show()
+exit()
 
 
 def scatter(x, y, ax, xlabel, ylabel):
