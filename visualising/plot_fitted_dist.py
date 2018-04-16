@@ -7,10 +7,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import heliopy.plot.particles as partplt
 import heliopy.data.helios as helios
 
 import helpers
+
+
+def contour2d(x, y, pdf, showbins=True, levels=10):
+    """Perform a countour plot of 2D distribution function data."""
+    ax = plt.gca()
+    pdf = np.log10(pdf)
+    if type(levels) == int:
+        levels = np.linspace(np.nanmin(pdf), np.nanmax(pdf), levels)
+    ax.tricontourf(x, y, pdf, levels=levels, cmap='viridis')
+    ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k', linewidths=0.5, alpha=0.8)
+    if showbins:
+        ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
 
 def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
@@ -80,7 +91,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     vn = np.sin(theta) * vs
 
     plt.sca(ax[0])
-    partplt.contour2d(vr, vn, pdf, levels=20, showbins=True)
+    contour2d(vr, vn, pdf, levels=20, showbins=True)
     ax[0].scatter(output['vp_x'], output['vp_z'],
                   marker='x', color='r')
     ax[0].set_ylabel(r'$v_{n}$' + ' (km/s)')
@@ -95,7 +106,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     vt = np.sin(phi) * vs + params['helios_v']
 
     plt.sca(ax[1])
-    partplt.contour2d(vr, vt, pdf, levels=20, showbins=True)
+    contour2d(vr, vt, pdf, levels=20, showbins=True)
     ax[1].scatter(output['vp_x'], output['vp_y'],
                   marker='x', color='r')
     ax[1].set_ylabel(r'$v_{t}$' + ' (km/s)')
@@ -152,7 +163,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         axs2[0].set_title(title)
 
         plt.sca(axs2[0])
-        partplt.contour2d(
+        contour2d(
             vpar, vperp,
             np.concatenate((dist['pdf'].values,
                             dist['pdf'].values)) / dist['pdf'].max(),
@@ -161,7 +172,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         fitted_bimax = perp_par_maxwellian(
             output['n_p'], output['vth_p_perp'], output['vth_p_par'],
             vperp, vpar)
-        partplt.contour2d(vpar, vperp, fitted_bimax / np.max(fitted_bimax),
+        contour2d(vpar, vperp, fitted_bimax / np.max(fitted_bimax),
                           levels=levels)
 
         for ax2 in axs2:
