@@ -24,6 +24,30 @@ years = range(1974, 1986)
 doys = range(1, 367)
 
 
+# Method to remove bad data
+def remove_bad_data(data, probe):
+    # Import keys that need to be set to nan when we manually get rid of
+    # bad data
+    keys = ions_3D.keys
+    keys.remove('Time')
+    keys.remove('Ion instrument')
+    for comp in ['x', 'y', 'z']:
+        keys.remove('vp_' + comp)
+    manual_bad_data = pd.read_csv('manual_remove_intervals.csv',
+                                  parse_dates=[1, 2])
+    for _, bad_data in manual_bad_data.iterrows():
+        if str(bad_data['Probe']) != str(probe):
+            continue
+        bad_locations = ((data.index > bad_data['Start']) &
+                         (data.index < bad_data['End']))
+        if bad_locations.any():
+            for key in keys:
+                data.loc[bad_locations, key] = np.nan
+            data.loc[bad_locations, 'Status'] = 5
+            data.loc[bad_locations, 'B instrument'] = -1
+    return data
+
+
 def save_fits(fits, probe, year, doy, dim, fdir):
     # Save fits
     fname = ('h' + probe + '_' + str(year) + '_' + str(doy).zfill(3) +
@@ -173,6 +197,8 @@ def do_fitting(pltfigs=False):
                     continue
 
                 fits_3D = fits_3D.set_index('Time', drop=True)
+                print('Removing manually identified known bad data')
+                fits_3D = remove_bad_data(fits_3D, probe)
                 save_fits(fits_3D, probe, year, doy, '3', fdir)
 
                 # Save 1D fits
