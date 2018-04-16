@@ -30,7 +30,7 @@ echo "download_dir = /data/storage/directory" >> ~/.heliopy/heliopyrc
 (replacing "/data/storage/directory" by the directory where all the data will
 be stored)
 
-3. Download the original distribution function files from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E1_experiment/helios_raw/
+3. Download the original distribution function files from ftp://apollo.ssl.berkeley.edu/pub/helios-data/E1_experiment/helios_original/
 The directory structure in your download location needs changing a bit,
 and should look like (1974 is an example year, 44 is an example day of year)
 ```bash
