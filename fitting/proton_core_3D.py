@@ -153,7 +153,6 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
 
     wobbly_B = False
     if not magempty:
-        # TODO: Check magnetic field is static enough
         mag = mag[['Bx', 'By', 'Bz']].values
 
         # Check magnetic field is static enough whilst distribution is
