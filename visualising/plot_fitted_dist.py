@@ -96,7 +96,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
                   marker='x', color='r')
     ax[0].set_ylabel(r'$v_{n}$' + ' (km/s)')
     ax[0].set_xlim(vrminlim, vrmaxlim)
-    ax[0].set_aspect('equal', 'datalim')
+    # ax[0].set_aspect('equal', 'datalim')
 
     # Calculate reduced ecliptic distribution function
     pdf = dist['pdf'].groupby(level=['E_bin', 'Az']).sum()
@@ -111,7 +111,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
                   marker='x', color='r')
     ax[1].set_ylabel(r'$v_{t}$' + ' (km/s)')
     ax[1].set_xlim(vrminlim, vrmaxlim)
-    ax[1].set_aspect('equal', 'datalim')
+    # ax[1].set_aspect('equal', 'datalim')
 
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean() / 1e3
@@ -176,7 +176,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
                           levels=levels)
 
         for ax2 in axs2:
-            ax2.set_aspect('equal', 'datalim')
+            # ax2.set_aspect('equal', 'datalim')
             ax2.set_xlabel(r'$v_{\parallel}$')
             ax2.set_ylabel(r'$v_{\perp}$')
 
