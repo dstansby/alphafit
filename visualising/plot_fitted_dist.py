@@ -81,7 +81,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     fig, ax = plt.subplots(3, 1, sharex=True)
     ax[0].set_title(title)
     vrminlim = 200
-    vrmaxlim = 600
+    vrmaxlim = 1000
 
     # Calculate reduced out of ecliptic distribution function
     pdf = dist['pdf'].groupby(level=['E_bin', 'El']).sum()
