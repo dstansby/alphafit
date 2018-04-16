@@ -93,7 +93,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     if n_phi_bins < 3 or n_theta_bins < 3:
         return return_nans(12, starttime, instrument)
 
-    # Return if the minimum velocity in the 3D distribution is not below
+    # Return if the minimum velocity bin in the 3D distribution is not below
     # the velocity of the peak in I1b (assumed to be the proton peak)
     vs_3D = dist['|v|'] / 1e3
     if len(I1a) != 0:
