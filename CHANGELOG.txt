@@ -1,0 +1,13 @@
+Helios corefit changelog
+------------------------
+
+1.1
+~~~
+
+- Manually removed some obviously bad data
+
+1.0
+~~~
+https://doi.org/10.5281/zenodo.891404
+
+Original data release
