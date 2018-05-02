@@ -4,6 +4,7 @@
 from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import scipy.interpolate as interp
 import numpy as np
 import pandas as pd
@@ -13,14 +14,19 @@ import heliopy.data.helios as helios
 import helpers
 
 
-def contour2d(x, y, pdf, showbins=True, levels=10):
+def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
     """Perform a countour plot of 2D distribution function data."""
     ax = plt.gca()
-    pdf = np.log10(pdf)
+    pdf = np.log(pdf)
     if type(levels) == int:
         levels = np.linspace(np.nanmin(pdf), np.nanmax(pdf), levels)
     ax.tricontourf(x, y, pdf, levels=levels, cmap='viridis')
-    ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k', linewidths=0.5, alpha=0.8)
+    ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k',
+                  linewidths=0.5, alpha=0.8)
+    if add1overe:
+        ax.tricontour(x, y, pdf, levels=[np.nanmax(pdf) - 1],
+                      linestyles='-', colors='r',
+                      linewidths=2, alpha=0.8)
     if showbins:
         ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
@@ -75,7 +81,7 @@ def plot_dist_time(probe, time):
 
 
 def slice_dist(vs, pdf, plane):
-    vlim = 300
+    vlim = 400
     x, y = np.meshgrid(np.linspace(-vlim, vlim, 100),
                        np.linspace(-vlim, vlim, 100))
     sampling_points = [x, y, y]
@@ -96,31 +102,41 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios 2 ' + str(time)
-    fig, ax = plt.subplots(3, 1)
-    ax[0].set_title(title)
+    fig = plt.figure()
+    spec = gridspec.GridSpec(ncols=2, nrows=2)
+    ax1 = fig.add_subplot(spec[0, 0])
+    ax2 = fig.add_subplot(spec[0, 1])
+    ax3 = fig.add_subplot(spec[1, :])
+    ax = [ax1, ax2, ax3]
+    #for a in ax[0:2]:
+    #    a.axhline(0, color='k', lw=0.5)
+    #    a.axvline(0, color='k', lw=0.5)
+
+    fig.suptitle(title)
     vrminlim = 200
     vrmaxlim = 1000
-
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     dist_vcentre = dist.copy()
     for comp in ['x', 'y', 'z']:
         dist_vcentre['v' + comp] -= output['vp_' + comp]
-    print(dist_vcentre.head())
+    # Distribution is in spacecraft frame, but output velocities are in
+    # solar wind frame, so correct
+    dist_vcentre['vx'] += params['helios_vr']
+    dist_vcentre['vy'] += params['helios_v']
     vs = np.dot(R, dist_vcentre[['vx', 'vy', 'vz']].T).T
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
 
     plt.sca(ax[0])
-    contour2d(x.ravel(), y.ravel(), pdf.ravel(), levels=20, showbins=False)
+    contour2d(x.ravel(), y.ravel(), pdf.ravel(), levels=20, showbins=False, add1overe=True)
+    ax[0].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
+    ax[0].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
     ax[0].set_aspect('equal', adjustable='datalim')
-
 
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
-    contour2d(x, y, pdf, levels=20, showbins=False)
-    '''ax[1].scatter(output['vp_x'], output['vp_y'],
-                  marker='x', color='r')
-    ax[1].set_ylabel(r'$v_{t}$' + ' (km/s)')
-    ax[1].set_xlim(vrminlim, vrmaxlim)'''
+    contour2d(x, y, pdf, levels=20, showbins=False, add1overe=True)
+    ax[1].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
+    ax[1].plot((-output['vth_p_par'], output['vth_p_par']), (0, 0), color='k')
     ax[1].set_aspect('equal', 'datalim')
 
     # Calculate 1D reduced distribution from data
