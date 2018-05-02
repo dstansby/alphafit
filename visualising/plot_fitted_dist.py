@@ -83,9 +83,10 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     vrminlim = 200
     vrmaxlim = 1000
 
+    dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     # Calculate reduced out of ecliptic distribution function
     pdf = dist['pdf'].groupby(level=['E_bin', 'El']).sum()
-    vs = dist['|v|'].groupby(level=['E_bin', 'El']).mean() / 1e3
+    vs = dist['|v|'].groupby(level=['E_bin', 'El']).mean()
     theta = dist['theta'].groupby(level=['E_bin', 'El']).mean()
     vr = np.cos(theta) * vs + params['helios_vr']
     vn = np.sin(theta) * vs
@@ -100,7 +101,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
 
     # Calculate reduced ecliptic distribution function
     pdf = dist['pdf'].groupby(level=['E_bin', 'Az']).sum()
-    vs = dist['|v|'].groupby(level=['E_bin', 'Az']).mean() / 1e3
+    vs = dist['|v|'].groupby(level=['E_bin', 'Az']).mean()
     phi = dist['phi'].groupby(level=['E_bin', 'Az']).mean()
     vr = np.cos(phi) * vs + params['helios_vr']
     vt = np.sin(phi) * vs + params['helios_v']
@@ -114,7 +115,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     # ax[1].set_aspect('equal', 'datalim')
 
     # Calculate 1D reduced distribution from data
-    vs = dist['|v|'].groupby(level=['E_bin']).mean() / 1e3
+    vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
 
     ax[2].plot(I1a['v'], I1a['df'] / I1a['df'].max(),
@@ -155,7 +156,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         df[df < 1e-3] = np.nan
 
         ax[2].plot(df.index.values, df)
-        vperp, vpar = perp_par_vels(dist[['vx', 'vy', 'vz']].values / 1e3,
+        vperp, vpar = perp_par_vels(dist[['vx', 'vy', 'vz']].values,
                                     output[['vp_x', 'vp_y', 'vp_z']].values, R)
         levels = np.linspace(-5, 0, 20)
         fig, axs2 = plt.subplots(2, 1, sharex=True, sharey=True)
