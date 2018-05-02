@@ -4,6 +4,7 @@
 from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
+import scipy.interpolate as interp
 import numpy as np
 import pandas as pd
 
