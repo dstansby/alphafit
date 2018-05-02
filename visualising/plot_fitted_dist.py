@@ -73,46 +73,54 @@ def plot_dist_time(probe, time):
     plot_dist(time, dist, params, corefit, I1a, I1b)
 
 
+def slice_dist(vs, pdf, plane):
+    vlim = 300
+    x, y = np.meshgrid(np.linspace(-vlim, vlim, 100),
+                       np.linspace(-vlim, vlim, 100))
+    sampling_points = [x, y, y]
+    sampling_points[plane] = np.zeros(x.shape)
+    xyinterp = interp.LinearNDInterpolator(vs, pdf)
+    pdf = xyinterp(np.array(sampling_points).T).T
+    x = x.ravel()
+    y = y.ravel()
+    pdf = pdf.ravel()
+    x = x[np.isfinite(pdf)]
+    y = y[np.isfinite(pdf)]
+    pdf = pdf[np.isfinite(pdf)]
+    return x, y, pdf
+
+
 def plot_dist(time, dist, params, output, I1a, I1b):
     magempty = np.any(output[['Bx', 'By', 'Bz']] == np.nan)
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios 2 ' + str(time)
-    fig, ax = plt.subplots(3, 1, sharex=True)
+    fig, ax = plt.subplots(3, 1)
     ax[0].set_title(title)
     vrminlim = 200
     vrmaxlim = 1000
 
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
-    # Calculate reduced out of ecliptic distribution function
-    pdf = dist['pdf'].groupby(level=['E_bin', 'El']).sum()
-    vs = dist['|v|'].groupby(level=['E_bin', 'El']).mean()
-    theta = dist['theta'].groupby(level=['E_bin', 'El']).mean()
-    vr = np.cos(theta) * vs + params['helios_vr']
-    vn = np.sin(theta) * vs
+    dist_vcentre = dist.copy()
+    for comp in ['x', 'y', 'z']:
+        dist_vcentre['v' + comp] -= output['vp_' + comp]
+    print(dist_vcentre.head())
+    vs = np.dot(R, dist_vcentre[['vx', 'vy', 'vz']].T).T
+    x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
 
     plt.sca(ax[0])
-    contour2d(vr, vn, pdf, levels=20, showbins=True)
-    ax[0].scatter(output['vp_x'], output['vp_z'],
-                  marker='x', color='r')
-    ax[0].set_ylabel(r'$v_{n}$' + ' (km/s)')
-    ax[0].set_xlim(vrminlim, vrmaxlim)
-    # ax[0].set_aspect('equal', 'datalim')
+    contour2d(x.ravel(), y.ravel(), pdf.ravel(), levels=20, showbins=False)
+    ax[0].set_aspect('equal', adjustable='datalim')
 
-    # Calculate reduced ecliptic distribution function
-    pdf = dist['pdf'].groupby(level=['E_bin', 'Az']).sum()
-    vs = dist['|v|'].groupby(level=['E_bin', 'Az']).mean()
-    phi = dist['phi'].groupby(level=['E_bin', 'Az']).mean()
-    vr = np.cos(phi) * vs + params['helios_vr']
-    vt = np.sin(phi) * vs + params['helios_v']
 
+    x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
-    contour2d(vr, vt, pdf, levels=20, showbins=True)
-    ax[1].scatter(output['vp_x'], output['vp_y'],
+    contour2d(x, y, pdf, levels=20, showbins=False)
+    '''ax[1].scatter(output['vp_x'], output['vp_y'],
                   marker='x', color='r')
     ax[1].set_ylabel(r'$v_{t}$' + ' (km/s)')
-    ax[1].set_xlim(vrminlim, vrmaxlim)
-    # ax[1].set_aspect('equal', 'datalim')
+    ax[1].set_xlim(vrminlim, vrmaxlim)'''
+    ax[1].set_aspect('equal', 'datalim')
 
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
