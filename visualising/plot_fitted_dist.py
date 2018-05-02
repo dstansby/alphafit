@@ -155,9 +155,8 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         df[df < 1e-3] = np.nan
 
         ax[2].plot(df.index.values, df)
-
         vperp, vpar = perp_par_vels(dist[['vx', 'vy', 'vz']].values / 1e3,
-                                    output[['vp_x', 'vp_y', 'vp_z']], R)
+                                    output[['vp_x', 'vp_y', 'vp_z']].values, R)
         levels = np.linspace(-5, 0, 20)
         fig, axs2 = plt.subplots(2, 1, sharex=True, sharey=True)
         axs2[0].set_title(title)
@@ -173,7 +172,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
             output['n_p'], output['vth_p_perp'], output['vth_p_par'],
             vperp, vpar)
         contour2d(vpar, vperp, fitted_bimax / np.max(fitted_bimax),
-                          levels=levels)
+                  levels=levels)
 
         for ax2 in axs2:
             # ax2.set_aspect('equal', 'datalim')
