@@ -25,8 +25,8 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
                   linewidths=0.5, alpha=0.8)
     if add1overe:
         ax.tricontour(x, y, pdf, levels=[np.nanmax(pdf) - 1],
-                      linestyles='-', colors='r',
-                      linewidths=2, alpha=0.8)
+                      linestyles='--', colors='r',
+                      linewidths=1, alpha=0.8)
     if showbins:
         ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
@@ -86,8 +86,8 @@ def slice_dist(vs, pdf, plane):
                        np.linspace(-vlim, vlim, 100))
     sampling_points = [x, y, y]
     sampling_points[plane] = np.zeros(x.shape)
-    xyinterp = interp.LinearNDInterpolator(vs, pdf)
-    pdf = xyinterp(np.array(sampling_points).T).T
+    pdf = interp.griddata(vs, pdf, np.array(sampling_points).T,
+                          method='linear').T
     x = x.ravel()
     y = y.ravel()
     pdf = pdf.ravel()
@@ -131,6 +131,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     ax[0].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
     ax[0].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
     ax[0].set_aspect('equal', adjustable='datalim')
+    ax[0].set_ylim(-400, 400)
 
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
@@ -138,6 +139,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     ax[1].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
     ax[1].plot((-output['vth_p_par'], output['vth_p_par']), (0, 0), color='k')
     ax[1].set_aspect('equal', 'datalim')
+    ax[1].set_ylim(-400, 400)
 
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
