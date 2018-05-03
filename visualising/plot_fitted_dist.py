@@ -24,7 +24,7 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
     ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k',
                   linewidths=0.5, alpha=0.8)
     if add1overe:
-        ax.tricontour(x, y, pdf, levels=[np.nanmax(pdf) - 1],
+        ax.tricontour(x, y, pdf, levels=[np.nanmax(levels) - 1],
                       linestyles='--', colors='r',
                       linewidths=1, alpha=0.8)
     if showbins:
