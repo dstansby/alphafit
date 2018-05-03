@@ -157,6 +157,9 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     ax[1].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
 
     # Plot formatting
+    ax[0].set_ylabel(r'$v_{\perp ,1}$ (km/s)')
+    ax[0].set_xlabel(r'$v_{\parallel}$ (km/s)')
+    ax[1].set_xlabel(r'$v_{\perp ,2}$ (km/s)')
     for a in ax[0:2]:
         a.set_aspect('equal', 'datalim')
         a.set_ylim(-400, 400)
@@ -169,6 +172,11 @@ def plot_dist(time, dist, params, output, I1a, I1b):
                marker='x', label='1D')
     ax[2].plot(vs, pdf / np.max(pdf),
                marker='+', label='Integrated 3D')
+
+    ax[2].legend()
+    ax[2].set_yscale('log')
+    ax[2].set_xlabel(r'$v_{r}$' + ' (km/s)')
+
     if not magempty:
         # Calculate reduced 3D fit
         phis = np.linspace(-np.pi, np.pi, 100)
@@ -226,10 +234,6 @@ def plot_dist(time, dist, params, output, I1a, I1b):
             # ax2.set_aspect('equal', 'datalim')
             ax2.set_xlabel(r'$v_{\parallel}$')
             ax2.set_ylabel(r'$v_{\perp}$')
-
-    ax[2].legend()
-    ax[2].set_yscale('log')
-    ax[2].set_xlabel(r'$v_{r}$' + ' (km/s)')
 
 
 if __name__ == '__main__':
