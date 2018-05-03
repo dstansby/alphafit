@@ -124,9 +124,6 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     ax2 = fig.add_subplot(spec[0, 1])
     ax3 = fig.add_subplot(spec[1, :])
     ax = [ax1, ax2, ax3]
-    #for a in ax[0:2]:
-    #    a.axhline(0, color='k', lw=0.5)
-    #    a.axvline(0, color='k', lw=0.5)
 
     fig.suptitle(title)
     vrminlim = 200
@@ -140,22 +137,26 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
     vs = np.dot(R, dist_vcentre[['vx', 'vy', 'vz']].T).T
-    x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
 
+    # Slice along B
+    x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
     plt.sca(ax[0])
-    contour2d(x.ravel(), y.ravel(), pdf.ravel(), levels=20, showbins=False, add1overe=True)
+    contour2d(x, y, pdf, levels=20, showbins=False, add1overe=True)
+    # Plot thermal speeds
     ax[0].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
     ax[0].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
-    ax[0].set_aspect('equal', adjustable='datalim')
-    ax[0].set_ylim(-400, 400)
 
+    # Slice perp to B
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
     contour2d(x, y, pdf, levels=20, showbins=False, add1overe=True)
     ax[1].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
     ax[1].plot((-output['vth_p_par'], output['vth_p_par']), (0, 0), color='k')
-    ax[1].set_aspect('equal', 'datalim')
-    ax[1].set_ylim(-400, 400)
+
+    # Plot formatting
+    for a in ax[0:2]:
+        a.set_aspect('equal', 'datalim')
+        a.set_ylim(-400, 400)
 
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
