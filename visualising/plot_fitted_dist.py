@@ -81,20 +81,36 @@ def plot_dist_time(probe, time):
 
 
 def slice_dist(vs, pdf, plane):
+    '''
+    Get distribution slices. Interpolates on to either the x-y, x-z or y-z
+    plane.
+
+    Parameters
+    ----------
+    plane : int
+        0 for y-z, 1 for x-z, 2 for y-z.
+    '''
     vlim = 400
-    x, y = np.meshgrid(np.linspace(-vlim, vlim, 100),
-                       np.linspace(-vlim, vlim, 100))
-    sampling_points = [x, y, y]
-    sampling_points[plane] = np.zeros(x.shape)
+    dim1, dim2 = np.meshgrid(np.linspace(-vlim, vlim, 100),
+                             np.linspace(-vlim, vlim, 100))
+    zeros = np.zeros(dim1.shape)
+    if plane == 0:
+        sampling_points = [zeros, dim1, dim2]
+    elif plane == 1:
+        sampling_points = [dim1, zeros, dim2]
+    elif plane == 2:
+        sampling_points = [dim1, dim2, zeros]
+    else:
+        raise ValueError('plane must be 1, 2 or 3')
     pdf = interp.griddata(vs, pdf, np.array(sampling_points).T,
                           method='linear').T
-    x = x.ravel()
-    y = y.ravel()
+    dim1 = dim1.ravel()
+    dim2 = dim2.ravel()
     pdf = pdf.ravel()
-    x = x[np.isfinite(pdf)]
-    y = y[np.isfinite(pdf)]
+    dim1 = dim1[np.isfinite(pdf)]
+    dim2 = dim2[np.isfinite(pdf)]
     pdf = pdf[np.isfinite(pdf)]
-    return x, y, pdf
+    return dim1, dim2, pdf
 
 
 def plot_dist(time, dist, params, output, I1a, I1b):
