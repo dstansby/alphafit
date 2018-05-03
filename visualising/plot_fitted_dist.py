@@ -119,7 +119,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios 2 ' + str(time)
-    fig = plt.figure()
+    fig = plt.figure(figsize=(6, 6))
     spec = gridspec.GridSpec(ncols=2, nrows=2)
     ax1 = fig.add_subplot(spec[0, 0])
     ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
@@ -163,6 +163,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     for a in ax[0:2]:
         a.set_aspect('equal', 'datalim')
         a.set_ylim(-400, 400)
+    ax[1].tick_params(axis='y', labelleft=False, labelright=True, left=False, right=True)
 
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
@@ -211,6 +212,10 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         ax[2].legend()
         ax[2].set_yscale('log')
         ax[2].set_xlabel(r'$|v|$' + ' (km/s)')
+        ax[2].set_ylim(1e-3, 2)
+        ax[2].set_xlim(400, 1600)
+        fig.tight_layout()
+        fig.subplots_adjust(top=0.9)
         vperp, vpar = perp_par_vels(dist[['vx', 'vy', 'vz']].values,
                                     output[['vp_x', 'vp_y', 'vp_z']].values, R)
         levels = np.linspace(-5, 0, 20)
