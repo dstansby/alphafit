@@ -137,22 +137,24 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     # solar wind frame, so correct
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
-    vs = np.dot(R, dist_vcentre[['vx', 'vy', 'vz']].T).T
+    vs = np.dot(R, dist_vcentre[['vx', 'vy', 'vz']].values.T).T
+    levels = np.linspace(np.log(dist_vcentre['pdf']).min(),
+                         np.log(dist_vcentre['pdf']).max(), 20)
 
-    # Slice along B
-    x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
+    # Slice along B (which is along z-axis)
+    x, z, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
     plt.sca(ax[0])
-    contour2d(x, y, pdf, levels=20, showbins=False, add1overe=True)
+    contour2d(z, x, pdf, levels=levels, showbins=False, add1overe=True)
     # Plot thermal speeds
-    ax[0].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
-    ax[0].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
+    ax[0].plot((0, 0), (-output['vth_p_perp'], output['vth_p_perp']), color='k')
+    ax[0].plot((-output['vth_p_par'], output['vth_p_par']), (0, 0), color='k')
 
     # Slice perp to B
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
-    contour2d(x, y, pdf, levels=20, showbins=False, add1overe=True)
-    ax[1].plot((0, 0), (-output['vth_p_par'], output['vth_p_par']), color='k')
-    ax[1].plot((-output['vth_p_par'], output['vth_p_par']), (0, 0), color='k')
+    contour2d(y, x, pdf, levels=levels, showbins=False, add1overe=True)
+    ax[1].plot((0, 0), (-output['vth_p_perp'], output['vth_p_perp']), color='k')
+    ax[1].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
 
     # Plot formatting
     for a in ax[0:2]:
