@@ -169,14 +169,9 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
 
     ax[2].plot(I1a['v'], I1a['df'] / I1a['df'].max(),
-               marker='x', label='1D')
-    ax[2].plot(vs, pdf / np.max(pdf),
-               marker='+', label='Integrated 3D')
-
-    ax[2].legend()
-    ax[2].set_yscale('log')
-    ax[2].set_xlabel(r'$v_{r}$' + ' (km/s)')
-
+               marker='x', label='Data')
+    # ax[2].plot(vs, pdf / np.max(pdf),
+    #            marker='+', label='Integrated 3D')
     if not magempty:
         # Calculate reduced 3D fit
         phis = np.linspace(-np.pi, np.pi, 100)
@@ -210,7 +205,12 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         df /= df.max()
         df[df < 1e-3] = np.nan
 
-        ax[2].plot(df.index.values, df)
+        ax[2].plot(df.index.values, df, label='Fit')
+
+        # Formatting
+        ax[2].legend()
+        ax[2].set_yscale('log')
+        ax[2].set_xlabel(r'$|v|$' + ' (km/s)')
         vperp, vpar = perp_par_vels(dist[['vx', 'vy', 'vz']].values,
                                     output[['vp_x', 'vp_y', 'vp_z']].values, R)
         levels = np.linspace(-5, 0, 20)
