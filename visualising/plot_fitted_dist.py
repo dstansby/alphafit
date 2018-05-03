@@ -91,8 +91,9 @@ def slice_dist(vs, pdf, plane):
         0 for y-z, 1 for x-z, 2 for y-z.
     '''
     vlim = 400
-    dim1, dim2 = np.meshgrid(np.linspace(-vlim, vlim, 100),
-                             np.linspace(-vlim, vlim, 100))
+    nbins = 200
+    dim1, dim2 = np.meshgrid(np.linspace(-vlim, vlim, nbins + 1),
+                             np.linspace(-vlim, vlim, nbins + 1))
     zeros = np.zeros(dim1.shape)
     if plane == 0:
         sampling_points = [zeros, dim1, dim2]
