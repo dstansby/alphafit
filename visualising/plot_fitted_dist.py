@@ -122,7 +122,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     fig = plt.figure()
     spec = gridspec.GridSpec(ncols=2, nrows=2)
     ax1 = fig.add_subplot(spec[0, 0])
-    ax2 = fig.add_subplot(spec[0, 1])
+    ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
     ax3 = fig.add_subplot(spec[1, :])
     ax = [ax1, ax2, ax3]
 
