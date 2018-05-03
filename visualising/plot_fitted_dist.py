@@ -5,6 +5,7 @@ from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.patches as mpatch
 import scipy.interpolate as interp
 import numpy as np
 import pandas as pd
@@ -153,8 +154,10 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
     contour2d(y, x, pdf, levels=levels, showbins=False, add1overe=True)
-    ax[1].plot((0, 0), (-output['vth_p_perp'], output['vth_p_perp']), color='k')
-    ax[1].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0), color='k')
+    ax[1].plot((0, 0), (-output['vth_p_perp'], output['vth_p_perp']),
+               color='k')
+    ax[1].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0),
+               color='k')
 
     # Plot formatting
     ax[0].set_ylabel(r'$v_{\perp ,1}$ (km/s)')
@@ -163,8 +166,15 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     for a in ax[0:2]:
         a.set_aspect('equal', 'datalim')
         a.set_ylim(-400, 400)
-    ax[1].tick_params(axis='y', labelleft=False, labelright=True, left=False, right=True)
-
+    ax[1].tick_params(axis='y', labelleft=False, labelright=True,
+                      left=False, right=True)
+    # Add magnetic field arrows
+    arrow = mpatch.FancyArrowPatch((30, 290), (330, 290),
+                                   arrowstyle='-|>', mutation_scale=20,
+                                   facecolor='k')
+    ax[0].add_patch(arrow)
+    ax[0].text(150, 310, r'B', fontsize=14)
+    ax[1].text(210, 310, 'B ⊗', fontsize=14)
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
