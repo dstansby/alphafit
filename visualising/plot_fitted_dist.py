@@ -116,7 +116,9 @@ def slice_dist(vs, pdf, plane):
 
 
 def plot_dist(time, dist, params, output, I1a, I1b):
-    magempty = np.any(output[['Bx', 'By', 'Bz']] == np.nan)
+    magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
+    if magempty:
+        raise RuntimeError('No magnetic field present')
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios 2 ' + str(time)
