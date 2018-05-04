@@ -183,7 +183,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
     ax[0].text(0.05, 0.05,
                r'$T_{\perp} / T_{\parallel} =$' + '{:.01f}'.format(Tani),
                transform=trans)
-    ax[1].text(210, 310, 'B ⊗', fontsize=14)
+    ax[1].text(0.8, 0.9, 'B ⊗', fontsize=14, transform=ax[1].transAxes)
     # ax[1].text(0.02, 0.05,
     #            r'$\mathbf{B}_{rtn}$ = ' +
     #            '({:.01f}, {:.01f}, {:.01f}) nT'.format(output['Bx'],
