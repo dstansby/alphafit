@@ -104,7 +104,7 @@ def slice_dist(vs, pdf, plane):
         sampling_points = [dim1, dim2, zeros]
     else:
         raise ValueError('plane must be 1, 2 or 3')
-    pdf = interp.griddata(vs, pdf, np.array(sampling_points).T,
+    pdf = interp.griddata(vs, pdf.values, np.array(sampling_points).T,
                           method='linear').T
     dim1 = dim1.ravel()
     dim2 = dim2.ravel()
