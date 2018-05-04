@@ -168,13 +168,26 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         a.set_ylim(-400, 400)
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
                       left=False, right=True)
+    trans = ax[0].transAxes
     # Add magnetic field arrows
-    arrow = mpatch.FancyArrowPatch((30, 290), (330, 290),
+    arrow = mpatch.FancyArrowPatch((0.6, 0.87), (0.95, 0.87),
                                    arrowstyle='-|>', mutation_scale=20,
-                                   facecolor='k')
+                                   facecolor='k', transform=trans)
     ax[0].add_patch(arrow)
-    ax[0].text(150, 310, r'B', fontsize=14)
+    ax[0].text(0.73, 0.9,
+               'B', fontsize=14,
+               transform=trans)
+    Tani = output['Tp_perp'] / output['Tp_par']
+    ax[0].text(0.05, 0.05,
+               r'$T_{\perp} / T_{\parallel} =$' + '{:.01f}'.format(Tani),
+               transform=trans)
     ax[1].text(210, 310, 'B ⊗', fontsize=14)
+    # ax[1].text(0.02, 0.05,
+    #            r'$\mathbf{B}_{rtn}$ = ' +
+    #            '({:.01f}, {:.01f}, {:.01f}) nT'.format(output['Bx'],
+    #                                                    output['By'],
+    #                                                    output['Bz']),
+    #            transform=ax[1].transAxes)
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
@@ -219,7 +232,7 @@ def plot_dist(time, dist, params, output, I1a, I1b):
         ax[2].plot(df.index.values, df, label='Fit')
 
         # Formatting
-        ax[2].legend()
+        ax[2].legend(frameon=False)
         ax[2].set_yscale('log')
         ax[2].set_xlabel(r'$|v|$' + ' (km/s)')
         ax[2].set_ylim(1e-3, 2)
