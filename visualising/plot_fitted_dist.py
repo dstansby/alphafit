@@ -78,7 +78,7 @@ def plot_dist_time(probe, time):
     params = helios.distparams_single(*args)
     I1a, I1b = helios.integrated_dists_single(*args)
 
-    plot_dist(time, dist, params, corefit, I1a, I1b)
+    plot_dist(time, probe, dist, params, corefit, I1a, I1b)
 
 
 def slice_dist(vs, pdf, plane):
@@ -115,13 +115,13 @@ def slice_dist(vs, pdf, plane):
     return dim1, dim2, pdf
 
 
-def plot_dist(time, dist, params, output, I1a, I1b):
+def plot_dist(time, probe, dist, params, output, I1a, I1b):
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
-    title = 'Helios 2 ' + str(time)
+    title = 'Helios {} '.format(probe) + str(time)
     fig = plt.figure(figsize=(6, 6))
     spec = gridspec.GridSpec(ncols=2, nrows=2)
     ax1 = fig.add_subplot(spec[0, 0])
