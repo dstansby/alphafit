@@ -26,8 +26,8 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
                   linewidths=0.5, alpha=0.8)
     if add1overe:
         ax.tricontour(x, y, pdf, levels=[np.nanmax(levels) - 1],
-                      linestyles='--', colors='r',
-                      linewidths=1, alpha=0.8)
+                      linestyles='-', colors='k',
+                      linewidths=1)
     if showbins:
         ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
