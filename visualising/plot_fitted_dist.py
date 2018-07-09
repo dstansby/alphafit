@@ -12,7 +12,7 @@ import pandas as pd
 
 import heliopy.data.helios as helios
 
-import helpers
+import vis_helpers as helpers
 
 
 def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):

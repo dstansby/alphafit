@@ -10,7 +10,7 @@ import numpy as np
 
 from heliopy.data import helios
 
-import helpers
+import vis_helpers as helpers
 from plot_fitted_dist import plot_dist_time
 
 # Set probe and dates to compare here
@@ -96,8 +96,7 @@ def onclick(event):
 
 
 cid = n_fig.canvas.mpl_connect('button_press_event', onclick)
-plt.show()
-exit()
+# plt.show()
 
 
 def scatter(x, y, ax, xlabel, ylabel):
