@@ -1,3 +1,6 @@
 [data_dirs]
 # Directory to output fitted parameters to
 output_dir =
+
+# Directory that contains the corefit code
+corefit_code_dir =

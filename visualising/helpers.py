@@ -7,7 +7,7 @@ import numpy as np
 sys.path.append('./fitting')
 from config import get_dirs
 
-output_dir = get_dirs()
+output_dir, _ = get_dirs()
 
 
 def load_corefit(probe, starttime, endtime, verbose=False):

@@ -18,10 +18,10 @@ import proton_core_1D as ions_1D
 import proton_core_3D as ions_3D
 from config import get_dirs
 
-output_dir = get_dirs()
 probes = ['1', '2']
 years = range(1974, 1986)
 doys = range(1, 367)
+output_dir, corefit_code_dir = get_dirs()
 
 
 # Method to remove bad data
@@ -33,7 +33,9 @@ def remove_bad_data(data, probe):
     keys.remove('Ion instrument')
     for comp in ['x', 'y', 'z']:
         keys.remove('vp_' + comp)
-    manual_bad_data = pd.read_csv('manual_remove_intervals.csv',
+    manual_bad_data = pd.read_csv((corefit_code_dir /
+                                   'fitting' /
+                                   'manual_remove_intervals.csv'),
                                   parse_dates=[1, 2])
     for _, bad_data in manual_bad_data.iterrows():
         if str(bad_data['Probe']) != str(probe):

@@ -3,7 +3,7 @@ import sys
 sys.path.append('./fitting')
 from config import get_dirs
 
-output_dir = get_dirs()
+output_dir, _ = get_dirs()
 
 
 for probe in ['1', '2']:
