@@ -59,6 +59,116 @@ def save_fits(fits, probe, year, doy, dim, fdir):
     fits.to_hdf(saveloc, 'fits', mode='w', format='f')
 
 
+def fit_single_day(year, doy, probe, pltfigs):
+    starttime = doy2dtime(year, doy)
+    if starttime.year != year:
+        return
+    endtime = starttime + timedelta(hours=24) -\
+        timedelta(microseconds=1)
+    # Uncomment next line to start from a specific datetime
+    starttime = starttime + timedelta(hours=23)
+
+    # Load magnetic field data
+    mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
+    # If no magnetic field data available
+    if mag4hz is None and mag6s is None:
+        print('No mag data available for '
+              'probe {} year {} doy {}'.format(probe, year, doy))
+        return
+
+    # Load a days worth of ion distribution functions
+    try:
+        dists_3D = helios.ion_dists(probe,
+                                    starttime, endtime,
+                                    verbose=True)
+        print('Loaded 3D dists')
+        dists_1D = helios.integrated_dists(probe,
+                                           starttime, endtime,
+                                           verbose=True)
+        print('Loaded 1D dists')
+        distparams = helios.distparams(probe,
+                                       starttime, endtime,
+                                       verbose=True)
+        print('Loaded distribution parameters')
+    except RuntimeError as err:
+        print(str(err))
+        if 'No data available for times' in str(err):
+            return
+        raise
+
+    distparams['vth_i1a'] =\
+        np.sqrt(const.k_B *
+                distparams['Tp_i1a'].values * u.K /
+                const.m_p).to(
+                    u.km / u.s).value
+
+    # Add a velocity level to 1D dataframe
+    I1as = dists_1D['a']
+    I1bs = dists_1D['b']
+    I1as['v'] = I1as.index.get_level_values('v')
+    I1bs['v'] = I1bs.index.get_level_values('v')
+
+    # Throw away zero distribution function values
+    I1as = I1as[I1as['df'] != 0]
+    I1bs = I1bs[I1bs['df'] != 0]
+
+    # Re-order 3D index levels
+    dists_3D = dists_3D.reorder_levels(
+        ['Time', 'E_bin', 'El', 'Az'], axis=0)
+    dists_3D = helpers_data.clean3D(dists_3D)
+
+    # fitlist_1D = []
+    fitlist_3D = []
+    # Loop through individual times
+    for time, dist_3D in dists_3D.groupby(level='Time'):
+        params = distparams.loc[time].copy()
+
+        if len(params.shape) > 1:
+            params = params.iloc[0, :]
+        I1a = I1as.loc[time]
+        I1b = I1bs.loc[time]
+
+        # Do 1D fit
+        fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
+                                      plotfigs=pltfigs)
+        # fitlist_1D.append(fit_1D)
+
+        # Do 3D fit
+        fit_3D = ions_3D.iondistfitting(
+            dist_3D, params, fit_1D,
+            mag4hz, mag6s, time, I1a, I1b, pltfigs)
+
+        if pltfigs:
+            import matplotlib.pyplot as plt
+            plt.show()
+
+        # Add orbital information
+        for var in ['r_sun', 'clong', 'clat',
+                    'carrot', 'earth_he_angle']:
+            fit_3D[var] = params[var]
+        fitlist_3D.append(fit_3D)
+    # End of a single day, put each day into its own DataFrame
+    # fits_1D = pd.DataFrame(fitlist_1D)
+    fits_3D = pd.DataFrame(fitlist_3D)
+    if fits_3D.empty:
+        return
+
+    fits_3D = fits_3D.set_index('Time', drop=True)
+    print('Removing manually identified known bad data')
+    fits_3D = remove_bad_data(fits_3D, probe)
+    # Make directory to save fits
+    fdir = os.path.join(output_dir,
+                        'helios' + probe,
+                        'fits',
+                        str(year))
+    if not os.path.exists(fdir):
+        os.makedirs(fdir)
+    save_fits(fits_3D, probe, year, doy, '3', fdir)
+
+    # Save 1D fits
+    # save_fits(fits_1D, probe, year, doy, '1', fdir)
+
+
 def do_fitting(pltfigs=False):
     '''
     Main method for doing all the fitting.
@@ -67,116 +177,9 @@ def do_fitting(pltfigs=False):
     for probe in probes:
         # Loop through years
         for year in years:
-            # Make directory to save fits
-            fdir = os.path.join(output_dir,
-                                'helios' + probe,
-                                'fits',
-                                str(year))
-            if not os.path.exists(fdir):
-                os.makedirs(fdir)
-
             # Loop through days of the year
             for doy in doys:
-                starttime = doy2dtime(year, doy)
-                if starttime.year != year:
-                    continue
-                endtime = starttime + timedelta(hours=24) -\
-                    timedelta(microseconds=1)
-                # Uncomment next line to start from a specific datetime
-                # starttime = datetime()
-
-                # Load magnetic field data
-                mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
-                # If no magnetic field data available
-                if mag4hz is None and mag6s is None:
-                    print('No mag data available for '
-                          'probe {} year {} doy {}'.format(probe, year, doy))
-                    continue
-
-                # Load a days worth of ion distribution functions
-                try:
-                    dists_3D = helios.ion_dists(probe,
-                                                starttime, endtime,
-                                                verbose=True)
-                    print('Loaded 3D dists')
-                    dists_1D = helios.integrated_dists(probe,
-                                                       starttime, endtime,
-                                                       verbose=True)
-                    print('Loaded 1D dists')
-                    distparams = helios.distparams(probe,
-                                                   starttime, endtime,
-                                                   verbose=True)
-                    print('Loaded distribution parameters')
-                except RuntimeError as err:
-                    print(str(err))
-                    if 'No data available for times' in str(err):
-                        continue
-                    raise
-
-                distparams['vth_i1a'] =\
-                    np.sqrt(const.k_B *
-                            distparams['Tp_i1a'].values * u.K /
-                            const.m_p).to(
-                                u.km / u.s).value
-
-                # Add a velocity level to 1D dataframe
-                I1as = dists_1D['a']
-                I1bs = dists_1D['b']
-                I1as['v'] = I1as.index.get_level_values('v')
-                I1bs['v'] = I1bs.index.get_level_values('v')
-
-                # Throw away zero distribution function values
-                I1as = I1as[I1as['df'] != 0]
-                I1bs = I1bs[I1bs['df'] != 0]
-
-                # Re-order 3D index levels
-                dists_3D = dists_3D.reorder_levels(
-                    ['Time', 'E_bin', 'El', 'Az'], axis=0)
-                dists_3D = helpers_data.clean3D(dists_3D)
-
-                # fitlist_1D = []
-                fitlist_3D = []
-                # Loop through individual times
-                for time, dist_3D in dists_3D.groupby(level='Time'):
-                    params = distparams.loc[time].copy()
-
-                    if len(params.shape) > 1:
-                        params = params.iloc[0, :]
-                    I1a = I1as.loc[time]
-                    I1b = I1bs.loc[time]
-
-                    # Do 1D fit
-                    fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
-                                                  plotfigs=pltfigs)
-                    # fitlist_1D.append(fit_1D)
-
-                    # Do 3D fit
-                    fit_3D = ions_3D.iondistfitting(
-                        dist_3D, params, fit_1D,
-                        mag4hz, mag6s, time, I1a, I1b, pltfigs)
-
-                    if pltfigs:
-                        import matplotlib.pyplot as plt
-                        plt.show()
-
-                    # Add orbital information
-                    for var in ['r_sun', 'clong', 'clat',
-                                'carrot', 'earth_he_angle']:
-                        fit_3D[var] = params[var]
-                    fitlist_3D.append(fit_3D)
-                # End of a single day, put each day into its own DataFrame
-                # fits_1D = pd.DataFrame(fitlist_1D)
-                fits_3D = pd.DataFrame(fitlist_3D)
-                if fits_3D.empty:
-                    continue
-
-                fits_3D = fits_3D.set_index('Time', drop=True)
-                print('Removing manually identified known bad data')
-                fits_3D = remove_bad_data(fits_3D, probe)
-                save_fits(fits_3D, probe, year, doy, '3', fdir)
-
-                # Save 1D fits
-                # save_fits(fits_1D, probe, year, doy, '1', fdir)
+                fit_single_day(year, doy, probe, pltfigs)
 
 
 if __name__ == '__main__':
