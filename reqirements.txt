@@ -1,5 +1,5 @@
 pandas
 numpy
-heliopy>=0.1b4
+heliopy>=0.5
 scipy
 astropy
