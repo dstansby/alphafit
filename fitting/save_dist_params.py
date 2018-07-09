@@ -84,6 +84,21 @@ def get_mag(probe, starttime, endtime):
     return mag4hz, mag6s
 
 
+def clean3D(dists_3D):
+    dists_3D = dists_3D[dists_3D['counts'] != 1]
+
+    # A handful of files seem to have some garbage counts in them
+    dists_3D = dists_3D[dists_3D['counts'] < 32768]
+
+    # Throw away high and low energy bins
+    # (which contain just noise)
+    dists_3D = dists_3D[
+        dists_3D.index.get_level_values('E_bin') > 3]
+    dists_3D = dists_3D[
+        dists_3D.index.get_level_values('E_bin') < 32]
+    return dists_3D
+
+
 def do_fitting(pltfigs=False):
     '''
     Main method for doing all the fitting.
@@ -157,17 +172,7 @@ def do_fitting(pltfigs=False):
                 # Re-order 3D index levels
                 dists_3D = dists_3D.reorder_levels(
                     ['Time', 'E_bin', 'El', 'Az'], axis=0)
-                dists_3D = dists_3D[dists_3D['counts'] != 1]
-
-                # A handful of files seem to have some garbage counts in them
-                dists_3D = dists_3D[dists_3D['counts'] < 32768]
-
-                # Throw away high and low energy bins
-                # (which contain just noise)
-                dists_3D = dists_3D[
-                    dists_3D.index.get_level_values('E_bin') > 3]
-                dists_3D = dists_3D[
-                    dists_3D.index.get_level_values('E_bin') < 32]
+                dists_3D = clean3D(dists_3D)
 
                 # fitlist_1D = []
                 fitlist_3D = []
