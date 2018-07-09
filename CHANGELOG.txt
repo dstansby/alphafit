@@ -4,7 +4,9 @@ Helios corefit changelog
 1.1
 ~~~
 
-- Manually removed some obviously bad data
+- Manually removed some obviously bad data.
+- Uses astropy units to calculate physical quantities.
+- Updated distribution visualisation script.
 
 1.0
 ~~~
