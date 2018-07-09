@@ -68,7 +68,7 @@ def plot_dist_time(probe, time):
     # Calls plot_dist with a given time. Uses already processed values
     corefit = helpers.load_corefit(probe, time - dt(seconds=20),
                                    time + dt(seconds=20))
-    corefit = corefit[corefit.index == time]
+    corefit = corefit.loc[corefit.index == time]
     if corefit.shape[0] != 1:
         raise ValueError('Could not find fitted parameters at requested time')
     corefit = pd.Series(corefit.iloc[0])
