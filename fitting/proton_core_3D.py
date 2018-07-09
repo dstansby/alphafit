@@ -97,7 +97,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     # the velocity of the peak in I1b (assumed to be the proton peak)
     vs_3D = dist['|v|'] / 1e3
     if len(I1a) != 0:
-        if vs_3D.min() > I1a['df'].argmax():
+        if vs_3D.min() > I1a['df'].idxmax():
             return return_nans(10, starttime, instrument)
 
     # Estimate the times during which the distribution was measured
@@ -109,7 +109,7 @@ def iondistfitting(dist, params, fit_1D, mag4hz, mag6s, starttime, I1a, I1b,
     # the blue books for more information
     E_bins = dist.index.get_level_values('E_bin').values
     # Energy bin in which the peak of the distribution was measured
-    peak_Ebin = int(dist['pdf'].argmax()[1])
+    peak_Ebin = int(dist['pdf'].idxmax()[1])
     min_Ebin = int(np.min(E_bins))
     max_Ebin = int(np.max(E_bins))
     # Take 3 energy bins either side of the peak distribution function

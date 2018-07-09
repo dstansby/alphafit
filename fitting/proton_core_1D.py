@@ -71,7 +71,7 @@ def oned_fitting(I1a, I1b, distparams, starttime, plotfigs=False):
     distparams['vth_i1a'] = helpers.temp2vth(distparams['Tp_i1a'])
 
     # Get maximum distribution function (assumed to be proton peak)
-    maxdf_v = I1b['df'].argmax()
+    maxdf_v = I1b['df'].idxmax()
     maxdf = I1b['df'].max() / (4 * np.pi * maxdf_v**2 *
                                np.power(np.pi * 40**2, -1.5))
 
@@ -81,7 +81,7 @@ def oned_fitting(I1a, I1b, distparams, starttime, plotfigs=False):
         if I1b['df'].max() / I1a['df'].max() > 10:
             return return_nans(9, starttime, instrument)
         elif np.any((I1a.loc[(I1a['v'] -
-                             (I1b['df'].argmax())).abs().argmin(), 'df'] /
+                             (I1b['df'].idxmax())).abs().idxmin(), 'df'] /
                      I1b['df'].max()) < 0.01):
             return return_nans(9, starttime, instrument)
     else:
