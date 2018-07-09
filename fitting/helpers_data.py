@@ -40,3 +40,9 @@ def clean3D(dists_3D):
     dists_3D = dists_3D[
         dists_3D.index.get_level_values('E_bin') < 32]
     return dists_3D
+
+
+def clean1D(I1as, I1bs):
+    I1as = I1as[I1as['df'] != 0]
+    I1bs = I1bs[I1bs['df'] != 0]
+    return I1as, I1bs
