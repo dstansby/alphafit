@@ -66,8 +66,9 @@ def perp_par_vels(vs, bulkv, R):
 
 def plot_dist_time(probe, time):
     # Calls plot_dist with a given time. Uses already processed values
-    corefit = helpers.load_corefit(probe, time - dt(seconds=20),
-                                   time + dt(seconds=20))
+    corefit = helios.corefit(probe,
+                             time - dt(seconds=20),
+                             time + dt(seconds=20))
     corefit = corefit.loc[corefit.index == time]
     if corefit.shape[0] != 1:
         raise ValueError('Could not find fitted parameters at requested time')
@@ -195,7 +196,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b):
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
 
     ax[2].plot(I1a['v'], I1a['df'] / I1a['df'].max(),
-               marker='x', label='Data')
+               marker='x', label='I1a')
+    ax[2].plot(I1b['v'], I1b['df'] / I1b['df'].max(),
+               marker='x', label='I1b')
     # ax[2].plot(vs, pdf / np.max(pdf),
     #            marker='+', label='Integrated 3D')
     if not magempty:
