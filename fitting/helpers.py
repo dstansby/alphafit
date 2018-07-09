@@ -25,9 +25,9 @@ def vth2temp(vth):
 
 def temp2vth(temp):
     """
-    Assumes velocities are floating point numbers in km/s.
+    Assumes velocities are floating point numbers in degrees Kelvin.
     """
-    return np.sqrt(2 * const.k_B * float(temp) * u.K /
+    return np.sqrt(2 * const.k_B * temp * u.K /
                    const.m_p).to(u.km / u.s).value
 
 

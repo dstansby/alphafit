@@ -63,7 +63,6 @@ def fit_single_day(year, doy, probe, pltfigs):
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
-
     # Uncomment next line to start from a specific datetime
     starttime = starttime + timedelta(hours=23)
 
@@ -95,11 +94,7 @@ def fit_single_day(year, doy, probe, pltfigs):
             return
         raise
 
-    distparams['vth_i1a'] =\
-        np.sqrt(const.k_B *
-                distparams['Tp_i1a'].values * u.K /
-                const.m_p).to(
-                    u.km / u.s).value
+    distparams['vth_i1a'] = helpers.temp2vth(distparams['Tp_i1a'].values)
 
     # Add a velocity level to 1D dataframe
     I1as = dists_1D['a']
