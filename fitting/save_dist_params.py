@@ -58,7 +58,36 @@ def save_fits(fits, probe, year, doy, dim, fdir):
     fits.to_hdf(saveloc, 'fits', mode='w', format='f')
 
 
+def get_mag(probe, starttime, endtime):
+    try:
+        mag4hz = helios.mag_4hz(probe, starttime, endtime,
+                                try_download=True)
+
+        # Deal with the flipped 4Hz data on Helios 2
+        if probe == '2':
+            mag4hz['By'] *= -1
+            mag4hz['Bz'] *= -1
+
+    except Exception as err:
+        if str(err) != 'No raw 4Hz mag data available':
+            print(str(err))
+        mag4hz = None
+
+    # Also load 6s data as backup
+    try:
+        mag6s = helios.mag_ness(probe, starttime, endtime,
+                                verbose=False, try_download=False)
+    except Exception as err:
+        if 'No 6s mag data avaialble' not in str(err):
+            print(str(err))
+        mag6s = None
+    return mag4hz, mag6s
+
+
 def do_fitting(pltfigs=False):
+    '''
+    Main method for doing all the fitting.
+    '''
     # Loop through each probe
     for probe in probes:
         # Loop through years
@@ -81,30 +110,8 @@ def do_fitting(pltfigs=False):
                 # Uncomment next line to start from a specific datetime
                 # starttime = datetime()
 
-                # Load 4Hz magnetic field data
-                try:
-                    mag4hz = helios.mag_4hz(probe, starttime, endtime,
-                                            verbose=False, try_download=False)
-
-                    # Deal with the flipped 4Hz data on Helios 2
-                    if probe == '2':
-                        mag4hz['By'] *= -1
-                        mag4hz['Bz'] *= -1
-
-                except Exception as err:
-                    if str(err) != 'No raw 4Hz mag data available':
-                        print(str(err))
-                    mag4hz = None
-
-                # Also load 6s data as backup
-                try:
-                    mag6s = helios.mag_ness(probe, starttime, endtime,
-                                            verbose=False, try_download=False)
-                except Exception as err:
-                    if 'No 6s mag data avaialble' not in str(err):
-                        print(str(err))
-                    mag6s = None
-
+                # Load magnetic field data
+                mag4hz, mag6s = get_mag(probe, starttime, endtime)
                 # If no magnetic field data available
                 if mag4hz is None and mag6s is None:
                     print('No mag data available for '
