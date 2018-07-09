@@ -28,7 +28,7 @@ doys = range(1, 367)
 def remove_bad_data(data, probe):
     # Import keys that need to be set to nan when we manually get rid of
     # bad data
-    keys = ions_3D.keys
+    keys = ions_3D.keys.copy()
     keys.remove('Time')
     keys.remove('Ion instrument')
     for comp in ['x', 'y', 'z']:
