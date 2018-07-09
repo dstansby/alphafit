@@ -1,7 +1,7 @@
 # Helper methods for distribution fitting
 #
 # David Stansby 2017
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import astropy.units as u
@@ -147,3 +147,13 @@ def rotationmatrix(v):
 
 def doy2dtime(y, doy):
     return datetime.strptime(str(y) + '-' + str(doy).zfill(3), '%Y-%j')
+
+
+def doy2stime_etime(y, doy):
+    '''
+    Return start and end of day in datetime form.
+    '''
+    starttime = doy2dtime(y, doy)
+    endtime = starttime + timedelta(hours=24) -\
+        timedelta(microseconds=1)
+    return starttime, endtime

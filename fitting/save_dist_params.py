@@ -13,7 +13,7 @@ from heliopy import config as helioconfig
 import astropy.units as u
 import astropy.constants as const
 
-from helpers import doy2dtime
+import helpers
 import helpers_data
 import proton_core_1D as ions_1D
 import proton_core_3D as ions_3D
@@ -60,11 +60,10 @@ def save_fits(fits, probe, year, doy, dim, fdir):
 
 
 def fit_single_day(year, doy, probe, pltfigs):
-    starttime = doy2dtime(year, doy)
+    starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
-    endtime = starttime + timedelta(hours=24) -\
-        timedelta(microseconds=1)
+
     # Uncomment next line to start from a specific datetime
     starttime = starttime + timedelta(hours=23)
 
