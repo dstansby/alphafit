@@ -92,8 +92,8 @@ def slice_dist(vs, pdf, plane):
     plane : int
         0 for y-z, 1 for x-z, 2 for y-z.
     '''
-    vlim = 400
-    nbins = 200
+    vlim = 2000
+    nbins = 100
     dim1, dim2 = np.meshgrid(np.linspace(-vlim, vlim, nbins + 1),
                              np.linspace(-vlim, vlim, nbins + 1))
     zeros = np.zeros(dim1.shape)
@@ -123,25 +123,24 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b):
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios {} '.format(probe) + str(time)
-    fig = plt.figure(figsize=(6, 6))
-    spec = gridspec.GridSpec(ncols=2, nrows=2)
+    fig = plt.figure(figsize=(6, 10))
+    spec = gridspec.GridSpec(ncols=2, nrows=3)
     ax1 = fig.add_subplot(spec[0, 0])
     ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
     ax3 = fig.add_subplot(spec[1, :])
-    ax = [ax1, ax2, ax3]
+    ax4 = fig.add_subplot(spec[2, :], sharex=ax3)
+    ax = [ax1, ax2, ax3, ax4]
 
     fig.suptitle(title)
     vrminlim = 200
     vrmaxlim = 1000
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     dist_vcentre = dist.copy()
-    for comp in ['x', 'y', 'z']:
-        dist_vcentre['v' + comp] -= output['vp_' + comp]
     # Distribution is in spacecraft frame, but output velocities are in
     # solar wind frame, so correct
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
-    vs = np.dot(R, dist_vcentre[['vx', 'vy', 'vz']].values.T).T
+    vs = dist_vcentre[['vx', 'vy', 'vz']]
     levels = np.linspace(np.log(dist_vcentre['pdf']).min(),
                          np.log(dist_vcentre['pdf']).max(), 20)
 
@@ -149,48 +148,21 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b):
     x, z, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
     plt.sca(ax[0])
     contour2d(z, x, pdf, levels=levels, showbins=False, add1overe=True)
-    # Plot thermal speeds
-    ax[0].plot((0, 0), (-output['vth_p_perp'], output['vth_p_perp']), color='k')
-    ax[0].plot((-output['vth_p_par'], output['vth_p_par']), (0, 0), color='k')
 
     # Slice perp to B
     x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
     plt.sca(ax[1])
     contour2d(y, x, pdf, levels=levels, showbins=False, add1overe=True)
-    ax[1].plot((0, 0), (-output['vth_p_perp'], output['vth_p_perp']),
-               color='k')
-    ax[1].plot((-output['vth_p_perp'], output['vth_p_perp']), (0, 0),
-               color='k')
 
     # Plot formatting
-    ax[0].set_ylabel(r'$v_{\perp ,1}$ (km/s)')
-    ax[0].set_xlabel(r'$v_{\parallel}$ (km/s)')
-    ax[1].set_xlabel(r'$v_{\perp ,2}$ (km/s)')
+    ax[0].set_ylabel(r'$v_{n}$ (km/s)')
+    ax[0].set_xlabel(r'$v_{t}$ (km/s)')
+    ax[1].set_xlabel(r'$v_{r}$ (km/s)')
     for a in ax[0:2]:
         a.set_aspect('equal', 'datalim')
-        a.set_ylim(-400, 400)
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
                       left=False, right=True)
-    trans = ax[0].transAxes
-    # Add magnetic field arrows
-    arrow = mpatch.FancyArrowPatch((0.6, 0.87), (0.95, 0.87),
-                                   arrowstyle='-|>', mutation_scale=20,
-                                   facecolor='k', transform=trans)
-    ax[0].add_patch(arrow)
-    ax[0].text(0.73, 0.9,
-               'B', fontsize=14,
-               transform=trans)
-    Tani = output['Tp_perp'] / output['Tp_par']
-    ax[0].text(0.05, 0.05,
-               r'$T_{\perp} / T_{\parallel} =$' + '{:.01f}'.format(Tani),
-               transform=trans)
-    ax[1].text(0.8, 0.9, 'B ⊗', fontsize=14, transform=ax[1].transAxes)
-    # ax[1].text(0.02, 0.05,
-    #            r'$\mathbf{B}_{rtn}$ = ' +
-    #            '({:.01f}, {:.01f}, {:.01f}) nT'.format(output['Bx'],
-    #                                                    output['By'],
-    #                                                    output['Bz']),
-    #            transform=ax[1].transAxes)
+
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
@@ -199,6 +171,13 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b):
                marker='x', label='I1a')
     ax[2].plot(I1b['v'], I1b['df'] / I1b['df'].max(),
                marker='x', label='I1b')
+    I1binterp = 10**np.interp(I1a['v'].values, I1b['v'].values, np.log10(I1b['df'].values))
+    print(I1binterp)
+    ax[2].plot(I1a['v'], I1binterp / np.nanmax(I1binterp),
+               marker='x', label='I1b interp')
+    ax[3].plot(I1a['v'], I1a['df'] / I1binterp, marker='x')
+    # ax[3].set_yscale('log')
+
     # ax[2].plot(vs, pdf / np.max(pdf),
     #            marker='+', label='Integrated 3D')
     if not magempty:
@@ -244,29 +223,6 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b):
         ax[2].set_xlim(400, 1600)
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
-        vperp, vpar = perp_par_vels(dist[['vx', 'vy', 'vz']].values,
-                                    output[['vp_x', 'vp_y', 'vp_z']].values, R)
-        levels = np.linspace(-5, 0, 20)
-        fig, axs2 = plt.subplots(2, 1, sharex=True, sharey=True)
-        axs2[0].set_title(title)
-
-        plt.sca(axs2[0])
-        contour2d(
-            vpar, vperp,
-            np.concatenate((dist['pdf'].values,
-                            dist['pdf'].values)) / dist['pdf'].max(),
-            levels=levels, showbins=True)
-        plt.sca(axs2[1])
-        fitted_bimax = perp_par_maxwellian(
-            output['n_p'], output['vth_p_perp'], output['vth_p_par'],
-            vperp, vpar)
-        contour2d(vpar, vperp, fitted_bimax / np.max(fitted_bimax),
-                  levels=levels)
-
-        for ax2 in axs2:
-            # ax2.set_aspect('equal', 'datalim')
-            ax2.set_xlabel(r'$v_{\parallel}$')
-            ax2.set_ylabel(r'$v_{\perp}$')
 
 
 if __name__ == '__main__':
