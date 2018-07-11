@@ -79,7 +79,7 @@ def fit_single_day(year, doy, probe, pltfigs):
 
     # Load a days worth of ion distribution functions
     try:
-        dists_3D, dists_1D, distparams = helpers_data.load_dists(
+        dists_3D, I1as, I1bs, distparams = helpers_data.load_dists(
             probe, starttime, endtime)
     except RuntimeError as err:
         print(str(err))
@@ -90,8 +90,6 @@ def fit_single_day(year, doy, probe, pltfigs):
     distparams['vth_i1a'] = helpers.temp2vth(distparams['Tp_i1a'].values)
 
     # Add a velocity level to 1D dataframe
-    I1as = dists_1D['a']
-    I1bs = dists_1D['b']
     I1as['v'] = I1as.index.get_level_values('v')
     I1bs['v'] = I1bs.index.get_level_values('v')
 
