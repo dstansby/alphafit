@@ -63,8 +63,11 @@ def fit_single_day(year, doy, probe, pltfigs):
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
+    old_starttime = starttime
     # Uncomment next line to start from a specific datetime
-    starttime = starttime + timedelta(hours=23)
+    # starttime = starttime + timedelta(hours=23)
+    if starttime != old_starttime:
+        input('Manually setting starttime, press enter to continue')
 
     # Load magnetic field data
     mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
