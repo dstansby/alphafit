@@ -23,7 +23,9 @@ def plot_status(ax, params, key):
     ax.plot(params[key], marker='o', linewidth=0)
 
 
-params_3D = helpers.load_corefit(probe, starttime, endtime)
+params_method = helpers.load_corefit
+# params_method = helios.corefit
+params_3D = params_method(probe, starttime, endtime)
 merged = helios.merged(probe, starttime, endtime,
                        try_download=False, verbose=False)
 
