@@ -79,18 +79,8 @@ def fit_single_day(year, doy, probe, pltfigs):
 
     # Load a days worth of ion distribution functions
     try:
-        dists_3D = helios.ion_dists(probe,
-                                    starttime, endtime,
-                                    verbose=True)
-        print('Loaded 3D dists')
-        dists_1D = helios.integrated_dists(probe,
-                                           starttime, endtime,
-                                           verbose=True)
-        print('Loaded 1D dists')
-        distparams = helios.distparams(probe,
-                                       starttime, endtime,
-                                       verbose=True)
-        print('Loaded distribution parameters')
+        dists_3D, dists_1D, distparams = helpers_data.load_dists(
+            probe, starttime, endtime)
     except RuntimeError as err:
         print(str(err))
         if 'No data available for times' in str(err):

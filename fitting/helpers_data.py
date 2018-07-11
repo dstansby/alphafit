@@ -46,3 +46,20 @@ def clean1D(I1as, I1bs):
     I1as = I1as[I1as['df'] != 0]
     I1bs = I1bs[I1bs['df'] != 0]
     return I1as, I1bs
+
+
+def load_dists(probe, starttime, endtime):
+    # Load a days worth of ion distribution functions
+    dists_3D = helios.ion_dists(probe,
+                                starttime, endtime,
+                                verbose=True)
+    print('Loaded 3D dists')
+    dists_1D = helios.integrated_dists(probe,
+                                       starttime, endtime,
+                                       verbose=True)
+    print('Loaded 1D dists')
+    distparams = helios.distparams(probe,
+                                   starttime, endtime,
+                                   verbose=True)
+    print('Loaded distribution parameters')
+    return dists_3D, dists_1D, distparams
