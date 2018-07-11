@@ -27,6 +27,9 @@ def fit_single_day(year, doy, probe):
 
     # Loop through each timestamp
     for time, row in corefit.iterrows():
+        # Only do alpha fitting if high data mode
+        if not (int(row['data_rate']) == 1):
+            continue
         # Only do alpha fitting if fitting proton core velocity was successful
         if not np.isfinite(row['vp_x']):
             continue
