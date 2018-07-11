@@ -62,4 +62,6 @@ def load_dists(probe, starttime, endtime):
                                    starttime, endtime,
                                    verbose=True)
     print('Loaded distribution parameters')
-    return dists_3D, dists_1D, distparams
+    I1as = dists_1D['a']
+    I1bs = dists_1D['b']
+    return dists_3D, I1as, I1bs, distparams
