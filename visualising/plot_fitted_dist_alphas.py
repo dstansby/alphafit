@@ -105,7 +105,7 @@ def slice_dist(vs, pdf, plane):
         sampling_points = [dim1, dim2, zeros]
     else:
         raise ValueError('plane must be 1, 2 or 3')
-    pdf = interp.griddata(vs, pdf.values, np.array(sampling_points).T,
+    pdf = interp.griddata(vs, pdf, np.array(sampling_points).T,
                           method='linear').T
     dim1 = dim1.ravel()
     dim2 = dim2.ravel()
@@ -114,6 +114,44 @@ def slice_dist(vs, pdf, plane):
     dim2 = dim2[np.isfinite(pdf)]
     pdf = pdf[np.isfinite(pdf)]
     return dim1, dim2, pdf
+
+
+def plot_RTN_cuts(dist, ax1, ax2):
+    '''
+    Plot slices of dist on two different axes. ax1 is the RT plane, ax2 is the
+    RN plane.
+    '''
+    vs = dist[['vx', 'vy', 'vz']].values
+    pdf = dist['pdf'].values
+    levels = np.linspace(np.log(pdf).min(),
+                         np.log(pdf).max(), 20)
+    # Slice along B (which is along z-axis)
+    x, z, slice_pdf = slice_dist(vs, pdf, 1)
+    plt.sca(ax1)
+    contour2d(z, x, slice_pdf, levels=levels, showbins=True, add1overe=True)
+
+    # Slice perp to B
+    x, y, slice_pdf = slice_dist(vs, pdf, 2)
+    plt.sca(ax2)
+    contour2d(y, x, slice_pdf, levels=levels, showbins=True, add1overe=True)
+    for a in [ax1, ax2]:
+        a.set_aspect('equal', 'datalim')
+    ax1.set_ylabel(r'$v_{r}$ (km/s)')
+    ax1.set_xlabel(r'$v_{t}$ (km/s)')
+    ax2.set_xlabel(r'$v_{n}$ (km/s)')
+
+
+def plot_alpha_dist(dist):
+    # Convert to km/s
+    dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
+    # sqrt(2) charge to mass ratio correction
+    dist[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
+
+    fig = plt.figure(figsize=(6, 6))
+    spec = gridspec.GridSpec(ncols=2, nrows=1)
+    ax1 = fig.add_subplot(spec[0, 0])
+    ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
+    plot_RTN_cuts(dist, ax1, ax2)
 
 
 def plot_dist(time, probe, dist, params, output, I1a, I1b,
@@ -142,26 +180,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # solar wind frame, so correct
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
-    vs = dist_vcentre[['vx', 'vy', 'vz']]
-    levels = np.linspace(np.log(dist_vcentre['pdf']).min(),
-                         np.log(dist_vcentre['pdf']).max(), 20)
-
-    # Slice along B (which is along z-axis)
-    x, z, pdf = slice_dist(vs, dist_vcentre['pdf'], 1)
-    plt.sca(ax[0])
-    contour2d(z, x, pdf, levels=levels, showbins=False, add1overe=True)
-
-    # Slice perp to B
-    x, y, pdf = slice_dist(vs, dist_vcentre['pdf'], 2)
-    plt.sca(ax[1])
-    contour2d(y, x, pdf, levels=levels, showbins=False, add1overe=True)
+    plot_RTN_cuts(dist_vcentre, ax[0], ax[1])
 
     # Plot formatting
-    ax[0].set_ylabel(r'$v_{n}$ (km/s)')
-    ax[0].set_xlabel(r'$v_{t}$ (km/s)')
-    ax[1].set_xlabel(r'$v_{r}$ (km/s)')
-    for a in ax[0:2]:
-        a.set_aspect('equal', 'datalim')
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
                       left=False, right=True)
 
@@ -231,6 +252,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         ax[2].set_xlim(400, 1600)
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
+
+    plot_alpha_dist(alpha_dist)
 
 
 if __name__ == '__main__':
