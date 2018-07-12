@@ -142,17 +142,13 @@ def plot_RTN_cuts(dist, ax1, ax2):
 
 
 def plot_alpha_dist(dist, ax1, ax2):
-    # Convert to km/s
-    dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
-    # sqrt(2) charge to mass ratio correction
-    dist[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
-
     plot_RTN_cuts(dist, ax1, ax2)
 
 
 def plot_dist(time, probe, dist, params, output, I1a, I1b,
               last_high_ratio=np.nan,
-              alpha_dist=None):
+              alpha_dist=None,
+              va_guess=None):
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
@@ -179,6 +175,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
     plot_RTN_cuts(dist_vcentre, ax[0], ax[1])
+    ax[0].scatter(va_guess[1], va_guess[0], marker='+', color='r')
+    ax[1].scatter(va_guess[2], va_guess[0], marker='+', color='r')
 
     # Plot formatting
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
@@ -251,7 +249,10 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
-    plot_alpha_dist(alpha_dist, ax[4], ax[5])
+    plot_RTN_cuts(alpha_dist, ax[4], ax[5])
+    ax[4].scatter(va_guess[1], va_guess[0], marker='+', color='r')
+    ax[5].scatter(va_guess[2], va_guess[0], marker='+', color='r')
+    ax[0].set_ylim(bottom=0)
 
 
 if __name__ == '__main__':

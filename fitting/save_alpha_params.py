@@ -18,7 +18,9 @@ years = range(1976, 1977)
 doys = range(108, 109)
 
 
-def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
+def find_speed_cut(I1a, I1b):
+    # Take the peak velocity as the proton core, and only look at bins after
+    # that
     peak_1D_v = I1a['df'].idxmax()
     # Calculate ratio between I1b and I1a
     I1a['I1b'] = np.interp(I1a.index.values, I1b.index.values,
@@ -26,12 +28,32 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     I1a['Ratio'] = I1a['df'] / I1a['I1b']
     I1a['Ratio'] /= I1a.loc[peak_1D_v, 'Ratio']
     last_high_ratio = ((I1a['Ratio'] < 0.8) & (I1a.index > peak_1D_v)).idxmax()
+    return I1a, last_high_ratio
 
+
+def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
+    I1a, speed_cut = find_speed_cut(I1a, I1b)
     # Cut out what we think is the alpha distribution
-    alpha_dist = helpers.dist_cut(dist3D, last_high_ratio)
+    alpha_dist = helpers.dist_cut(dist3D, speed_cut)
+    # Convert to km/s
+    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
+    # sqrt(2) charge to mass ratio correction
+    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
 
-    kwargs = {'last_high_ratio': last_high_ratio,
-              'alpha_dist': alpha_dist}
+    df = alpha_dist['pdf'].values
+    vs = alpha_dist[['vx', 'vy', 'vz']].values
+
+    # Initial proton parameter guesses
+    # Take maximum of distribution function for amplitude
+    Aa_guess = np.max(df)
+    # Take numerical ion velocity moment for v_p
+    va_guess = [np.sum(df * vs[:, 0]) / np.sum(df),
+                np.sum(df * vs[:, 1]) / np.sum(df),
+                np.sum(df * vs[:, 2]) / np.sum(df)]
+
+    kwargs = {'last_high_ratio': speed_cut,
+              'alpha_dist': alpha_dist,
+              'va_guess': va_guess}
     from plot_fitted_dist_alphas import plot_dist
     import matplotlib.pyplot as plt
     plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
