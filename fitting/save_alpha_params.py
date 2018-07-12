@@ -2,6 +2,8 @@
 #
 # David Stansby 2018
 import sys
+
+import scipy.optimize as opt
 import numpy as np
 import pandas as pd
 from heliopy.data import helios
@@ -31,6 +33,17 @@ def find_speed_cut(I1a, I1b):
     return I1a, last_high_ratio
 
 
+def bimaxwellian_fit(vs, df, guesses):
+    # Residuals to minimize
+    def resid(maxwell_params, vs, df):
+        fit = helpers.bi_maxwellian_3D(vs[:, 0], vs[:, 1],
+                                       vs[:, 2], *maxwell_params)
+        return df - fit
+
+    return opt.leastsq(resid, guesses, args=(vs, df),
+                       full_output=True)
+
+
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     I1a, speed_cut = find_speed_cut(I1a, I1b)
     # Cut out what we think is the alpha distribution
@@ -46,14 +59,26 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     # Initial proton parameter guesses
     # Take maximum of distribution function for amplitude
     Aa_guess = np.max(df)
-    # Take numerical ion velocity moment for v_p
+    # Take numerical ion velocity moment for v_a
     va_guess = [np.sum(df * vs[:, 0]) / np.sum(df),
                 np.sum(df * vs[:, 1]) / np.sum(df),
                 np.sum(df * vs[:, 2]) / np.sum(df)]
+    # Take proton thermal speeds as guesses for alpha thermal speeds
+    vtha_perp_guess = corefit['vth_p_perp']
+    vtha_par_guess = corefit['vth_p_par']
+    guesses = (Aa_guess, vtha_perp_guess, vtha_par_guess,
+               va_guess[0], va_guess[1], va_guess[2])
+    fitout = bimaxwellian_fit(vs, df, guesses)
+    fitmsg = fitout[3]
+    fitstatus = fitout[4]
+    fitparams = fitout[0]
+
+    v_a = fitparams[3:6]
+    print(guesses, fitparams)
 
     kwargs = {'last_high_ratio': speed_cut,
               'alpha_dist': alpha_dist,
-              'va_guess': va_guess}
+              'va_guess': v_a}
     from plot_fitted_dist_alphas import plot_dist
     import matplotlib.pyplot as plt
     plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
