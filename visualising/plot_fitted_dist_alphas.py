@@ -117,7 +117,8 @@ def slice_dist(vs, pdf, plane):
 
 
 def plot_dist(time, probe, dist, params, output, I1a, I1b,
-              last_high_ratio=np.nan):
+              last_high_ratio=np.nan,
+              alpha_dist=None):
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')

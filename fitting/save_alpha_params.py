@@ -27,8 +27,11 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     I1a['Ratio'] /= I1a.loc[peak_1D_v, 'Ratio']
     last_high_ratio = ((I1a['Ratio'] < 0.8) & (I1a.index > peak_1D_v)).idxmax()
 
-    kwargs = {'last_high_ratio': last_high_ratio}
+    # Cut out what we think is the alpha distribution
+    alpha_dist = helpers.dist_cut(dist3D, last_high_ratio)
 
+    kwargs = {'last_high_ratio': last_high_ratio,
+              'alpha_dist': alpha_dist}
     from plot_fitted_dist_alphas import plot_dist
     import matplotlib.pyplot as plt
     plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,

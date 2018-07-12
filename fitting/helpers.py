@@ -15,6 +15,14 @@ def _columndotproduct(v1, v2):
     return out
 
 
+def dist_cut(dist3D, velocity):
+    """
+    Returns the portion of dist3D that has speeds >= velocity.
+    """
+    dist3D = dist3D.copy()
+    return dist3D.loc[dist3D['|v|'] / 1e3 >= velocity]
+
+
 def vth2temp(vth):
     """
     Assumes velocities are floating point numbers in km/s.
