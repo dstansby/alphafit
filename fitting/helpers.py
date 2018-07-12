@@ -15,7 +15,7 @@ def _columndotproduct(v1, v2):
     return out
 
 
-def process_fitparams(fitparams, species, dist_vs, magempty, params):
+def process_fitparams(fitparams, species, dist_vs, magempty, params, R):
     '''
     Process the output of a bi-Maxwellian fitting routine into a sensible
     dictionary of parameters.
@@ -27,7 +27,7 @@ def process_fitparams(fitparams, species, dist_vs, magempty, params):
         fitparams[1:3] = np.nan
     else:
         # Otherwise transformt bulk velocity back into spacecraft frame
-        # v = np.dot(R.T, v)
+        v = np.dot(R.T, v)
         pass
 
     # Speed is less than lowest speed in distribution function

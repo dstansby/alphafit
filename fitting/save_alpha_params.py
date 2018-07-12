@@ -56,31 +56,38 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
 
+    # Rotate velocities into field aligned co-ordinates
+    B = corefit[['Bx', 'By', 'Bz']].values
+    magempty = not np.isfinite(B[0])
+    if not magempty:
+        R = helpers.rotationmatrix(B)
+        vprime = np.dot(R, vs.T).T
+    else:
+        R = None
+        vprime = vs
+
     # Initial proton parameter guesses
     # Take maximum of distribution function for amplitude
     Aa_guess = np.max(df)
     # Take numerical ion velocity moment for v_a
-    va_guess = [np.sum(df * vs[:, 0]) / np.sum(df),
-                np.sum(df * vs[:, 1]) / np.sum(df),
-                np.sum(df * vs[:, 2]) / np.sum(df)]
+    va_guess = [np.sum(df * vprime[:, 0]) / np.sum(df),
+                np.sum(df * vprime[:, 1]) / np.sum(df),
+                np.sum(df * vprime[:, 2]) / np.sum(df)]
     # Take proton thermal speeds as guesses for alpha thermal speeds
     vtha_perp_guess = corefit['vth_p_perp']
     vtha_par_guess = corefit['vth_p_par']
     guesses = (Aa_guess, vtha_perp_guess, vtha_par_guess,
                va_guess[0], va_guess[1], va_guess[2])
-    fitout = bimaxwellian_fit(vs, df, guesses)
+    fitout = bimaxwellian_fit(vprime, df, guesses)
     fitmsg = fitout[3]
     fitstatus = fitout[4]
     fitparams = fitout[0]
 
-    magempty = False
-    fit_dict = helpers.process_fitparams(fitparams, 'a', vs, magempty, params)
-    print(fit_dict)
-    exit()
+    fit_dict = helpers.process_fitparams(fitparams, 'a', vs, magempty, params, R)
 
     kwargs = {'last_high_ratio': speed_cut,
               'alpha_dist': alpha_dist,
-              'va_guess': v_a}
+              'fit_dict': fit_dict}
     from plot_fitted_dist_alphas import plot_dist
     import matplotlib.pyplot as plt
     plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,

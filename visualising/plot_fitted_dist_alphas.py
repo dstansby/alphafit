@@ -148,7 +148,7 @@ def plot_alpha_dist(dist, ax1, ax2):
 def plot_dist(time, probe, dist, params, output, I1a, I1b,
               last_high_ratio=np.nan,
               alpha_dist=None,
-              va_guess=None):
+              fit_dict=None):
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
@@ -175,8 +175,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
     plot_RTN_cuts(dist_vcentre, ax[0], ax[1])
-    ax[0].scatter(va_guess[1], va_guess[0], marker='+', color='r')
-    ax[1].scatter(va_guess[2], va_guess[0], marker='+', color='r')
+    ax[0].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
+    ax[1].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
 
     # Plot formatting
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
@@ -192,7 +192,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                marker='x', label='I1b')
 
     for axnum in [0, 1]:
-        circ = mpatch.Circle((0, 0), last_high_ratio, edgecolor='k', facecolor='none')
+        circ = mpatch.Circle((0, 0), last_high_ratio,
+                             edgecolor='k', facecolor='none')
         ax[axnum].add_patch(circ)
 
     ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
@@ -250,8 +251,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.subplots_adjust(top=0.9)
 
     plot_RTN_cuts(alpha_dist, ax[4], ax[5])
-    ax[4].scatter(va_guess[1], va_guess[0], marker='+', color='r')
-    ax[5].scatter(va_guess[2], va_guess[0], marker='+', color='r')
+    ax[4].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
+    ax[5].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
 
 
