@@ -18,12 +18,21 @@ years = range(1976, 1977)
 doys = range(108, 109)
 
 
-def fit_single_dist(probe, time, dist3D):
+def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
+    peak_1D_v = I1a['df'].idxmax()
+    # Calculate ratio between I1b and I1a
+    I1a['I1b'] = np.interp(I1a.index.values, I1b.index.values,
+                           I1b['df'].values)
+    I1a['Ratio'] = I1a['df'] / I1a['I1b']
+    I1a['Ratio'] /= I1a.loc[peak_1D_v, 'Ratio']
+    last_high_ratio = ((I1a['Ratio'] < 0.8) & (I1a.index > peak_1D_v)).idxmax()
 
-    kwargs = {}
-    from plot_fitted_dist_alphas import plot_dist_time
+    kwargs = {'last_high_ratio': last_high_ratio}
+
+    from plot_fitted_dist_alphas import plot_dist
     import matplotlib.pyplot as plt
-    plot_dist_time(probe, time, **kwargs)
+    plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
+              **kwargs)
     plt.show()
     exit()
 
@@ -60,9 +69,11 @@ def fit_single_day(year, doy, probe):
         # Only do alpha fitting if fitting proton core velocity was successful
         if not np.isfinite(row['vp_x']):
             continue
-        print(dists_3D)
         dist3D = dists_3D.loc[time]
-        fit_single_dist(probe, time, dist3D)
+        I1a = I1as.loc[time]
+        I1b = I1bs.loc[time]
+        params = distparams.loc[time]
+        fit_single_dist(probe, time, dist3D, I1a, I1b, row, params)
 
 
 def do_fitting():

@@ -64,7 +64,7 @@ def perp_par_vels(vs, bulkv, R):
     return vperp, vpar
 
 
-def plot_dist_time(probe, time):
+def plot_dist_time(probe, time, **kwargs):
     # Calls plot_dist with a given time. Uses already processed values
     corefit = helios.corefit(probe,
                              time - dt(seconds=20),
@@ -79,7 +79,7 @@ def plot_dist_time(probe, time):
     params = helios.distparams_single(*args)
     I1a, I1b = helios.integrated_dists_single(*args)
 
-    plot_dist(time, probe, dist, params, corefit, I1a, I1b)
+    plot_dist(time, probe, dist, params, corefit, I1a, I1b, **kwargs)
 
 
 def slice_dist(vs, pdf, plane):
@@ -116,7 +116,8 @@ def slice_dist(vs, pdf, plane):
     return dim1, dim2, pdf
 
 
-def plot_dist(time, probe, dist, params, output, I1a, I1b):
+def plot_dist(time, probe, dist, params, output, I1a, I1b,
+              last_high_ratio=np.nan):
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
@@ -167,16 +168,22 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b):
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
 
-    ax[2].plot(I1a['v'], I1a['df'] / I1a['df'].max(),
+    ax[2].plot(I1a['df'] / I1a['df'].max(),
                marker='x', label='I1a')
-    ax[2].plot(I1b['v'], I1b['df'] / I1b['df'].max(),
+    ax[2].plot(I1b['df'] / I1b['df'].max(),
                marker='x', label='I1b')
-    I1binterp = 10**np.interp(I1a['v'].values, I1b['v'].values, np.log10(I1b['df'].values))
-    print(I1binterp)
-    ax[2].plot(I1a['v'], I1binterp / np.nanmax(I1binterp),
+
+    for axnum in [0, 1]:
+        circ = mpatch.Circle((0, 0), last_high_ratio, edgecolor='k', facecolor='none')
+        ax[axnum].add_patch(circ)
+
+    ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
                marker='x', label='I1b interp')
-    ax[3].plot(I1a['v'], I1a['df'] / I1binterp, marker='x')
-    # ax[3].set_yscale('log')
+
+    ax[3].plot(I1a['Ratio'], marker='x')
+    for axnum in [2, 3]:
+        ax[axnum].axvline(last_high_ratio, color='k')
+    ax[3].axhline(1, color='k')
 
     # ax[2].plot(vs, pdf / np.max(pdf),
     #            marker='+', label='Integrated 3D')
