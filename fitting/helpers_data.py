@@ -62,6 +62,10 @@ def load_dists(probe, starttime, endtime):
                                    starttime, endtime,
                                    verbose=True)
     print('Loaded distribution parameters')
+
     I1as = dists_1D['a']
     I1bs = dists_1D['b']
+    # Re-order 3D index levels
+    dists_3D = dists_3D.reorder_levels(
+        ['Time', 'E_bin', 'El', 'Az'], axis=0)
     return dists_3D, I1as, I1bs, distparams

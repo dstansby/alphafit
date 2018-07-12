@@ -95,10 +95,6 @@ def fit_single_day(year, doy, probe, pltfigs):
 
     # Throw away zero distribution function values
     I1as, I1bs = helpers_data.clean1D(I1as, I1bs)
-
-    # Re-order 3D index levels
-    dists_3D = dists_3D.reorder_levels(
-        ['Time', 'E_bin', 'El', 'Az'], axis=0)
     dists_3D = helpers_data.clean3D(dists_3D)
 
     # fitlist_1D = []
