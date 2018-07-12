@@ -23,6 +23,19 @@ def dist_cut(dist3D, velocity):
     return dist3D.loc[dist3D['|v|'] / 1e3 >= velocity]
 
 
+def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
+    '''
+    Return distribution function at (vx, vy, vz),
+    given 6 distribution parameters.
+    '''
+    # Put in bulk frame
+    vx = vx - vbx
+    vy = vy - vby
+    vz = vz - vbz
+    exponent = (vx / vth_perp)**2 + (vy / vth_perp)**2 + (vz / vth_z)**2
+    return A * np.exp(-exponent)
+
+
 def vth2temp(vth):
     """
     Assumes velocities are floating point numbers in km/s.
