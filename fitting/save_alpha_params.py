@@ -73,8 +73,10 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     fitstatus = fitout[4]
     fitparams = fitout[0]
 
-    v_a = fitparams[3:6]
-    print(guesses, fitparams)
+    magempty = False
+    fit_dict = helpers.process_fitparams(fitparams, 'a', vs, magempty, params)
+    print(fit_dict)
+    exit()
 
     kwargs = {'last_high_ratio': speed_cut,
               'alpha_dist': alpha_dist,

@@ -15,6 +15,51 @@ def _columndotproduct(v1, v2):
     return out
 
 
+def process_fitparams(fitparams, species, dist_vs, magempty, params):
+    '''
+    Process the output of a bi-Maxwellian fitting routine into a sensible
+    dictionary of parameters.
+    '''
+    v = fitparams[3:6]
+
+    # If no magnetic field data, set temperatures to nans
+    if magempty:
+        fitparams[1:3] = np.nan
+    else:
+        # Otherwise transformt bulk velocity back into spacecraft frame
+        # v = np.dot(R.T, v)
+        pass
+
+    # Speed is less than lowest speed in distribution function
+    if np.linalg.norm(v) < np.min(np.linalg.norm(dist_vs, axis=1)):
+        return 4
+
+    fit_dict = {'vth_' + species + '_perp': np.abs(fitparams[1]),
+                'vth_' + species + '_par': np.abs(fitparams[2])}
+    fit_dict['T' + species + '_perp'] =\
+        vth2temp(fit_dict['vth_' + species + '_perp'])
+    fit_dict['T' + species + '_par'] =\
+        vth2temp(fit_dict['vth_' + species + '_par'])
+    # Original distribution has units s**3 / m**6
+    # Get n_p in 1 / m**3
+    n = (fitparams[0] * (u.s**3 / u.m**6) * np.power(np.pi, 1.5) *
+         np.abs(fitparams[1]) * (u.km / u.s) *
+         np.abs(fitparams[1]) * (u.km / u.s) *
+         np.abs(fitparams[2]) * (u.km / u.s)).to(u.cm**-3).value
+    fit_dict.update({'n_' + species: n})
+
+    # Remove spacecraft abberation
+    # Velocities here are all in km/s
+    v_x = v[0] + params['helios_vr']
+    v_y = v[1] + params['helios_v']
+    v_z = v[2]
+    fit_dict.update({'v' + species + '_x': v_x,
+                     'v' + species + '_y': v_y,
+                     'v' + species + '_z': v_z})
+
+    return fit_dict
+
+
 def dist_cut(dist3D, velocity):
     """
     Returns the portion of dist3D that has speeds >= velocity.
