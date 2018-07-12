@@ -11,12 +11,12 @@ import numpy as np
 from heliopy.data import helios
 
 import vis_helpers as helpers
-from plot_fitted_dist import plot_dist_time
+from plot_fitted_dist_alphas import plot_dist_time
 
 # Set probe and dates to compare here
-probe = '1'
-starttime = datetime(1974, 12, 1, 0, 0, 0)
-endtime = starttime + timedelta(days=31)
+probe = '2'
+starttime = datetime(1976, 4, 13, 0, 0, 0)
+endtime = starttime + timedelta(days=1)
 
 
 def plot_status(ax, params, key):
@@ -27,7 +27,7 @@ params_method = helpers.load_corefit
 # params_method = helios.corefit
 params_3D = params_method(probe, starttime, endtime)
 merged = helios.merged(probe, starttime, endtime,
-                       try_download=False, verbose=False)
+                       try_download=True)
 
 fig, axs = plt.subplots(3, 1, sharex=True)
 axs[0].plot(merged['Tp1'], label='Merged T')

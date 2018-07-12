@@ -19,10 +19,10 @@ import proton_core_1D as ions_1D
 import proton_core_3D as ions_3D
 from config import get_dirs
 
-probes = ['1', '2']
-years = range(1974, 1986)
-doys = range(1, 367)
 output_dir, corefit_code_dir = get_dirs()
+probes = ['2', ]
+years = range(1976, 1977)
+doys = range(104, 105)
 
 
 # Method to remove bad data
