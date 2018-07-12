@@ -141,16 +141,12 @@ def plot_RTN_cuts(dist, ax1, ax2):
     ax2.set_xlabel(r'$v_{n}$ (km/s)')
 
 
-def plot_alpha_dist(dist):
+def plot_alpha_dist(dist, ax1, ax2):
     # Convert to km/s
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     # sqrt(2) charge to mass ratio correction
     dist[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
 
-    fig = plt.figure(figsize=(6, 6))
-    spec = gridspec.GridSpec(ncols=2, nrows=1)
-    ax1 = fig.add_subplot(spec[0, 0])
-    ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
     plot_RTN_cuts(dist, ax1, ax2)
 
 
@@ -163,13 +159,15 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios {} '.format(probe) + str(time)
-    fig = plt.figure(figsize=(6, 10))
-    spec = gridspec.GridSpec(ncols=2, nrows=3)
+    fig = plt.figure(figsize=(12, 10))
+    spec = gridspec.GridSpec(ncols=4, nrows=3)
     ax1 = fig.add_subplot(spec[0, 0])
     ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
-    ax3 = fig.add_subplot(spec[1, :])
-    ax4 = fig.add_subplot(spec[2, :], sharex=ax3)
-    ax = [ax1, ax2, ax3, ax4]
+    ax3 = fig.add_subplot(spec[1, 0:2])
+    ax4 = fig.add_subplot(spec[2, 0:2], sharex=ax3)
+    ax5 = fig.add_subplot(spec[0, 2], sharey=ax1)
+    ax6 = fig.add_subplot(spec[0, 3], sharey=ax1)
+    ax = [ax1, ax2, ax3, ax4, ax5, ax6]
 
     fig.suptitle(title)
     vrminlim = 200
@@ -253,7 +251,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
-    plot_alpha_dist(alpha_dist)
+    plot_alpha_dist(alpha_dist, ax[4], ax[5])
 
 
 if __name__ == '__main__':
