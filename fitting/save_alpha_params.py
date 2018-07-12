@@ -1,6 +1,7 @@
 # Script to save fit parameters from alpha particle fitting processes
 #
 # David Stansby 2018
+import os
 import sys
 
 import scipy.optimize as opt
@@ -18,6 +19,14 @@ output_dir, corefit_code_dir = get_dirs()
 probes = ['2', ]
 years = range(1976, 1977)
 doys = range(108, 109)
+
+
+def save_fits(fits, probe, year, doy, fdir):
+    if not os.path.exists(fdir):
+        os.makedirs(fdir)
+    # Save fits
+    fname = 'h{}_{}_{}_alpha_fits.hdf'.format(probe, year, str(doy).zfill(3))
+    fits.to_hdf(fdir / fname, 'fits', mode='w', format='f')
 
 
 def find_speed_cut(I1a, I1b):
@@ -84,7 +93,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     fitparams = fitout[0]
 
     fit_dict = helpers.process_fitparams(fitparams, 'a', vs, magempty, params, R)
-
+    '''
     kwargs = {'last_high_ratio': speed_cut,
               'alpha_dist': alpha_dist,
               'fit_dict': fit_dict}
@@ -94,6 +103,8 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
               **kwargs)
     plt.show()
     exit()
+    '''
+    return fit_dict
 
 
 def fit_single_day(year, doy, probe):
@@ -120,7 +131,10 @@ def fit_single_day(year, doy, probe):
             return
         raise
 
+    # NOTE: THIS IS TO LIMIT NUMBER OF FITS DONE
+    i = 0
     # Loop through each timestamp
+    fitlist = []
     for time, row in corefit.iterrows():
         # Only do alpha fitting if high data mode
         if not (distparams.loc[time]['data_rate'] == 1):
@@ -132,7 +146,27 @@ def fit_single_day(year, doy, probe):
         I1a = I1as.loc[time]
         I1b = I1bs.loc[time]
         params = distparams.loc[time]
-        fit_single_dist(probe, time, dist3D, I1a, I1b, row, params)
+        fit_dict = fit_single_dist(probe, time, dist3D, I1a, I1b, row, params)
+
+        if isinstance(fit_dict, int):
+            continue
+        fit_dict.update({'Time': time})
+        fitlist.append(fit_dict)
+        print(time)
+        i += 1
+        if i > 10:
+            break
+
+    # End of a single day, put each day into its own DataFrame
+    # fits_1D = pd.DataFrame(fitlist_1D)
+    fits = pd.DataFrame(fitlist)
+    if fits.empty:
+        return
+
+    fits = fits.set_index('Time', drop=True)
+    # Make directory to save fits
+    fdir = output_dir / 'helios{}'.format(probe) / 'fits' / str(year)
+    save_fits(fits, probe, year, doy, fdir)
 
 
 def do_fitting():
