@@ -3,6 +3,7 @@
 # David Stansby 2018
 import os
 import sys
+import warnings
 
 import scipy.optimize as opt
 import numpy as np
@@ -131,12 +132,13 @@ def fit_single_day(year, doy, probe):
             return
         raise
 
-    # NOTE: THIS IS TO LIMIT NUMBER OF FITS DONE
-    i = 0
     # Loop through each timestamp
     fitlist = []
     for time, row in corefit.iterrows():
         # Only do alpha fitting if high data mode
+        if time not in distparams.index:
+            warnings.warn('Could not find time {} in distparams'.format(time))
+            continue
         if not (distparams.loc[time]['data_rate'] == 1):
             continue
         # Only do alpha fitting if fitting proton core velocity was successful
@@ -153,9 +155,6 @@ def fit_single_day(year, doy, probe):
         fit_dict.update({'Time': time})
         fitlist.append(fit_dict)
         print(time)
-        i += 1
-        if i > 10:
-            break
 
     # End of a single day, put each day into its own DataFrame
     fits = pd.DataFrame(fitlist)
