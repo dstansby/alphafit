@@ -15,6 +15,7 @@ def get_dirs():
                                 'config.ini in the current directory')
 
     output_dir = os.path.expanduser(config['data_dirs']['output_dir'])
+    output_dir = pathlib.Path(output_dir)
     if not os.path.isdir(output_dir):
         raise FileNotFoundError('Output directory "{}" specified in '
                                 'config.ini does not exist'.format(output_dir))
