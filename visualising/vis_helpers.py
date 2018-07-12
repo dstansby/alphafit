@@ -41,6 +41,33 @@ def load_corefit(probe, starttime, endtime, verbose=False):
     return paramlist
 
 
+def load_alphafit(probe, starttime, endtime, verbose=False):
+    starttime_orig = starttime
+    paramlist = []
+    starttime_orig = starttime
+    while starttime < endtime + timedelta(days=1):
+        year = str(starttime.year)
+        doy = starttime.strftime('%j')
+        fname = 'h{}_{}_{}_alpha_fits.hdf'.format(probe, year, str(doy).zfill(3))
+        saveloc = output_dir / 'helios{}'.format(probe) / 'fits' / str(year) / fname
+        print(saveloc)
+        try:
+            params = pd.read_hdf(saveloc, 'fits')
+        except FileNotFoundError:
+            starttime += timedelta(days=1)
+            if verbose:
+                print('{}/{} corefit data not available'.format(year, doy))
+            continue
+        paramlist.append(params)
+        starttime += timedelta(days=1)
+        if verbose:
+            print('{}/{} corefit data loaded'.format(year, doy))
+    paramlist = pd.concat(paramlist)
+    paramlist = paramlist[(paramlist.index > starttime_orig) &
+                          (paramlist.index < endtime)]
+    return paramlist
+
+
 def _columndotproduct(v1, v2):
     out = np.zeros(v1.shape[0])
     for i in range(v1.shape[0]):

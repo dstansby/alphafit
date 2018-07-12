@@ -158,7 +158,6 @@ def fit_single_day(year, doy, probe):
             break
 
     # End of a single day, put each day into its own DataFrame
-    # fits_1D = pd.DataFrame(fitlist_1D)
     fits = pd.DataFrame(fitlist)
     if fits.empty:
         return
