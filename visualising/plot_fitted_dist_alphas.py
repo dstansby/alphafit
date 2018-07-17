@@ -175,9 +175,12 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # solar wind frame, so correct
     dist_vcentre['vx'] += params['helios_vr']
     dist_vcentre['vy'] += params['helios_v']
+    sqrt2 = np.sqrt(2)
     plot_RTN_cuts(dist_vcentre, ax[0], ax[1])
     ax[0].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[1].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
+    ax[0].scatter(fit_dict['va_y'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
+    ax[1].scatter(fit_dict['va_z'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
 
     # Plot formatting
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
