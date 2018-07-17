@@ -57,7 +57,7 @@ def bimaxwellian_fit(vs, df, guesses):
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     I1a, speed_cut = find_speed_cut(I1a, I1b)
     # Cut out what we think is the alpha distribution
-    alpha_dist = helpers.dist_cut(dist3D, speed_cut)
+    alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
     # Convert to km/s
     alpha_dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     # sqrt(2) charge to mass ratio correction
