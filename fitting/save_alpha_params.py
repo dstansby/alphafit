@@ -48,7 +48,7 @@ def bimaxwellian_fit(vs, df, guesses):
     def resid(maxwell_params, vs, df):
         fit = helpers.bi_maxwellian_3D(vs[:, 0], vs[:, 1],
                                        vs[:, 2], *maxwell_params)
-        return df - fit
+        return np.log10(df - fit)
 
     return opt.leastsq(resid, guesses, args=(vs, df),
                        full_output=True)
