@@ -94,17 +94,17 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     fitparams = fitout[0]
 
     fit_dict = helpers.process_fitparams(fitparams, 'a', vs, magempty, params, R)
-    '''
-    kwargs = {'last_high_ratio': speed_cut,
-              'alpha_dist': alpha_dist,
-              'fit_dict': fit_dict}
-    from plot_fitted_dist_alphas import plot_dist
-    import matplotlib.pyplot as plt
-    plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
-              **kwargs)
-    plt.show()
-    exit()
-    '''
+    print(fit_dict)
+    plotfigs = True
+    if plotfigs and not isinstance(fit_dict, int) and not magempty:
+        kwargs = {'last_high_ratio': speed_cut,
+                  'alpha_dist': alpha_dist,
+                  'fit_dict': fit_dict}
+        from plot_fitted_dist_alphas import plot_dist
+        import matplotlib.pyplot as plt
+        plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
+                  **kwargs)
+        plt.show()
     return fit_dict
 
 
