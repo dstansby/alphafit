@@ -149,6 +149,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
               last_high_ratio=np.nan,
               alpha_dist=None,
               fit_dict=None):
+    dist = dist.copy()
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
