@@ -45,16 +45,19 @@ def find_speed_cut(I1a, I1b):
 
 
 def bimaxwellian_fit(vs, df, guesses):
+    # Get rid of nans
+    finite = np.isfinite(df)
+    df = df[finite]
+    vs = vs[finite, :]
 
     # Residuals to minimize
     def resid(maxwell_params, vs, df):
         fit = helpers.bi_maxwellian_3D(vs[:, 0], vs[:, 1],
                                        vs[:, 2], *maxwell_params)
-        return np.log10(df - fit)
+        return df - fit
 
-    with np.errstate(invalid='ignore'):
-        return opt.leastsq(resid, guesses, args=(vs, df),
-                           full_output=True)
+    return opt.leastsq(resid, guesses, args=(vs, df),
+                       full_output=True)
 
 
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
