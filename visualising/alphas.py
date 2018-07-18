@@ -17,15 +17,35 @@ endtime = starttime + timedelta(days=1)
 alphas = helpers.load_alphafit(probe, starttime, endtime)
 protons = helios.corefit(probe, starttime, endtime).data
 
-fig, axs = plt.subplots(nrows=3, sharex=True)
-axs[0].plot(alphas.index, alphas['va_x'])
-axs[0].plot(protons['vp_x'])
+fig, axs = plt.subplots(nrows=5, sharex=True, figsize=(6, 10))
 
-axs[1].plot(alphas['n_a'])
-axs[1].plot(protons['n_p'])
-axs[1].set_yscale('log')
+ax = axs[0]
+ax.plot(protons['vp_x'])
+ax.plot(alphas.index, alphas['va_x'])
 
-axs[2].plot(alphas['Ta_perp'])
-axs[2].plot(protons['Tp_perp'])
-axs[2].set_yscale('log')
+ax = axs[1]
+ax.plot(protons['vp_y'])
+ax.plot(alphas['va_y'])
+
+ax = axs[2]
+ax.plot(protons['vp_z'])
+ax.plot(alphas['va_z'])
+
+ax = axs[3]
+ax.plot(protons['n_p'])
+ax.plot(alphas['n_a'])
+ax.set_yscale('log')
+
+ax = axs[4]
+ax.plot(protons['Tp_perp'])
+ax.plot(alphas['Ta_perp'])
+ax.plot(protons['Tp_par'])
+ax.plot(alphas['Ta_par'])
+ax.legend()
+ax.set_yscale('log')
+
+fig, ax = plt.subplots()
+kwargs = {'s': 1}
+ax.scatter(protons['vp_y'], protons['vp_x'], **kwargs)
+ax.scatter(alphas['va_y'], alphas['va_x'], **kwargs)
 plt.show()
