@@ -68,6 +68,11 @@ def dist_cut(dist3D, velocity):
     return dist3D.loc[dist3D['|v|'] / 1e3 >= velocity]
 
 
+def maxwellian_1D(v, n, v0, v_th):
+    prefactor = n * 4 * np.pi * v**2 * np.power(np.pi * v_th**2, -1.5)
+    return prefactor * np.exp(-((v - v0) / v_th)**2)
+
+
 def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
     '''
     Return distribution function at (vx, vy, vz),
