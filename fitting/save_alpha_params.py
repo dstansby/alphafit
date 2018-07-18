@@ -41,19 +41,29 @@ def find_speed_cut(I1a, I1b):
 
 
 def bimaxwellian_fit(vs, df, guesses):
+    """
+    Given a (n, 3) array of velocities and a (n, ) array of distribution
+    function values, fit a bi-Maxwellian. guesses contains the initial
+    parameter guesses.
+
+    If fitting fails, returns None, otherwise returns the result of
+    opt.curve_fit.
+    """
     # Get rid of nans
     finite = np.isfinite(df)
     df = df[finite]
     vs = vs[finite, :]
 
     # Residuals to minimize
-    def resid(maxwell_params, vs, df):
-        fit = helpers.bi_maxwellian_3D(vs[:, 0], vs[:, 1],
-                                       vs[:, 2], *maxwell_params)
-        return df - fit
+    def maxwell_to_fit(vs, *params):
+        return helpers.bi_maxwellian_3D(vs[:, 0], vs[:, 1],
+                                        vs[:, 2], *params)
 
-    return opt.leastsq(resid, guesses, args=(vs, df),
-                       full_output=True)
+    try:
+        return opt.curve_fit(maxwell_to_fit, vs, df, p0=guesses)
+    except Exception as e:
+        warnings.warn("Fitting failed with the following error:\n{}".format(e))
+        return
 
 
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
