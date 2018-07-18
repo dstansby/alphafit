@@ -31,15 +31,14 @@ def process_fitparams(fitparams, species, dist_vs, magempty, params, R):
         pass
 
     # Speed is less than lowest speed in distribution function
-    if np.linalg.norm(v) < np.min(np.linalg.norm(dist_vs, axis=1)):
-        return 4
+    # if np.linalg.norm(v) < np.min(np.linalg.norm(dist_vs, axis=1)):
+    #     return 4
 
-    fit_dict = {'vth_' + species + '_perp': np.abs(fitparams[1]),
-                'vth_' + species + '_par': np.abs(fitparams[2])}
+    fit_dict = {}
     fit_dict['T' + species + '_perp'] =\
-        vth2temp(fit_dict['vth_' + species + '_perp'])
+        vth2temp(np.abs(fitparams[1]))
     fit_dict['T' + species + '_par'] =\
-        vth2temp(fit_dict['vth_' + species + '_par'])
+        vth2temp(np.abs(fitparams[2]))
     # Original distribution has units s**3 / m**6
     # Get n_p in 1 / m**3
     n = (fitparams[0] * (u.s**3 / u.m**6) * np.power(np.pi, 1.5) *

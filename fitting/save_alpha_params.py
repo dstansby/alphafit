@@ -20,10 +20,41 @@ output_dir, corefit_code_dir = get_dirs()
 
 
 # Status dictionary to map status integers to descriptions
-status_dict = {1: 'Fitting successful',
+status_dict = {-1: "Couldn't find time in distparams",
+               1: 'Fitting successful',
                2: 'No magnetic field available',
                2: 'No proton corefit data available',
-               3: 'Curve fitting failed'}
+               3: 'Curve fitting failed',
+               4: 'Low data rate distribution'}
+
+expected_params = set(['Ta_perp', 'Ta_par', 'va_x', 'va_y', 'va_z', 'n_a'])
+
+
+def check_output(fit_dict, status):
+    """
+    Check the output of the fitting process.
+
+    Parameters
+    ----------
+    fit_dict : dict or int
+        Must be either empty, or contain all expected fields.
+    status : int
+        See status_dict for information.
+    """
+    if status not in status_dict:
+        raise RuntimeError('Status must be in the status dictionary')
+
+    if status == 1:
+        pass
+    elif status == 2:
+        pass
+    else:
+        assert fit_dict == {}, 'fit_dict must be empty for this error code'
+        for param in expected_params:
+            fit_dict[param] = np.nan
+    assert set(fit_dict.keys()) == expected_params, 'Keys not as expected: {}'.format(fit_dict.keys())
+    fit_dict['Status'] = status
+    return fit_dict
 
 
 def save_fits(fits, probe, year, doy, fdir):
@@ -108,18 +139,17 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     guesses = (Aa_guess, vtha_perp_guess, vtha_par_guess,
                va_guess[0], va_guess[1], va_guess[2])
     result = bimaxwellian_fit(vprime, df, guesses)
+    fit_dict = {}
     if result is None:
         status = 3
     else:
         popt, pcov = result
+        fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params, R)
         if magempty:
             status = 2
         else:
             status = 1
 
-    fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params, R)
-    assert status in staus_dict
-    fit_dict['Status'] = status
     print(fit_dict)
 
     plotfigs = False
@@ -132,6 +162,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
                   **kwargs)
         plt.show()
+    fit_dict = check_output(fit_dict, status)
     return fit_dict
 
 
@@ -169,20 +200,20 @@ def fit_single_day(year, doy, probe):
         # Only do alpha fitting if high data mode
         if time not in distparams.index:
             warnings.warn('Could not find time {} in distparams'.format(time))
-            continue
-        if not (distparams.loc[time]['data_rate'] == 1):
-            continue
+            fit_dict = check_output({}, -1)
+        elif not (distparams.loc[time]['data_rate'] == 1):
+            fit_dict = check_output({}, 4)
         # Only do alpha fitting if fitting proton core velocity was successful
-        if not np.isfinite(row['vp_x']):
-            continue
-        dist3D = dists_3D.loc[time]
-        I1a = I1as.loc[time]
-        I1b = I1bs.loc[time]
-        params = distparams.loc[time]
-        fit_dict = fit_single_dist(probe, time, dist3D, I1a, I1b, row, params)
+        elif not np.isfinite(row['vp_x']):
+            fit_dict = check_output({}, 2)
+        else:
+            dist3D = dists_3D.loc[time]
+            I1a = I1as.loc[time]
+            I1b = I1bs.loc[time]
+            params = distparams.loc[time]
+            fit_dict = fit_single_dist(probe, time, dist3D, I1a, I1b,
+                                       row, params)
 
-        if isinstance(fit_dict, int):
-            continue
         fit_dict.update({'Time': time})
         fitlist.append(fit_dict)
         print(time)
