@@ -23,9 +23,9 @@ output_dir, corefit_code_dir = get_dirs()
 status_dict = {-1: "Couldn't find time in distparams",
                1: 'Fitting successful',
                2: 'No magnetic field available',
-               2: 'No proton corefit data available',
                3: 'Curve fitting failed',
-               4: 'Low data rate distribution'}
+               4: 'Low data rate distribution',
+               5: 'No proton corefit data available',}
 
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x', 'va_y', 'va_z', 'n_a'])
 
@@ -205,7 +205,7 @@ def fit_single_day(year, doy, probe):
             fit_dict = check_output({}, 4)
         # Only do alpha fitting if fitting proton core velocity was successful
         elif not np.isfinite(row['vp_x']):
-            fit_dict = check_output({}, 2)
+            fit_dict = check_output({}, 5)
         else:
             dist3D = dists_3D.loc[time]
             I1a = I1as.loc[time]
