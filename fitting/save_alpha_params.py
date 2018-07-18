@@ -25,9 +25,11 @@ status_dict = {-1: "Couldn't find time in distparams",
                2: 'No magnetic field available',
                3: 'Curve fitting failed',
                4: 'Low data rate distribution',
-               5: 'No proton corefit data available',}
+               5: 'No proton corefit data available',
+               }
 
-expected_params = set(['Ta_perp', 'Ta_par', 'va_x', 'va_y', 'va_z', 'n_a'])
+expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
+                       'va_y', 'va_z', 'n_a', 'Status'])
 
 
 def check_output(fit_dict, status):
@@ -41,6 +43,7 @@ def check_output(fit_dict, status):
     status : int
         See status_dict for information.
     """
+    fit_dict['Status'] = status
     if status not in status_dict:
         raise RuntimeError('Status must be in the status dictionary')
 
@@ -53,7 +56,6 @@ def check_output(fit_dict, status):
         for param in expected_params:
             fit_dict[param] = np.nan
     assert set(fit_dict.keys()) == expected_params, 'Keys not as expected: {}'.format(fit_dict.keys())
-    fit_dict['Status'] = status
     return fit_dict
 
 
