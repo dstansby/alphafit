@@ -51,4 +51,14 @@ fig, ax = plt.subplots()
 kwargs = {'s': 1}
 ax.scatter(protons['vp_y'], protons['vp_x'], **kwargs)
 ax.scatter(alphas['va_y'], alphas['va_x'], **kwargs)
+
+fig, axs = plt.subplots(ncols=2)
+histkwargs = dict(histtype='step', density=True)
+ax = axs[0]
+protons['Tani'] = protons['Tp_perp'] / protons['Tp_par']
+alphas['Tani'] = alphas['Ta_perp'] / alphas['Ta_par']
+bins = np.linspace(-1, 1, 100)
+ax.hist(np.log10(protons['Tani']).dropna(), bins=bins, **histkwargs)
+ax.hist(np.log10(alphas['Tani']).dropna(), bins=bins, **histkwargs)
+
 plt.show()
