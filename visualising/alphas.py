@@ -17,7 +17,7 @@ endtime = starttime + timedelta(days=1)
 alphas = helpers.load_alphafit(probe, starttime, endtime)
 protons = helios.corefit(probe, starttime, endtime).data
 
-fig, axs = plt.subplots(nrows=5, sharex=True, figsize=(6, 10))
+fig, axs = plt.subplots(nrows=6, sharex=True, figsize=(6, 10))
 
 ax = axs[0]
 ax.plot(protons['vp_x'])
@@ -43,6 +43,9 @@ ax.plot(protons['Tp_par'])
 ax.plot(alphas['Ta_par'])
 ax.legend()
 ax.set_yscale('log')
+
+ax = axs[5]
+ax.scatter(alphas.index, alphas['Status'])
 
 fig, ax = plt.subplots()
 kwargs = {'s': 1}
