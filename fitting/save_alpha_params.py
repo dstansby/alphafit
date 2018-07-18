@@ -115,6 +115,10 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
 
 
 def fit_single_day(year, doy, probe):
+    """
+    Method to fit a single day of Helios distribution functions. This function
+    is responsible for saving the results for the given day to a file.
+    """
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
