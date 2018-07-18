@@ -16,11 +16,7 @@ from config import get_dirs
 sys.path.append('visualising/')
 import helpers
 import helpers_data
-
 output_dir, corefit_code_dir = get_dirs()
-probes = ['2', ]
-years = range(1976, 1977)
-doys = range(108, 109)
 
 
 def save_fits(fits, probe, year, doy, fdir):
@@ -177,7 +173,7 @@ def fit_single_day(year, doy, probe):
     save_fits(fits, probe, year, doy, fdir)
 
 
-def do_fitting():
+def do_fitting(probes, years, doys):
     '''
     Main method for doing all the fitting.
     '''
@@ -191,4 +187,7 @@ def do_fitting():
 
 
 if __name__ == '__main__':
-    do_fitting()
+    probes = ['2', ]
+    years = range(1976, 1977)
+    doys = range(108, 109)
+    do_fitting(probes, years, doys)
