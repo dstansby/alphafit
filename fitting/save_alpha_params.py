@@ -10,6 +10,7 @@ import scipy.optimize as opt
 import numpy as np
 import pandas as pd
 from heliopy.data import helios
+import matplotlib.pyplot as plt
 
 from config import get_dirs
 
@@ -43,7 +44,6 @@ def check_output(fit_dict, status):
     status : int
         See status_dict for information.
     """
-    fit_dict['Status'] = status
     if status not in status_dict:
         raise RuntimeError('Status must be in the status dictionary')
 
@@ -56,6 +56,7 @@ def check_output(fit_dict, status):
         assert fit_dict == {}, 'fit_dict must be empty for this error code'
         for param in expected_params:
             fit_dict[param] = np.nan
+    fit_dict['Status'] = status
     assert set(fit_dict.keys()) == expected_params, 'Keys not as expected: {}'.format(fit_dict.keys())
     return fit_dict
 
@@ -153,8 +154,6 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         else:
             status = 1
 
-    print(fit_dict)
-
     plotfigs = False
     if plotfigs and not isinstance(fit_dict, int) and not magempty:
         kwargs = {'last_high_ratio': speed_cut,
@@ -165,11 +164,13 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
                   **kwargs)
         plt.show()
+        exit()
+
     fit_dict = check_output(fit_dict, status)
     return fit_dict
 
 
-def fit_single_day(year, doy, probe):
+def fit_single_day(year, doy, probe, startdelta=None):
     """
     Method to fit a single day of Helios distribution functions. This function
     is responsible for saving the results for the given day to a file.
@@ -177,15 +178,12 @@ def fit_single_day(year, doy, probe):
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
-    old_starttime = starttime
-    # Uncomment next line to start from a specific datetime
-    # starttime = starttime + timedelta(hours=23)
-    if starttime != old_starttime:
+    if startdelta is not None:
+        starttime += startdelta
         input('Manually setting starttime, press enter to continue')
 
-    corefit = helios.corefit(probe, starttime, endtime)
-    distparams = helios.distparams(probe,
-                                   starttime, endtime, verbose=True)
+    corefit = helios.corefit(probe, starttime, endtime).data
+    distparams = helios.distparams(probe, starttime, endtime, verbose=True)
 
     # Load a days worth of ion distribution functions
     try:
@@ -232,7 +230,7 @@ def fit_single_day(year, doy, probe):
     save_fits(fits, probe, year, doy, fdir)
 
 
-def do_fitting(probes, years, doys):
+def do_fitting(probes, years, doys, startdelta=None):
     '''
     Main method for doing all the fitting.
     '''
@@ -242,11 +240,13 @@ def do_fitting(probes, years, doys):
         for year in years:
             # Loop through days of the year
             for doy in doys:
-                fit_single_day(year, doy, probe)
+                fit_single_day(year, doy, probe, startdelta)
 
 
 if __name__ == '__main__':
     probes = ['2', ]
     years = range(1976, 1977)
     doys = range(108, 109)
-    do_fitting(probes, years, doys)
+    startdelta = None
+    # startdelta =
+    do_fitting(probes, years, doys, startdelta)
