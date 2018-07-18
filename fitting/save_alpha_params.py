@@ -50,7 +50,8 @@ def check_output(fit_dict, status):
     if status == 1:
         pass
     elif status == 2:
-        pass
+        for param in ['Ta_perp', 'Ta_par', 'n_a']:
+            fit_dict[param] = np.nan
     else:
         assert fit_dict == {}, 'fit_dict must be empty for this error code'
         for param in expected_params:
