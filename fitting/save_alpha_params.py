@@ -19,6 +19,13 @@ import helpers_data
 output_dir, corefit_code_dir = get_dirs()
 
 
+# Status dictionary to map status integers to descriptions
+status_dict = {1: 'Fitting successful',
+               2: 'No magnetic field available',
+               2: 'No proton corefit data available',
+               3: 'Curve fitting failed'}
+
+
 def save_fits(fits, probe, year, doy, fdir):
     if not os.path.exists(fdir):
         os.makedirs(fdir)
@@ -100,14 +107,22 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     vtha_par_guess = corefit['vth_p_par']
     guesses = (Aa_guess, vtha_perp_guess, vtha_par_guess,
                va_guess[0], va_guess[1], va_guess[2])
-    fitout = bimaxwellian_fit(vprime, df, guesses)
-    fitmsg = fitout[3]
-    fitstatus = fitout[4]
-    fitparams = fitout[0]
+    result = bimaxwellian_fit(vprime, df, guesses)
+    if result is None:
+        status = 3
+    else:
+        popt, pcov = result
+        if magempty:
+            status = 2
+        else:
+            status = 1
 
-    fit_dict = helpers.process_fitparams(fitparams, 'a', vs, magempty, params, R)
+    fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params, R)
+    assert status in staus_dict
+    fit_dict['Status'] = status
     print(fit_dict)
-    plotfigs = True
+
+    plotfigs = False
     if plotfigs and not isinstance(fit_dict, int) and not magempty:
         kwargs = {'last_high_ratio': speed_cut,
                   'alpha_dist': alpha_dist,
