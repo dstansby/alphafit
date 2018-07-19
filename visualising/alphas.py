@@ -15,7 +15,9 @@ starttime = datetime(1976, 4, 17, 0, 0, 0)
 endtime = starttime + timedelta(days=1)
 
 alphas = helpers.load_alphafit(probe, starttime, endtime)
-protons = helios.corefit(probe, starttime, endtime).data
+protons = helios.corefit(probe, starttime, endtime)
+
+print('Alpha points:', alphas.shape[0])
 
 fig, axs = plt.subplots(nrows=6, sharex=True, figsize=(6, 10))
 
