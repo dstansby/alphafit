@@ -170,34 +170,11 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     return fit_dict
 
 
-def fit_single_day(year, doy, probe, startdelta=None):
-    """
-    Method to fit a single day of Helios distribution functions. This function
-    is responsible for saving the results for the given day to a file.
-    """
-    starttime, endtime = helpers.doy2stime_etime(year, doy)
-    if starttime.year != year:
-        return
-    if startdelta is not None:
-        starttime += startdelta
-        input('Manually setting starttime, press enter to continue')
-
-    corefit = helios.corefit(probe, starttime, endtime).data
-    distparams = helios.distparams(probe, starttime, endtime, verbose=True)
-
-    # Load a days worth of ion distribution functions
-    try:
-        dists_3D, I1as, I1bs, distparams = helpers_data.load_dists(
-            probe, starttime, endtime)
-    except RuntimeError as err:
-        print(str(err))
-        if 'No data available for times' in str(err):
-            return
-        raise
-
-    # Loop through each timestamp
+# Loop through each timestamp
+def fit_rows(x):
+    time_rows, dists_3D, I1as, I1bs, distparams, probe = x
     fitlist = []
-    for time, row in corefit.iterrows():
+    for [time, row] in time_rows:
         # Only do alpha fitting if high data mode
         if time not in distparams.index:
             warnings.warn('Could not find time {} in distparams'.format(time))
@@ -218,7 +195,54 @@ def fit_single_day(year, doy, probe, startdelta=None):
         fit_dict.update({'Time': time})
         fitlist.append(fit_dict)
         print(time)
+    return fitlist
 
+
+def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
+    """
+    Method to fit a single day of Helios distribution functions. This function
+    is responsible for saving the results for the given day to a file.
+    """
+    starttime, endtime = helpers.doy2stime_etime(year, doy)
+    if starttime.year != year:
+        return
+    if startdelta is not None:
+        parallel = False
+        starttime += startdelta
+        input('Manually setting starttime, press enter to continue')
+        if enddelta is not None:
+            endtime = starttime + enddelta
+    else:
+        parallel = True
+
+    corefit = helios.corefit(probe, starttime, endtime)
+    distparams = helios.distparams(probe, starttime, endtime, verbose=True)
+    distparams = distparams.sort_index()
+    # Load a days worth of ion distribution functions
+    try:
+        dists_3D, I1as, I1bs, distparams = helpers_data.load_dists(
+            probe, starttime, endtime)
+    except RuntimeError as err:
+        print(str(err))
+        if 'No data available for times' in str(err):
+            return
+        raise
+
+    rows = list(corefit.iterrows())
+    if parallel:
+        import multiprocessing
+        npools = 4
+        # Split up times
+        rows = [rows[i::4] for i in range(npools)]
+        # Add distribution functions to each list of rows
+        rows = [(row, dists_3D, I1as, I1bs, distparams, probe) for row in rows]
+        with multiprocessing.Pool(npools) as p:
+            mapped = p.map(fit_rows, rows)
+        fitlist = []
+        for l in mapped:
+            fitlist += l
+    else:
+        fitlist = fit_rows((rows, dists_3D, I1as, I1bs, distparams, probe))
     # End of a single day, put each day into its own DataFrame
     fits = pd.DataFrame(fitlist)
     if fits.empty:
@@ -248,5 +272,5 @@ if __name__ == '__main__':
     years = range(1976, 1977)
     doys = range(108, 109)
     startdelta = None
-    # startdelta =
+    # startdelta = timedelta(seconds=1)
     do_fitting(probes, years, doys, startdelta)
