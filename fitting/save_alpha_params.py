@@ -72,14 +72,15 @@ def save_fits(fits, probe, year, doy, fdir):
 def find_speed_cut(I1a, I1b):
     # Take the peak velocity as the proton core, and only look at bins after
     # that
-    peak_1D_v = I1a['df'].idxmax()
+    peak_1D_v = np.nanargmax(I1a['df'].values)
     # Calculate ratio between I1b and I1a
-    I1a['I1b'] = np.interp(I1a.index.values, I1b.index.values,
-                           I1b['df'].values)
-    I1a['Ratio'] = I1a['df'] / I1a['I1b']
-    I1a['Ratio'] /= I1a.loc[peak_1D_v, 'Ratio']
-    last_high_ratio = ((I1a['Ratio'] < 0.8) & (I1a.index > peak_1D_v)).idxmax()
-    return I1a, last_high_ratio
+    I1a_I1b = np.interp(I1a.index.values, I1b.index.values,
+                        I1b['df'].values)
+    # I1a['I1b'] = I1a_I1b
+    ratios = I1a['df'].values / I1a_I1b
+    ratios = ratios / ratios[peak_1D_v]
+    last_high_ratio = I1a.index.values[peak_1D_v + np.nanargmax(ratios[peak_1D_v:] < 0.8)]
+    return ratios, last_high_ratio
 
 
 def bimaxwellian_fit(vs, df, guesses):
@@ -109,16 +110,15 @@ def bimaxwellian_fit(vs, df, guesses):
 
 
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
-    I1a, speed_cut = find_speed_cut(I1a, I1b)
+    ratios, speed_cut = find_speed_cut(I1a, I1b)
     # Cut out what we think is the alpha distribution
     alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
-    # Convert to km/s
-    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
-    # sqrt(2) charge to mass ratio correction
-    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
-
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
+    # Convert to km/s
+    vs /= 1e3
+    # sqrt(2) charge to mass ratio correction
+    vs /= np.sqrt(2)
 
     # Rotate velocities into field aligned co-ordinates
     B = corefit[['Bx', 'By', 'Bz']].values
@@ -156,6 +156,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
 
     plotfigs = False
     if plotfigs and not isinstance(fit_dict, int) and not magempty:
+        I1a['Ratio'] = ratios
         kwargs = {'last_high_ratio': speed_cut,
                   'alpha_dist': alpha_dist,
                   'fit_dict': fit_dict}
@@ -209,7 +210,7 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     if startdelta is not None:
         parallel = False
         starttime += startdelta
-        input('Manually setting starttime, press enter to continue')
+        # input('Manually setting starttime, press enter to continue')
         if enddelta is not None:
             endtime = starttime + enddelta
     else:
@@ -244,17 +245,14 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     else:
         fitlist = fit_rows((rows, dists_3D, I1as, I1bs, distparams, probe))
     # End of a single day, put each day into its own DataFrame
-    fits = pd.DataFrame(fitlist)
-    if fits.empty:
-        return
-
-    fits = fits.set_index('Time', drop=True)
+    fits = pd.DataFrame(fitlist).set_index('Time', drop=True)
+    assert fits.shape[0] == corefit.shape[0]
     # Make directory to save fits
     fdir = output_dir / 'helios{}'.format(probe) / 'fits' / str(year)
     save_fits(fits, probe, year, doy, fdir)
 
 
-def do_fitting(probes, years, doys, startdelta=None):
+def do_fitting(probes, years, doys, startdelta=None, enddelta=None):
     '''
     Main method for doing all the fitting.
     '''
@@ -264,7 +262,7 @@ def do_fitting(probes, years, doys, startdelta=None):
         for year in years:
             # Loop through days of the year
             for doy in doys:
-                fit_single_day(year, doy, probe, startdelta)
+                fit_single_day(year, doy, probe, startdelta, enddelta)
 
 
 if __name__ == '__main__':
@@ -272,5 +270,7 @@ if __name__ == '__main__':
     years = range(1976, 1977)
     doys = range(108, 109)
     startdelta = None
-    # startdelta = timedelta(seconds=1)
-    do_fitting(probes, years, doys, startdelta)
+    startdelta = timedelta(seconds=1)
+    enddelta = None
+    enddelta = timedelta(hours=1)
+    do_fitting(probes, years, doys, startdelta, enddelta)

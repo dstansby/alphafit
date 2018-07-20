@@ -41,10 +41,10 @@ def process_fitparams(fitparams, species, dist_vs, magempty, params, R):
         vth2temp(np.abs(fitparams[2]))
     # Original distribution has units s**3 / m**6
     # Get n_p in 1 / m**3
-    n = (fitparams[0] * (u.s**3 / u.m**6) * np.power(np.pi, 1.5) *
-         np.abs(fitparams[1]) * (u.km / u.s) *
-         np.abs(fitparams[1]) * (u.km / u.s) *
-         np.abs(fitparams[2]) * (u.km / u.s)).to(u.cm**-3).value
+    n = (fitparams[0] * np.power(np.pi, 1.5) *
+         np.abs(fitparams[1]) * 1e3 *
+         np.abs(fitparams[1]) * 1e3 *
+         np.abs(fitparams[2]) * 1e3) * 1e-6
     fit_dict.update({'n_' + species: n})
 
     # Remove spacecraft abberation
@@ -85,12 +85,16 @@ def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
     return A * np.exp(-exponent)
 
 
+mp = const.m_p.value
+kB = const.k_B.value
+
+
 def vth2temp(vth):
     """
     Assumes velocities are floating point numbers in km/s.
     """
-    return (const.m_p * ((float(vth) * (u.km / u.s))**2) /
-            (2 * const.k_B)).to(u.K).value
+    return (mp * ((vth * 1e3)**2) /
+            (2 * kB))
 
 
 def temp2vth(temp):
