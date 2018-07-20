@@ -32,6 +32,41 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
         ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
 
+def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, vrminlim, vrmaxlim, R, params):
+    # Calculate reduced 3D fit
+    phis = np.linspace(-np.pi, np.pi, 100)
+    thetas = np.linspace(-np.pi / 2, np.pi / 2, 100)
+    modvs = np.arange(vrminlim, vrmaxlim, 5)
+    modvs, thetas, phis = np.meshgrid(modvs, thetas, phis)
+    modvs = modvs.flatten()
+    thetas = thetas.flatten()
+    phis = phis.flatten()
+    vx, vy, vz = helpers.sph2cart(modvs, thetas, phis)
+    v = np.array([vx, vy, vz]).T
+    # Transform into rotated frame
+    v = np.dot(R, v.T).T
+
+    # Calculate bi-maxwellian parameters in field aligned frame
+    A = n * 1e6 / (np.power(np.pi, 1.5) *
+                   vth_perp * 1e3 *
+                   vth_perp * 1e3 *
+                   vth_par * 1e3)
+    vx -= params['helios_vr']
+    vy -= params['helios_v']
+    vbulkBframe = np.dot(R, np.array([vbx, vby, vbz]))
+    df = bi_maxwellian_3D(v[:, 0], v[:, 1], v[:, 2],
+                          A, vth_perp, vth_par,
+                          *vbulkBframe)
+    index = pd.MultiIndex.from_arrays([modvs, thetas, phis],
+                                      names=['v', 'theta', 'phi'])
+    df *= np.cos(thetas) * modvs
+    df = pd.DataFrame({'Reduced fit': df}, index=index)
+    df = df['Reduced fit'].groupby(level='v').sum()
+    df /= df.max()
+    df[df < 1e-3] = np.nan
+    return df
+
+
 def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
     '''
     Return distribution function at (vx, vy, vz),
@@ -153,7 +188,6 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
-    R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
 
     title = 'Helios {} '.format(probe) + str(time)
     fig = plt.figure(figsize=(12, 10))
@@ -167,8 +201,6 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax = [ax1, ax2, ax3, ax4, ax5, ax6]
 
     fig.suptitle(title)
-    vrminlim = 200
-    vrmaxlim = 1000
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
     dist_vcentre = dist.copy()
@@ -209,41 +241,13 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         ax[axnum].axvline(last_high_ratio, color='k')
     ax[3].axhline(1, color='k')
 
-    # ax[2].plot(vs, pdf / np.max(pdf),
-    #            marker='+', label='Integrated 3D')
     if not magempty:
-        # Calculate reduced 3D fit
-        phis = np.linspace(-np.pi, np.pi, 100)
-        thetas = np.linspace(-np.pi / 2, np.pi / 2, 100)
-        modvs = np.arange(vrminlim, vrmaxlim, 5)
-        modvs, thetas, phis = np.meshgrid(modvs, thetas, phis)
-        modvs = modvs.flatten()
-        thetas = thetas.flatten()
-        phis = phis.flatten()
-        vx, vy, vz = helpers.sph2cart(modvs, thetas, phis)
-        v = np.array([vx, vy, vz]).T
-        # Transform into rotated frame
-        v = np.dot(R, v.T).T
-
-        # Calculate bi-maxwellian parameters in field aligned frame
-        A = output['n_p'] * 1e6 / (np.power(np.pi, 1.5) *
-                                   output['vth_p_perp'] * 1e3 *
-                                   output['vth_p_perp'] * 1e3 *
-                                   output['vth_p_par'] * 1e3)
-        output['vp_x'] -= params['helios_vr']
-        output['vp_y'] -= params['helios_v']
-        vbulkBframe = np.dot(R, output[['vp_x', 'vp_y', 'vp_z']].values)
-        df = bi_maxwellian_3D(v[:, 0], v[:, 1], v[:, 2],
-                              A, output['vth_p_perp'], output['vth_p_par'],
-                              *vbulkBframe)
-        index = pd.MultiIndex.from_arrays([modvs, thetas, phis],
-                                          names=['v', 'theta', 'phi'])
-        df *= np.cos(phis) * modvs
-        df = pd.DataFrame({'Reduced fit': df}, index=index)
-        df = df['Reduced fit'].groupby(level='v').sum()
-        df /= df.max()
-        df[df < 1e-3] = np.nan
-
+        vrminlim = 200
+        vrmaxlim = 1000
+        R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
+        df = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
+                           output['vp_x'], output['vp_y'], output['vp_z'],
+                           output['n_p'], vrminlim, vrmaxlim, R, params)
         ax[2].plot(df.index.values, df, label='Fit')
 
         # Formatting
