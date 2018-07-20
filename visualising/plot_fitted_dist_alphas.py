@@ -68,7 +68,7 @@ def plot_dist_time(probe, time, **kwargs):
     # Calls plot_dist with a given time. Uses already processed values
     corefit = helios.corefit(probe,
                              time - dt(seconds=20),
-                             time + dt(seconds=20))
+                             time + dt(seconds=20)).data
     corefit = corefit.loc[corefit.index == time]
     if corefit.shape[0] != 1:
         raise ValueError('Could not find fitted parameters at requested time')
@@ -128,12 +128,12 @@ def plot_RTN_cuts(dist, ax1, ax2):
     # Slice along B (which is along z-axis)
     x, z, slice_pdf = slice_dist(vs, pdf, 1)
     plt.sca(ax1)
-    contour2d(z, x, slice_pdf, levels=levels, showbins=True, add1overe=True)
+    contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
 
     # Slice perp to B
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
     plt.sca(ax2)
-    contour2d(y, x, slice_pdf, levels=levels, showbins=True, add1overe=True)
+    contour2d(y, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
     for a in [ax1, ax2]:
         a.set_aspect('equal', 'datalim')
     ax1.set_ylabel(r'$v_{r}$ (km/s)')
@@ -170,6 +170,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     vrminlim = 200
     vrmaxlim = 1000
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
+    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
     dist_vcentre = dist.copy()
     # Distribution is in spacecraft frame, but output velocities are in
     # solar wind frame, so correct

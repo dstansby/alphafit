@@ -76,11 +76,11 @@ def find_speed_cut(I1a, I1b):
     # Calculate ratio between I1b and I1a
     I1a_I1b = np.interp(I1a.index.values, I1b.index.values,
                         I1b['df'].values)
-    # I1a['I1b'] = I1a_I1b
-    ratios = I1a['df'].values / I1a_I1b
-    ratios = ratios / ratios[peak_1D_v]
+    with np.errstate(divide='ignore'):
+        ratios = I1a['df'].values / I1a_I1b
+        ratios = ratios / ratios[peak_1D_v]
     last_high_ratio = I1a.index.values[peak_1D_v + np.nanargmax(ratios[peak_1D_v:] < 0.8)]
-    return ratios, last_high_ratio
+    return ratios, I1a_I1b, last_high_ratio
 
 
 def bimaxwellian_fit(vs, df, guesses):
@@ -110,7 +110,7 @@ def bimaxwellian_fit(vs, df, guesses):
 
 
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
-    ratios, speed_cut = find_speed_cut(I1a, I1b)
+    ratios, I1a_I1b, speed_cut = find_speed_cut(I1a, I1b)
     # Cut out what we think is the alpha distribution
     alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
     df = alpha_dist['pdf'].values
@@ -157,6 +157,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     plotfigs = False
     if plotfigs and not isinstance(fit_dict, int) and not magempty:
         I1a['Ratio'] = ratios
+        I1a['I1b'] = I1a_I1b
         kwargs = {'last_high_ratio': speed_cut,
                   'alpha_dist': alpha_dist,
                   'fit_dict': fit_dict}
@@ -165,7 +166,6 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
                   **kwargs)
         plt.show()
-        exit()
 
     fit_dict = check_output(fit_dict, status)
     return fit_dict
@@ -245,7 +245,7 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     else:
         fitlist = fit_rows((rows, dists_3D, I1as, I1bs, distparams, probe))
     # End of a single day, put each day into its own DataFrame
-    fits = pd.DataFrame(fitlist).set_index('Time', drop=True)
+    fits = pd.DataFrame(fitlist).set_index('Time', drop=True).sort_index()
     assert fits.shape[0] == corefit.shape[0]
     # Make directory to save fits
     fdir = output_dir / 'helios{}'.format(probe) / 'fits' / str(year)
@@ -270,7 +270,7 @@ if __name__ == '__main__':
     years = range(1976, 1977)
     doys = range(108, 109)
     startdelta = None
-    startdelta = timedelta(seconds=1)
+    # startdelta = timedelta(seconds=30, minutes=43)
     enddelta = None
-    enddelta = timedelta(hours=1)
+    # enddelta = timedelta(hours=1)
     do_fitting(probes, years, doys, startdelta, enddelta)
