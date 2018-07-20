@@ -119,6 +119,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     vs /= 1e3
     # sqrt(2) charge to mass ratio correction
     vs /= np.sqrt(2)
+    df *= 4
 
     # Rotate velocities into field aligned co-ordinates
     B = corefit[['Bx', 'By', 'Bz']].values
