@@ -4,10 +4,21 @@ from datetime import timedelta
 import pandas as pd
 import numpy as np
 
+import astropy.constants as const
+import astropy.units as u
+
 sys.path.append('./fitting')
 from config import get_dirs
 
 output_dir, _ = get_dirs()
+
+
+def temp2vth(temp):
+    """
+    Assumes velocities are floating point numbers in degrees Kelvin.
+    """
+    return np.sqrt(2 * const.k_B * temp * u.K /
+                   const.m_p).to(u.km / u.s).value
 
 
 def load_corefit(probe, starttime, endtime, verbose=False):

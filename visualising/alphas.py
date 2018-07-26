@@ -39,10 +39,10 @@ ax.plot(alphas['n_a'])
 ax.set_yscale('log')
 
 ax = axs[4]
-ax.plot(protons['Tp_perp'])
-ax.plot(alphas['Ta_perp'])
-ax.plot(protons['Tp_par'])
-ax.plot(alphas['Ta_par'])
+ax.plot(protons['Tp_perp'], color='C0')
+ax.plot(alphas['Ta_perp'], color='C3')
+ax.plot(protons['Tp_par'], color='C0', alpha=0.5)
+ax.plot(alphas['Ta_par'], color='C3', alpha=0.5)
 ax.legend()
 ax.set_yscale('log')
 
@@ -67,5 +67,6 @@ ax = axs[1]
 bins = np.logspace(-2, 1, 20)
 ax.hist((alphas['n_a'] / protons['n_p']).dropna(), bins=bins, histtype='step')
 ax.set_xscale('log')
+ax.set_xlabel(r'$n_{\alpha} / n_{p}$')
 
 plt.show()
