@@ -63,4 +63,9 @@ bins = np.linspace(-1, 1, 100)
 ax.hist(np.log10(protons['Tani']).dropna(), bins=bins, **histkwargs)
 ax.hist(np.log10(alphas['Tani']).dropna(), bins=bins, **histkwargs)
 
+ax = axs[1]
+bins = np.logspace(-2, 1, 20)
+ax.hist((alphas['n_a'] / protons['n_p']).dropna(), bins=bins, histtype='step')
+ax.set_xscale('log')
+
 plt.show()
