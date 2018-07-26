@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from config import get_dirs
 
 sys.path.append('visualising/')
-import helpers
+import helpers_fit as helpers
 import helpers_data
 import vis_helpers
 output_dir, corefit_code_dir = get_dirs()
@@ -39,6 +39,7 @@ status_dict = {-1: "Couldn't find time in distparams",
                3: 'Curve fitting failed',
                4: 'Low data rate distribution',
                5: 'No proton corefit data available',
+               6: 'No distribution left after cutting'
                }
 
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
@@ -81,17 +82,25 @@ def save_fits(fits, probe, year, doy, fdir):
     fits.to_hdf(fdir / fname, 'fits', mode='w', format='f')
 
 
-def find_speed_cut(I1a, I1b):
-    # Take the peak velocity as the proton core, and only look at bins after
-    # that
-    peak_1D_v = np.nanargmax(I1a['df'].values)
+def find_speed_cut(I1a, I1b, min_speed=0):
+    I1a_df = I1a['df'].values
+    # Get index of peak velocity
+    peak_1D_v_idx = np.nanargmax(I1a_df)
+    peak_1D_v = I1a.index.values[peak_1D_v_idx]
+
+    # If this peak velocity is less than required speed, take minimum speed
+    # instead
+    min_speed = max(peak_1D_v, min_speed)
+    min_speed_idx = np.nanargmin(np.abs(I1a.index.values - min_speed))
+    min_speed_v = I1a.index.values[peak_1D_v_idx]
+
     # Calculate ratio between I1b and I1a
     I1a_I1b = np.interp(I1a.index.values, I1b.index.values,
                         I1b['df'].values)
     with np.errstate(divide='ignore', invalid='ignore'):
-        ratios = I1a['df'].values / I1a_I1b
-        ratios = ratios / ratios[peak_1D_v]
-    last_high_ratio = I1a.index.values[peak_1D_v + np.nanargmax(ratios[peak_1D_v:] < 0.8)]
+        ratios = I1a_df / I1a_I1b
+        ratios = ratios / ratios[peak_1D_v_idx]
+    last_high_ratio = I1a.index.values[min_speed_idx + np.nanargmax(ratios[min_speed_idx:] < 0.8)]
     return ratios, I1a_I1b, last_high_ratio
 
 
@@ -136,13 +145,11 @@ def bi_maxwellian_instrument_frame(vx, vy, vz, vth_perp, vth_par,
     return df
 
 
-def check_speed_cut(speed_cut, corefit, threshold=1e-3):
+def check_speed_cut(speed_cut, corefit, threshold=1e-2):
     '''
     Check if the speed *speed_cut* is close to the proton core distribution
     or not. Returns a bool.
     '''
-    logger.info('Un-adjusted speed cut at {} km/s'.format(speed_cut))
-
     n = 200
     phis = np.linspace(-np.pi, np.pi, n)
     thetas = np.arcsin(np.linspace(-1, 1, n))
@@ -153,10 +160,8 @@ def check_speed_cut(speed_cut, corefit, threshold=1e-3):
         vx, vy, vz, corefit['vth_p_perp'], corefit['vth_p_par'],
         corefit['vp_x'], corefit['vp_y'], corefit['vp_z'],
         1, corefit[['Bx', 'By', 'Bz']])
-    max_df = np.max(out)
 
-    logger.info(
-        'Maximum distribution funciton value at speed cut: {}'.format(max_df))
+    max_df = np.max(out)
     if max_df > threshold:
         return False
     return True
@@ -176,9 +181,16 @@ def adjust_speed_cut(speed_cut, I1a, corefit):
 
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     ratios, I1a_I1b, speed_cut = find_speed_cut(I1a, I1b)
+    logger.info('Un-adjusted speed cut at {} km/s'.format(speed_cut))
     speed_cut = adjust_speed_cut(speed_cut, I1a, corefit)
+    logger.info('Adjusted speed cut at {} km/s'.format(speed_cut))
+    _, _, speed_cut = find_speed_cut(I1a, I1b, min_speed=speed_cut)
+    logger.info('Final speed cut at {} km/s'.format(speed_cut))
+
     # Cut out what we think is the alpha distribution
     alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
+    if alpha_dist.empty:
+        return check_output({}, 6)
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
     # Convert to km/s
@@ -209,6 +221,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     vtha_par_guess = corefit['vth_p_par']
     guesses = (Aa_guess, vtha_perp_guess, vtha_par_guess,
                va_guess[0], va_guess[1], va_guess[2])
+    logger.info('Initial parameters guesses are {}'.format(guesses))
     result = bimaxwellian_fit(vprime, df, guesses)
     fit_dict = {}
     if result is None:
@@ -335,10 +348,10 @@ def do_fitting(probes, years, doys, startdelta=None, enddelta=None):
 if __name__ == '__main__':
     probes = ['2', ]
     years = range(1976, 1977)
-    doys = range(108, 109)
+    doys = range(1, 366)
     startdelta = None
     # startdelta = timedelta(seconds=1)
-    # startdelta = timedelta(hours=1, minutes=29)
+    # startdelta = timedelta(minutes=9, seconds=30)
     enddelta = None
     # enddelta = timedelta(hours=1)
     do_fitting(probes, years, doys, startdelta, enddelta)
