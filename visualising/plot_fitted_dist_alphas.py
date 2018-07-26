@@ -32,11 +32,21 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
         ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
 
-def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, vrminlim, vrmaxlim, R, params):
+def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
+    '''
+    Construct an integrated 1D distribution function from bi-Maxwellian
+    parameters.
+
+    Returns the integrated 1D function in instrument velocities. Use *moverq*
+    in terms of proton units to normalise appropriately.
+    '''
+    squashing_factor = np.sqrt(moverq)
+    R = helpers.rotationmatrix(B.values)
+    vrminlim, vrmaxlim = 200, 1400
     # Calculate reduced 3D fit
     phis = np.linspace(-np.pi, np.pi, 100)
     thetas = np.linspace(-np.pi / 2, np.pi / 2, 100)
-    modvs = np.arange(vrminlim, vrmaxlim, 5)
+    modvs = np.arange(vrminlim, vrmaxlim, 5.)
     modvs, thetas, phis = np.meshgrid(modvs, thetas, phis)
     modvs = modvs.flatten()
     thetas = thetas.flatten()
@@ -57,13 +67,18 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, vrminlim, vrmaxlim, R, pa
     df = bi_maxwellian_3D(v[:, 0], v[:, 1], v[:, 2],
                           A, vth_perp, vth_par,
                           *vbulkBframe)
+    # Take into account different mass per charge ratios
+    df /= squashing_factor**4
+    modvs *= squashing_factor
+    # Mutliply by area element
+    df *= np.cos(thetas) * modvs**2
     index = pd.MultiIndex.from_arrays([modvs, thetas, phis],
                                       names=['v', 'theta', 'phi'])
-    df *= np.cos(thetas) * modvs
+
     df = pd.DataFrame({'Reduced fit': df}, index=index)
     df = df['Reduced fit'].groupby(level='v').sum()
-    df /= df.max()
-    df[df < 1e-3] = np.nan
+    # df /= df.max()
+    # df[df < 1e-3] = np.nan
     return df
 
 
@@ -242,14 +257,18 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax[3].axhline(1, color='k')
 
     if not magempty:
-        vrminlim = 200
-        vrmaxlim = 1000
-        R = helpers.rotationmatrix(output[['Bx', 'By', 'Bz']].values)
-        df = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
-                           output['vp_x'], output['vp_y'], output['vp_z'],
-                           output['n_p'], vrminlim, vrmaxlim, R, params)
-        ax[2].plot(df.index.values, df, label='Fit')
-
+        protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
+                                   output['vp_x'], output['vp_y'], output['vp_z'],
+                                   output['n_p'], params, output[['Bx', 'By', 'Bz']])
+        ax[2].plot(protons_1d.index.values,
+                   protons_1d / protons_1d.max(), label='Proton fit')
+        alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp']),
+                                  helpers.temp2vth(fit_dict['Ta_par']),
+                                  fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'],
+                                  fit_dict['n_a'], params, output[['Bx', 'By', 'Bz']],
+                                  moverq=2)
+        ax[2].plot(alphas_1d.index.values,
+                   alphas_1d / (protons_1d.max()), label='Alpha fit')
         # Formatting
         ax[2].legend(frameon=False)
         ax[2].set_yscale('log')
