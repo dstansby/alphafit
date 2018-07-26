@@ -1,7 +1,9 @@
 # Script to save fit parameters from alpha particle fitting processes
 #
 # David Stansby 2018
+import argparse
 from datetime import datetime, timedelta
+import logging
 import os
 import sys
 import warnings
@@ -17,8 +19,18 @@ from config import get_dirs
 sys.path.append('visualising/')
 import helpers
 import helpers_data
+import vis_helpers
 output_dir, corefit_code_dir = get_dirs()
 
+logger = logging.getLogger(__name__)
+parser = argparse.ArgumentParser(
+    description='A test script for http://stackoverflow.com/q/14097061/78845'
+)
+parser.add_argument("-v", "--verbose", help="increase output verbosity",
+                    action="store_true")
+args = parser.parse_args()
+if args.verbose:
+    logging.basicConfig(level=logging.INFO)
 
 # Status dictionary to map status integers to descriptions
 status_dict = {-1: "Couldn't find time in distparams",
@@ -76,7 +88,7 @@ def find_speed_cut(I1a, I1b):
     # Calculate ratio between I1b and I1a
     I1a_I1b = np.interp(I1a.index.values, I1b.index.values,
                         I1b['df'].values)
-    with np.errstate(divide='ignore'):
+    with np.errstate(divide='ignore', invalid='ignore'):
         ratios = I1a['df'].values / I1a_I1b
         ratios = ratios / ratios[peak_1D_v]
     last_high_ratio = I1a.index.values[peak_1D_v + np.nanargmax(ratios[peak_1D_v:] < 0.8)]
@@ -109,8 +121,62 @@ def bimaxwellian_fit(vs, df, guesses):
         return
 
 
+def bi_maxwellian_instrument_frame(vx, vy, vz, vth_perp, vth_par,
+                                   vbx, vby, vbz, A, B):
+    R = helpers.rotationmatrix(B.values)
+    # Calculate bi-maxwellian parameters in field aligned frame
+    '''A = n * 1e6 / (np.power(np.pi, 1.5) *
+                   vth_perp * 1e3 *
+                   vth_perp * 1e3 *
+                   vth_par * 1e3)'''
+    vbulkBframe = np.dot(R, np.array([vbx, vby, vbz]))
+    df = helpers.bi_maxwellian_3D(vx, vy, vz,
+                                  A, vth_perp, vth_par,
+                                  *vbulkBframe)
+    return df
+
+
+def check_speed_cut(speed_cut, corefit, threshold=1e-3):
+    '''
+    Check if the speed *speed_cut* is close to the proton core distribution
+    or not. Returns a bool.
+    '''
+    logger.info('Un-adjusted speed cut at {} km/s'.format(speed_cut))
+
+    n = 200
+    phis = np.linspace(-np.pi, np.pi, n)
+    thetas = np.arcsin(np.linspace(-1, 1, n))
+    thetas, phis = np.meshgrid(thetas, phis)
+    vx, vy, vz = vis_helpers.sph2cart(speed_cut, thetas, phis)
+    # Check that speed cut isn't too close to protons
+    out = bi_maxwellian_instrument_frame(
+        vx, vy, vz, corefit['vth_p_perp'], corefit['vth_p_par'],
+        corefit['vp_x'], corefit['vp_y'], corefit['vp_z'],
+        1, corefit[['Bx', 'By', 'Bz']])
+    max_df = np.max(out)
+
+    logger.info(
+        'Maximum distribution funciton value at speed cut: {}'.format(max_df))
+    if max_df > threshold:
+        return False
+    return True
+
+
+def adjust_speed_cut(speed_cut, I1a, corefit):
+    '''
+    Check that the speed cut is not taken too close to the proton core
+    population. If it is, return a higher speed that is not too close.
+    '''
+    vs = I1a.index.values
+    vs = vs[vs >= speed_cut]
+    for v in vs:
+        if check_speed_cut(v, corefit):
+            return v
+
+
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     ratios, I1a_I1b, speed_cut = find_speed_cut(I1a, I1b)
+    speed_cut = adjust_speed_cut(speed_cut, I1a, corefit)
     # Cut out what we think is the alpha distribution
     alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
     df = alpha_dist['pdf'].values
@@ -211,7 +277,7 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     if startdelta is not None:
         parallel = False
         starttime += startdelta
-        # input('Manually setting starttime, press enter to continue')
+        input('Manually setting starttime, press enter to continue')
         if enddelta is not None:
             endtime = starttime + enddelta
     else:
@@ -271,7 +337,8 @@ if __name__ == '__main__':
     years = range(1976, 1977)
     doys = range(108, 109)
     startdelta = None
-    # startdelta = timedelta(seconds=30, minutes=43)
+    # startdelta = timedelta(seconds=1)
+    # startdelta = timedelta(hours=1, minutes=29)
     enddelta = None
     # enddelta = timedelta(hours=1)
     do_fitting(probes, years, doys, startdelta, enddelta)
