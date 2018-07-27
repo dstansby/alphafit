@@ -183,6 +183,8 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     ratios, I1a_I1b, speed_cut = find_speed_cut(I1a, I1b)
     logger.info('Un-adjusted speed cut at {} km/s'.format(speed_cut))
     speed_cut = adjust_speed_cut(speed_cut, I1a, corefit)
+    if speed_cut is None:
+        return check_output({}, 6)
     logger.info('Adjusted speed cut at {} km/s'.format(speed_cut))
     _, _, speed_cut = find_speed_cut(I1a, I1b, min_speed=speed_cut)
     logger.info('Final speed cut at {} km/s'.format(speed_cut))
