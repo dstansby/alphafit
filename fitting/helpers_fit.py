@@ -15,10 +15,13 @@ def _columndotproduct(v1, v2):
     return out
 
 
-def process_fitparams(fitparams, species, dist_vs, magempty, params, R):
+def process_fitparams(fitparams, species, dist_vs, magempty, params, R,
+                      particle_mass=1):
     '''
     Process the output of a bi-Maxwellian fitting routine into a sensible
     dictionary of parameters.
+
+    particle_mass should be as a fraction of proton mass.
     '''
     v = fitparams[3:6]
 
@@ -36,9 +39,9 @@ def process_fitparams(fitparams, species, dist_vs, magempty, params, R):
 
     fit_dict = {}
     fit_dict['T' + species + '_perp'] =\
-        vth2temp(np.abs(fitparams[1]))
+        vth2temp(np.abs(fitparams[1]), particle_mass)
     fit_dict['T' + species + '_par'] =\
-        vth2temp(np.abs(fitparams[2]))
+        vth2temp(np.abs(fitparams[2]), particle_mass)
     # Original distribution has units s**3 / m**6
     # Get n_p in 1 / m**3
     n = (fitparams[0] * np.power(np.pi, 1.5) *
@@ -89,17 +92,19 @@ mp = const.m_p.value
 kB = const.k_B.value
 
 
-def vth2temp(vth):
+def vth2temp(vth, m=1):
     """
-    Assumes velocities are floating point numbers in km/s.
+    Assumes velocities are floating point numbers in km/s. m is in fractions
+    of proton mass.
     """
-    return (mp * ((vth * 1e3)**2) /
+    return (mp * m * ((vth * 1e3)**2) /
             (2 * kB))
 
 
-def temp2vth(temp):
+def temp2vth(temp, m=1):
     """
-    Assumes velocities are floating point numbers in degrees Kelvin.
+    Assumes velocities are floating point numbers in degrees Kelvin. m is in
+    fractions of proton mass.
     """
     return np.sqrt(2 * const.k_B * temp * u.K /
                    const.m_p).to(u.km / u.s).value

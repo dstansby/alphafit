@@ -230,7 +230,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         status = 3
     else:
         popt, pcov = result
-        fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params, R)
+        fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params, R, particle_mass=4)
         if magempty:
             status = 2
         else:
