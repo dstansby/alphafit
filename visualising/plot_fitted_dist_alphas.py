@@ -187,8 +187,8 @@ def plot_RTN_cuts(dist, ax1, ax2):
     for a in [ax1, ax2]:
         a.set_aspect('equal', 'datalim')
     ax1.set_ylabel(r'$v_{r}$ (km/s)')
-    ax1.set_xlabel(r'$v_{t}$ (km/s)')
-    ax2.set_xlabel(r'$v_{n}$ (km/s)')
+    ax1.set_xlabel(r'$v_{n}$ (km/s)')
+    ax2.set_xlabel(r'$v_{t}$ (km/s)')
 
 
 def plot_alpha_dist(dist, ax1, ax2):
