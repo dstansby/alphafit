@@ -285,8 +285,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.subplots_adjust(top=0.9)
 
     plot_RTN_cuts(alpha_dist, ax[4], ax[5])
-    ax[4].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
-    ax[5].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
+    ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
+    ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
 def bimax_angular_cut(theta, phi, modv, fit_dict, m=1):
     vx, vy, vz = helpers.sph2cart(modv, theta, phi)
