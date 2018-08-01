@@ -268,8 +268,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                                    output['n_p'], params, output[['Bx', 'By', 'Bz']])
         ax[2].plot(protons_1d.index.values,
                    protons_1d / protons_1d.max(), label='Proton fit')
-        alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp']),
-                                  helpers.temp2vth(fit_dict['Ta_par']),
+        alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
+                                  helpers.temp2vth(fit_dict['Ta_par'], m=4),
                                   fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'],
                                   fit_dict['n_a'], params, output[['Bx', 'By', 'Bz']],
                                   moverq=2)
