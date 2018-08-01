@@ -288,6 +288,46 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax[4].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[5].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
+def bimax_angular_cut(theta, phi, modv, fit_dict, m=1):
+    vx, vy, vz = helpers.sph2cart(modv, theta, phi)
+
+    vth_perp = helpers.temp2vth(fit_dict['Ta_perp'], m=m)
+    vth_par = helpers.temp2vth(fit_dict['Ta_par'], m=m)
+    A = fit_dict['n_a'] / (np.power(np.pi, 1.5) *
+                           vth_perp *
+                           vth_perp *
+                           vth_par) * 1e-3
+    df = bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_par,
+                          fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'])
+    return df
+
+
+def plot_angular_cuts(dist, fit_dict):
+    nel = len(dist.groupby(level='El'))
+    naz = len(dist.groupby(level='Az'))
+    fig, axs = plt.subplots(nrows=nel, ncols=naz, figsize=(10, 10),
+                            sharex=True, sharey=True)
+    for i, (el_bin, el_cut) in enumerate(dist.groupby(level='El')):
+        for j, (az_bin, az_cut) in enumerate(el_cut.groupby(level='Az')):
+            ax = axs[j, i]
+            df = az_cut['pdf'].values
+            modvs = az_cut['|v|'].values
+            # Do alpha particle corrections
+            modvs /= (np.sqrt(2) * 1e3)
+            df *= 4
+
+            # Plot data
+            ax.plot(modvs, df, marker='+')
+
+            # Calculate and plot fits
+            theta = az_cut['theta'].iloc[0]
+            phi = az_cut['phi'].iloc[0]
+            vs_fit = np.linspace(np.min(modvs), np.max(modvs), 100)
+            df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, m=4)
+            ax.plot(vs_fit, df_fit, scaley=False)
+
+    ax.set_ylim(bottom=dist['pdf'].min() / 2, top=dist['pdf'].max() * 2)
+    ax.set_yscale('log')
 
 
 if __name__ == '__main__':
