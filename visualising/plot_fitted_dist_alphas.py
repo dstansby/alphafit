@@ -70,6 +70,7 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
     # Take into account different mass per charge ratios
     df /= squashing_factor**4
     modvs *= squashing_factor
+    # df and modvs are now in the isntrument frame
     # Mutliply by area element
     df *= np.cos(thetas) * modvs**2
     index = pd.MultiIndex.from_arrays([modvs, thetas, phis],
@@ -215,7 +216,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax6 = fig.add_subplot(spec[0, 3], sharey=ax1)
     ax = [ax1, ax2, ax3, ax4, ax5, ax6]
 
-    fig.suptitle(title)
+    # fig.suptitle(title)
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
     dist_vcentre = dist.copy()
