@@ -8,3 +8,4 @@ config.ini
 *.synctex.gz
 *.aux
 *.cdf
+*.png
