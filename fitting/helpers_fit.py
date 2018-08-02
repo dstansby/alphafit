@@ -8,6 +8,24 @@ import astropy.units as u
 import astropy.constants as const
 
 
+def distribution_function_correction(vs, df, moverq):
+    '''
+    Correct a distribution function for different mass per charge ratios.
+
+    vs :
+        Velocities that correspond to proton velocities.
+    df :
+        Distribution function measurements that assume protons have been
+        measured.
+    moverq :
+        Mass per charge ratio of particles, relative to the mass per charge
+        ratio of protons.
+    '''
+    vs_corrected = vs / np.sqrt(moverq)
+    df_corrected = df * np.sqrt(moverq)**4
+    return vs_corrected, df_corrected
+
+
 def _columndotproduct(v1, v2):
     out = np.zeros(v1.shape[0])
     for i in range(v1.shape[0]):

@@ -197,11 +197,11 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         return check_output({}, 6)
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
+
     # Convert to km/s
     vs /= 1e3
-    # sqrt(2) charge to mass ratio correction
-    vs /= np.sqrt(2)
-    df *= 4
+    # Do alpha particle corrections
+    vs, df = helpers.distribution_function_correction(vs, df, 2)
 
     # Rotate velocities into field aligned co-ordinates
     B = corefit[['Bx', 'By', 'Bz']].values
@@ -232,7 +232,8 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         status = 3
     else:
         popt, pcov = result
-        fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params, R, particle_mass=4)
+        fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params,
+                                             R, particle_mass=4)
         if magempty:
             status = 2
         else:
