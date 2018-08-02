@@ -346,8 +346,9 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
                     transform=ax.transAxes, fontsize=8)
 
     ax.set_yscale('log')
-    ax.set_ylim(1e-12, 1e-9)
-    ax.set_xlim(600, 1200)
+    ax.set_ylim(1e-14, 1e-10)
+    ax.set_xlim(600, 1600)
+    ax.grid()
 
 
 if __name__ == '__main__':
