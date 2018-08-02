@@ -294,8 +294,13 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
-def bimax_angular_cut(theta, phi, modv, fit_dict, m=1):
+
+
+def bimax_angular_cut(theta, phi, modv, fit_dict, R, m=1):
     vx, vy, vz = helpers.sph2cart(modv, theta, phi)
+    vs = np.column_stack((vx, vy, vz))
+    vprime = np.dot(R, vs.T).T
+    vbulk = np.dot(R, np.array([fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z']]).T)
 
     vth_perp = helpers.temp2vth(fit_dict['Ta_perp'], m=m)
     vth_par = helpers.temp2vth(fit_dict['Ta_par'], m=m)
@@ -303,8 +308,9 @@ def bimax_angular_cut(theta, phi, modv, fit_dict, m=1):
                            vth_perp *
                            vth_perp *
                            vth_par) * 1e-3
-    df = bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_par,
-                          fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'])
+    df = bi_maxwellian_3D(vprime[:, 0], vprime[:, 1], vprime[:, 2], A,
+                          vth_perp, vth_par,
+                          *vbulk)
     return df
 
 
