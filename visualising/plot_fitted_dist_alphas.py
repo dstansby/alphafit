@@ -331,9 +331,14 @@ def plot_angular_cuts(dist, fit_dict):
             vs_fit = np.linspace(np.min(modvs), np.max(modvs), 100)
             df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, m=4)
             ax.plot(vs_fit, df_fit, scaley=False)
+            ax.text(0.1, 0.1,
+                    '$\\theta$ = {:.1f}\n$\phi$ = {:.1f}'.format(
+                        np.rad2deg(theta), np.rad2deg(phi)),
+                    transform=ax.transAxes, fontsize=8)
 
-    ax.set_ylim(bottom=dist['pdf'].min() / 2, top=dist['pdf'].max() * 2)
     ax.set_yscale('log')
+    ax.set_ylim(1e-12, 1e-9)
+    ax.set_xlim(600, 1200)
 
 
 if __name__ == '__main__':
