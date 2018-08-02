@@ -308,19 +308,16 @@ def bimax_angular_cut(theta, phi, modv, fit_dict, m=1):
     return df
 
 
-def plot_angular_cuts(dist, fit_dict):
+def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
     nel = len(dist.groupby(level='El'))
     naz = len(dist.groupby(level='Az'))
-    fig, axs = plt.subplots(nrows=nel, ncols=naz, figsize=(10, 10),
+    fig, axs = plt.subplots(nrows=naz, ncols=nel, figsize=(10, 10),
                             sharex=True, sharey=True)
     for i, (el_bin, el_cut) in enumerate(dist.groupby(level='El')):
         for j, (az_bin, az_cut) in enumerate(el_cut.groupby(level='Az')):
-            ax = axs[j, i]
+            ax = axs[i, j]
             df = az_cut['pdf'].values
-            modvs = az_cut['|v|'].values
-            # Do alpha particle corrections
-            modvs /= (np.sqrt(2) * 1e3)
-            df *= 4
+            modvs = az_cut['|v|'].values / 1e3
 
             # Plot data
             ax.plot(modvs, df, marker='+')
@@ -328,8 +325,9 @@ def plot_angular_cuts(dist, fit_dict):
             # Calculate and plot fits
             theta = az_cut['theta'].iloc[0]
             phi = az_cut['phi'].iloc[0]
-            vs_fit = np.linspace(np.min(modvs), np.max(modvs), 100)
-            df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, m=4)
+            vs_fit = np.linspace(600, 1600, 100)
+            df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, R, m=m)
+            vs_fit, df_fit = fit_helpers.distribution_function_correction(vs_fit, df_fit, 1 / moverq)
             ax.plot(vs_fit, df_fit, scaley=False)
             ax.text(0.1, 0.1,
                     '$\\theta$ = {:.1f}\n$\phi$ = {:.1f}'.format(
