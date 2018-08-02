@@ -294,6 +294,11 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
+    ax[1].set_ylim(bottom=0)
+
+    ax[0].set_xlim(-500, 500)
+    ax[1].set_xlim(-500, 500)
+    fig.tight_layout()
 
 
 def bimax_angular_cut(theta, phi, modv, fit_dict, R, m=1):
