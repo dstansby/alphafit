@@ -47,7 +47,7 @@ def process_fitparams(fitparams, species, dist_vs, magempty, params, R,
     if magempty:
         fitparams[1:3] = np.nan
     else:
-        # Otherwise transformt bulk velocity back into spacecraft frame
+        # Otherwise transform bulk velocity back into spacecraft frame
         v = np.dot(R.T, v)
         pass
 
@@ -112,8 +112,9 @@ kB = const.k_B.value
 
 def vth2temp(vth, m=1):
     """
-    Assumes velocities are floating point numbers in km/s. m is in fractions
-    of proton mass.
+    Assumes velocities are floating point numbers in km/s.
+    m is in fractions of proton mass.
+    Returns tempearture in degrees kelvin
     """
     return (mp * m * ((vth * 1e3)**2) /
             (2 * kB))
@@ -121,8 +122,9 @@ def vth2temp(vth, m=1):
 
 def temp2vth(temp, m=1):
     """
-    Assumes velocities are floating point numbers in degrees Kelvin. m is in
-    fractions of proton mass.
+    Assumes velocities are floating point numbers in degrees Kelvin.
+    m is in fractions of proton mass.
+    Returns thermal speed in km/s
     """
     return np.sqrt(2 * const.k_B * temp * u.K /
                    const.m_p).to(u.km / u.s).value
