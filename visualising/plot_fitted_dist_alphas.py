@@ -9,10 +9,14 @@ import matplotlib.patches as mpatch
 import scipy.interpolate as interp
 import numpy as np
 import pandas as pd
+import sys
+
+sys.path.append('../fitting')
 
 import heliopy.data.helios as helios
 
 import vis_helpers as helpers
+import helpers_fit as fit_helpers
 
 
 def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
@@ -67,9 +71,10 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
     df = bi_maxwellian_3D(v[:, 0], v[:, 1], v[:, 2],
                           A, vth_perp, vth_par,
                           *vbulkBframe)
-    # Take into account different mass per charge ratios
-    df /= squashing_factor**4
-    modvs *= squashing_factor
+    # Distribution function and velocities are in the alpha frame of reference
+    # Take into account different mass per charge ratios, and transform
+    # into the instrument frame of reference
+    modvs, df = fit_helpers.distribution_function_correction(modvs, df, 1 / moverq)
     # df and modvs are now in the isntrument frame
     # Mutliply by area element
     df *= np.cos(thetas) * modvs**2
