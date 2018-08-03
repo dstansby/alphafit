@@ -9,3 +9,4 @@ config.ini
 *.aux
 *.cdf
 *.png
+*.ipynb_checkpoints*
