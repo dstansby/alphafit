@@ -241,6 +241,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax[1].scatter(output['vp_y'], output['vp_x'], marker='x', color='k')
 
     print(output)
+    print(fit_dict)
 
     # Plot formatting
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
