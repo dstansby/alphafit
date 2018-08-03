@@ -345,11 +345,12 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
                     '$\\theta$ = {:.1f}\n$\phi$ = {:.1f}'.format(
                         np.rad2deg(theta), np.rad2deg(phi)),
                     transform=ax.transAxes, fontsize=8)
+            for exp in range(-14, -9):
+                ax.axhline(10**exp, linewidth=1, alpha=0.5, color='k')
 
     ax.set_yscale('log')
     ax.set_ylim(1e-14, 1e-10)
     ax.set_xlim(600, 1600)
-    ax.grid()
 
 
 if __name__ == '__main__':
