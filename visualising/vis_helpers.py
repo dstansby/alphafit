@@ -13,12 +13,12 @@ from config import get_dirs
 output_dir, _ = get_dirs()
 
 
-def temp2vth(temp):
+def temp2vth(temp, m=1):
     """
     Assumes velocities are floating point numbers in degrees Kelvin.
     """
     return np.sqrt(2 * const.k_B * temp * u.K /
-                   const.m_p).to(u.km / u.s).value
+                   (const.m_p * m)).to(u.km / u.s).value
 
 
 def load_corefit(probe, starttime, endtime, verbose=False):
