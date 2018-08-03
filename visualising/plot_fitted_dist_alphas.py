@@ -337,7 +337,7 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
             # Calculate and plot fits
             theta = az_cut['theta'].iloc[0]
             phi = az_cut['phi'].iloc[0]
-            vs_fit = np.linspace(600, 1600, 100)
+            vs_fit = np.linspace(600, 1600, 100) / np.sqrt(moverq)
             df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, R, m=m)
             vs_fit, df_fit = fit_helpers.distribution_function_correction(vs_fit, df_fit, 1 / moverq)
             ax.plot(vs_fit, df_fit, scaley=False)
