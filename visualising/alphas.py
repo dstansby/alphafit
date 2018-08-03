@@ -7,12 +7,13 @@ import numpy as np
 from heliopy.data import helios
 
 import vis_helpers as helpers
+from helpers import mplhelp
 from plot_fitted_dist_alphas import plot_dist_time
 
 # Set probe and dates to compare here
 probe = '2'
-starttime = datetime(1976, 4, 17, 0, 0, 0)
-endtime = starttime + timedelta(days=1)
+starttime = datetime(1976, 4, 15, 0, 0, 0)
+endtime = starttime + timedelta(days=10)
 
 alphas = helpers.load_alphafit(probe, starttime, endtime)
 protons = helios.corefit(probe, starttime, endtime)
@@ -55,13 +56,17 @@ ax.scatter(protons['vp_y'], protons['vp_x'], **kwargs)
 ax.scatter(alphas['va_y'], alphas['va_x'], **kwargs)
 
 fig, axs = plt.subplots(ncols=2)
-histkwargs = dict(histtype='step', density=True)
+histkwargs = dict(histtype='step')
 ax = axs[0]
 protons['Tani'] = protons['Tp_perp'] / protons['Tp_par']
 alphas['Tani'] = alphas['Ta_perp'] / alphas['Ta_par']
-bins = np.linspace(-1, 1, 100)
-ax.hist(np.log10(protons['Tani']).dropna(), bins=bins, **histkwargs)
-ax.hist(np.log10(alphas['Tani']).dropna(), bins=bins, **histkwargs)
+
+bins = np.logspace(-2, 2, 100)
+ax.hist(protons['Tani'].dropna(), bins=bins, label='p', **histkwargs)
+ax.hist(alphas['Tani'].dropna(), bins=bins, label=r'$\alpha$', **histkwargs)
+ax.set_xscale('log')
+ax.legend()
+ax.set_xlabel(r'$T_{\perp} / T_{\parallel}$')
 
 ax = axs[1]
 bins = np.logspace(-2, 1, 20)
