@@ -247,10 +247,12 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         kwargs = {'last_high_ratio': speed_cut,
                   'alpha_dist': alpha_dist,
                   'fit_dict': fit_dict}
-        from plot_fitted_dist_alphas import plot_dist
+        from plot_fitted_dist_alphas import plot_dist, plot_angular_cuts
         import matplotlib.pyplot as plt
+        plot_angular_cuts(alpha_dist, fit_dict, R, m=4, moverq=2)
         plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
                   **kwargs)
+        # plt.savefig('{}.png'.format(time))
         plt.show()
 
     fit_dict = check_output(fit_dict, status)
