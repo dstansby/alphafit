@@ -39,7 +39,8 @@ status_dict = {-1: "Couldn't find time in distparams",
                3: 'Curve fitting failed',
                4: 'Low data rate distribution',
                5: 'No proton corefit data available',
-               6: 'No distribution left after cutting'
+               6: 'No distribution left after cutting',
+               7: 'Two distributions found in one file'
                }
 
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
@@ -265,6 +266,8 @@ def fit_rows(x):
         if time not in distparams.index:
             warnings.warn('Could not find time {} in distparams'.format(time))
             fit_dict = check_output({}, -1)
+        elif (distparams.loc[time]['data_rate'].size != 1):
+            fit_dict = check_output({}, 7)
         elif not (distparams.loc[time]['data_rate'] == 1):
             fit_dict = check_output({}, 4)
         # Only do alpha fitting if fitting proton core velocity was successful
