@@ -306,7 +306,10 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     else:
         parallel = True
 
-    corefit = helios.corefit(probe, starttime, endtime)
+    try:
+        corefit = helios.corefit(probe, starttime, endtime)
+    except RuntimeError:
+        return
     distparams = helios.distparams(probe, starttime, endtime, verbose=True)
     distparams = distparams.sort_index()
     # Load a days worth of ion distribution functions
