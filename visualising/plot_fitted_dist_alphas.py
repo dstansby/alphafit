@@ -261,8 +261,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                              edgecolor='k', facecolor='none')
         ax[axnum].add_patch(circ)
 
-    ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
-               marker='x', label='I1b interp')
+    # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
+    #            marker='x', label='I1b interp')
 
     ax[3].plot(I1a['Ratio'], marker='x')
     for axnum in [2, 3]:
