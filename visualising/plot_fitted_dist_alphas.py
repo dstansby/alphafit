@@ -265,7 +265,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     #            marker='x', label='I1b interp')
 
     ax[3].plot(I1a['Ratio'], marker='x')
-    for axnum in [2, 3]:
+    for axnum in [3, ]:
         ax[axnum].axvline(last_high_ratio, color='k')
     ax[3].axhline(1, color='k')
 
