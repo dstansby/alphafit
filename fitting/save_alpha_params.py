@@ -23,10 +23,10 @@ import vis_helpers
 output_dir, corefit_code_dir = get_dirs()
 
 logger = logging.getLogger(__name__)
-parser = argparse.ArgumentParser(
-    description='A test script for http://stackoverflow.com/q/14097061/78845'
-)
-parser.add_argument("-v", "--verbose", help="increase output verbosity",
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", help="Increase output verbosity",
+                    action="store_true")
+parser.add_argument("-p", "--plot", help="Plot figures",
                     action="store_true")
 args = parser.parse_args()
 if args.verbose:
@@ -240,8 +240,9 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         else:
             status = 1
 
-    plotfigs = False
-    if plotfigs and not isinstance(fit_dict, int) and not magempty:
+    if (args.plot and
+            not isinstance(fit_dict, int) and
+            status == 1):
         I1a['Ratio'] = ratios
         I1a['I1b'] = I1a_I1b
         kwargs = {'last_high_ratio': speed_cut,
@@ -297,14 +298,14 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
-    if startdelta is not None:
+    parallel = True
+    if args.plot:
         parallel = False
+    if startdelta is not None:
         starttime += startdelta
         input('Manually setting starttime, press enter to continue')
         if enddelta is not None:
             endtime = starttime + enddelta
-    else:
-        parallel = True
 
     try:
         corefit = helios.corefit(probe, starttime, endtime)
