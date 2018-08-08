@@ -323,7 +323,7 @@ def bimax_angular_cut(theta, phi, modv, fit_dict, R, m=1):
 def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
     nel = len(dist.groupby(level='El'))
     naz = len(dist.groupby(level='Az'))
-    fig, axs = plt.subplots(nrows=naz, ncols=nel, figsize=(10, 10),
+    fig, axs = plt.subplots(nrows=nel, ncols=naz, figsize=(10, 10),
                             sharex=True, sharey=True)
     for i, (el_bin, el_cut) in enumerate(dist.groupby(level='El')):
         for j, (az_bin, az_cut) in enumerate(el_cut.groupby(level='Az')):
