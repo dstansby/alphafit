@@ -40,7 +40,8 @@ status_dict = {-1: "Couldn't find time in distparams",
                4: 'Low data rate distribution',
                5: 'No proton corefit data available',
                6: 'No distribution left after cutting',
-               7: 'Two distributions found in one file'
+               7: 'Two distributions found in one file',
+               8: 'I1b distribution function corrupted',
                }
 
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
@@ -101,8 +102,11 @@ def find_speed_cut(I1a, I1b, min_speed=0):
     with np.errstate(divide='ignore', invalid='ignore'):
         ratios = I1a_df / I1a_I1b
         ratios = ratios / ratios[peak_1D_v_idx]
-    last_high_ratio = I1a.index.values[min_speed_idx + np.nanargmax(ratios[min_speed_idx:] < 0.8)]
-    return ratios, I1a_I1b, last_high_ratio
+        threshold = 0.8
+        good_ratio_idx = (ratios[min_speed_idx:] < threshold) & (ratios[min_speed_idx:] > 0.1)
+    ratio_idx = min_speed_idx + np.nanargmax(good_ratio_idx)
+    speed_cut = I1a.index.values[ratio_idx]
+    return ratios, I1a_I1b, speed_cut, ratio_idx
 
 
 def bimaxwellian_fit(vs, df, guesses):
@@ -180,14 +184,30 @@ def adjust_speed_cut(speed_cut, I1a, corefit):
             return v
 
 
+def valid_ratio(rs, idx):
+    """
+    Return True if r is a valid ratio in an alpha distribution.
+    """
+    n = rs.size
+    if idx + 2 > n:
+        return False
+    if rs[idx] < 0.8 and rs[idx] > 0.1:
+        return True
+    return False
+
+
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
-    ratios, I1a_I1b, speed_cut = find_speed_cut(I1a, I1b)
+    ratios, I1a_I1b, speed_cut, ratio_idx = find_speed_cut(I1a, I1b)
+    if ratio_idx >= 30:
+        return check_output({}, 8)
+    if not valid_ratio(ratios, ratio_idx):
+        return check_output({}, 7)
     logger.info('Un-adjusted speed cut at {} km/s'.format(speed_cut))
     speed_cut = adjust_speed_cut(speed_cut, I1a, corefit)
     if speed_cut is None:
         return check_output({}, 6)
     logger.info('Adjusted speed cut at {} km/s'.format(speed_cut))
-    _, _, speed_cut = find_speed_cut(I1a, I1b, min_speed=speed_cut)
+    _, _, speed_cut, _ = find_speed_cut(I1a, I1b, min_speed=speed_cut)
     logger.info('Final speed cut at {} km/s'.format(speed_cut))
 
     # Cut out what we think is the alpha distribution
