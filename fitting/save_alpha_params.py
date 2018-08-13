@@ -306,7 +306,7 @@ def fit_rows(x):
 
         fit_dict.update({'Time': time})
         fitlist.append(fit_dict)
-        print(time)
+        print(time, fit_dict['Status'])
     return fitlist
 
 
