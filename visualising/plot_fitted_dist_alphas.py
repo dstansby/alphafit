@@ -217,7 +217,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax4 = fig.add_subplot(spec[2, 0:2], sharex=ax3)
     ax5 = fig.add_subplot(spec[0, 2], sharey=ax1)
     ax6 = fig.add_subplot(spec[0, 3], sharey=ax1)
-    ax = [ax1, ax2, ax3, ax4, ax5, ax6]
+    ax7 = fig.add_subplot(spec[1, 2])
+    ax8 = fig.add_subplot(spec[1, 3])
+    ax = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
 
     # fig.suptitle(title)
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
@@ -300,6 +302,26 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
 
     ax[0].set_xlim(-500, 500)
     ax[1].set_xlim(-500, 500)
+
+    alpha_dist_rot = alpha_dist.copy()
+    for comp in ['x', 'y', 'z']:
+        alpha_dist_rot['v' + comp] -= fit_dict['va_' + comp]
+    B = output[['Bx', 'By', 'Bz']].values
+    R = helpers.rotationmatrix(B)
+    alpha_dist_rot[['vx', 'vy', 'vz']] = np.dot(R, alpha_dist_rot[['vx', 'vy', 'vz']].values.T).T
+    plot_xyz_cuts(alpha_dist_rot, ax[6], ax[7])
+    ax[6].set_ylabel(r'$v_{\parallel 1}$ (km/s)')
+    ax[6].set_xlabel(r'$v_{\parallel 2}$ (km/s)')
+    ax[7].set_xlabel(r'$v_{\perp}$ (km/s)')
+
+    vth_par = helpers.temp2vth(fit_dict['Ta_par'], 4)
+    vth_perp = helpers.temp2vth(fit_dict['Ta_perp'], 4)
+    ax[6].plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
+    ax[6].plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
+
+    ax[7].plot([-vth_perp / 2, vth_perp / 2], [0, 0], color='k')
+    ax[7].plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
+
     fig.tight_layout()
 
 
