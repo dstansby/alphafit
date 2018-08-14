@@ -146,7 +146,9 @@ def slice_dist(vs, pdf, plane):
     Parameters
     ----------
     plane : int
-        0 for y-z, 1 for x-z, 2 for y-z.
+        0 for y-z
+        1 for x-z
+        2 for y-z.
     '''
     vlim = 2000
     nbins = 100
@@ -172,33 +174,29 @@ def slice_dist(vs, pdf, plane):
     return dim1, dim2, pdf
 
 
-def plot_RTN_cuts(dist, ax1, ax2):
+def plot_xyz_cuts(dist, ax1, ax2):
     '''
-    Plot slices of dist on two different axes. ax1 is the RT plane, ax2 is the
-    RN plane.
+    Plot slices of dist on two different axes.
+
+    ax1 is the x-y plane, ax2 is the x-z plane.
     '''
     vs = dist[['vx', 'vy', 'vz']].values
     pdf = dist['pdf'].values
     levels = np.linspace(np.log(pdf).min(),
                          np.log(pdf).max(), 20)
-    # Slice along B (which is along z-axis)
-    x, z, slice_pdf = slice_dist(vs, pdf, 1)
-    plt.sca(ax1)
-    contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
-
-    # Slice perp to B
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
-    plt.sca(ax2)
+    plt.sca(ax1)
     contour2d(y, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
+
+    x, z, slice_pdf = slice_dist(vs, pdf, 1)
+    plt.sca(ax2)
+    contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
     for a in [ax1, ax2]:
         a.set_aspect('equal', 'datalim')
-    ax1.set_ylabel(r'$v_{r}$ (km/s)')
-    ax1.set_xlabel(r'$v_{n}$ (km/s)')
-    ax2.set_xlabel(r'$v_{t}$ (km/s)')
 
 
 def plot_alpha_dist(dist, ax1, ax2):
-    plot_RTN_cuts(dist, ax1, ax2)
+    plot_xyz_cuts(dist, ax1, ax2)
 
 
 def plot_dist(time, probe, dist, params, output, I1a, I1b,
@@ -232,7 +230,10 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     alpha_dist['vx'] += params['helios_vr']
     alpha_dist['vy'] += params['helios_v']
     sqrt2 = np.sqrt(2)
-    plot_RTN_cuts(dist_vcentre, ax[0], ax[1])
+    plot_xyz_cuts(dist_vcentre, ax[0], ax[1])
+    ax[0].set_ylabel(r'$v_{r}$ (km/s)')
+    ax[0].set_xlabel(r'$v_{t}$ (km/s)')
+    ax[1].set_xlabel(r'$v_{n}$ (km/s)')
     ax[0].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[1].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[0].scatter(fit_dict['va_z'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
@@ -291,7 +292,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
-    plot_RTN_cuts(alpha_dist, ax[4], ax[5])
+    plot_xyz_cuts(alpha_dist, ax[4], ax[5])
     ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
