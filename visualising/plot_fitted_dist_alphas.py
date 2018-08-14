@@ -195,10 +195,6 @@ def plot_xyz_cuts(dist, ax1, ax2):
         a.set_aspect('equal', 'datalim')
 
 
-def plot_alpha_dist(dist, ax1, ax2):
-    plot_xyz_cuts(dist, ax1, ax2)
-
-
 def plot_dist(time, probe, dist, params, output, I1a, I1b,
               last_high_ratio=np.nan,
               alpha_dist=None,
