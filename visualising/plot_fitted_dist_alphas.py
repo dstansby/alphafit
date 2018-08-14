@@ -174,14 +174,12 @@ def slice_dist(vs, pdf, plane):
     return dim1, dim2, pdf
 
 
-def plot_xyz_cuts(dist, ax1, ax2):
+def plot_xyz_cuts(vs, pdf, ax1, ax2):
     '''
     Plot slices of dist on two different axes.
 
     ax1 is the x-y plane, ax2 is the x-z plane.
     '''
-    vs = dist[['vx', 'vy', 'vz']].values
-    pdf = dist['pdf'].values
     levels = np.linspace(np.log(pdf).min(),
                          np.log(pdf).max(), 20)
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
@@ -228,7 +226,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     alpha_dist['vx'] += params['helios_vr']
     alpha_dist['vy'] += params['helios_v']
     sqrt2 = np.sqrt(2)
-    plot_xyz_cuts(dist_vcentre, ax[0], ax[1])
+    plot_xyz_cuts(dist_vcentre[['vx', 'vy', 'vz']].values,
+                  dist_vcentre['pdf'].values,
+                  ax[0], ax[1])
     ax[0].set_ylabel(r'$v_{r}$ (km/s)')
     ax[0].set_xlabel(r'$v_{t}$ (km/s)')
     ax[1].set_xlabel(r'$v_{n}$ (km/s)')
@@ -290,7 +290,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
-    plot_xyz_cuts(alpha_dist, ax[4], ax[5])
+    plot_xyz_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
+                  alpha_dist['pdf'].values,
+                  ax[4], ax[5])
     ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
     ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[0].set_ylim(bottom=0)
@@ -305,7 +307,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     B = output[['Bx', 'By', 'Bz']].values
     R = helpers.rotationmatrix(B)
     alpha_dist_rot[['vx', 'vy', 'vz']] = np.dot(R, alpha_dist_rot[['vx', 'vy', 'vz']].values.T).T
-    plot_xyz_cuts(alpha_dist_rot, ax[6], ax[7])
+    plot_xyz_cuts(alpha_dist_rot[['vx', 'vy', 'vz']].values,
+                  alpha_dist_rot['pdf'].values,
+                  ax[6], ax[7])
     ax[6].set_ylabel(r'$v_{\parallel 1}$ (km/s)')
     ax[6].set_xlabel(r'$v_{\parallel 2}$ (km/s)')
     ax[7].set_xlabel(r'$v_{\perp}$ (km/s)')
