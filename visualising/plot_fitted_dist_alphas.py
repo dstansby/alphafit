@@ -45,7 +45,7 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
     in terms of proton units to normalise appropriately.
     '''
     squashing_factor = np.sqrt(moverq)
-    R = helpers.rotationmatrix(B.values)
+    R = helpers.rotationmatrix(B)
     vrminlim, vrmaxlim = 200, 1400
     # Calculate reduced 3D fit
     phis = np.linspace(-np.pi, np.pi, 100)
@@ -174,157 +174,6 @@ def slice_dist(vs, pdf, plane):
     return dim1, dim2, pdf
 
 
-def plot_xyz_cuts(vs, pdf, ax1, ax2):
-    '''
-    Plot slices of dist on two different axes.
-
-    ax1 is the x-y plane, ax2 is the x-z plane.
-    '''
-    levels = np.linspace(np.log(pdf).min(),
-                         np.log(pdf).max(), 20)
-    x, y, slice_pdf = slice_dist(vs, pdf, 2)
-    plt.sca(ax1)
-    contour2d(y, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
-
-    x, z, slice_pdf = slice_dist(vs, pdf, 1)
-    plt.sca(ax2)
-    contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
-    for a in [ax1, ax2]:
-        a.set_aspect('equal', 'datalim')
-
-
-def plot_dist(time, probe, dist, params, output, I1a, I1b,
-              last_high_ratio=np.nan,
-              alpha_dist=None,
-              fit_dict=None):
-    dist = dist.copy()
-    magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
-    if magempty:
-        raise RuntimeError('No magnetic field present')
-
-    title = 'Helios {} '.format(probe) + str(time)
-    fig = plt.figure(figsize=(12, 10))
-    spec = gridspec.GridSpec(ncols=4, nrows=3)
-    ax1 = fig.add_subplot(spec[0, 0])
-    ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
-    ax3 = fig.add_subplot(spec[1, 0:2])
-    ax4 = fig.add_subplot(spec[2, 0:2], sharex=ax3)
-    ax5 = fig.add_subplot(spec[0, 2], sharey=ax1)
-    ax6 = fig.add_subplot(spec[0, 3], sharey=ax1)
-    ax7 = fig.add_subplot(spec[1, 2])
-    ax8 = fig.add_subplot(spec[1, 3])
-    ax = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
-
-    # fig.suptitle(title)
-    dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
-    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
-    dist_vcentre = dist.copy()
-    # Distribution is in spacecraft frame, but output velocities are in
-    # solar wind frame, so correct
-    dist_vcentre['vx'] += params['helios_vr']
-    dist_vcentre['vy'] += params['helios_v']
-    alpha_dist['vx'] += params['helios_vr']
-    alpha_dist['vy'] += params['helios_v']
-    sqrt2 = np.sqrt(2)
-    plot_xyz_cuts(dist_vcentre[['vx', 'vy', 'vz']].values,
-                  dist_vcentre['pdf'].values,
-                  ax[0], ax[1])
-    ax[0].set_ylabel(r'$v_{r}$ (km/s)')
-    ax[0].set_xlabel(r'$v_{t}$ (km/s)')
-    ax[1].set_xlabel(r'$v_{n}$ (km/s)')
-    ax[0].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
-    ax[1].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
-    ax[0].scatter(fit_dict['va_z'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
-    ax[1].scatter(fit_dict['va_y'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
-    ax[0].scatter(output['vp_z'], output['vp_x'], marker='x', color='k')
-    ax[1].scatter(output['vp_y'], output['vp_x'], marker='x', color='k')
-
-    print(output)
-    print(fit_dict)
-
-    # Plot formatting
-    ax[1].tick_params(axis='y', labelleft=False, labelright=True,
-                      left=False, right=True)
-
-    # Calculate 1D reduced distribution from data
-    vs = dist['|v|'].groupby(level=['E_bin']).mean()
-    pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
-
-    ax[2].plot(I1a['df'] / I1a['df'].max(),
-               marker='x', label='I1a')
-    ax[2].plot(I1b['df'] / I1b['df'].max(),
-               marker='x', label='I1b')
-
-    for axnum in [0, 1]:
-        circ = mpatch.Circle((0, 0), last_high_ratio,
-                             edgecolor='k', facecolor='none')
-        ax[axnum].add_patch(circ)
-
-    # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
-    #            marker='x', label='I1b interp')
-
-    ax[3].plot(I1a['Ratio'], marker='x')
-    for axnum in [3, ]:
-        ax[axnum].axvline(last_high_ratio, color='k')
-    ax[3].axhline(1, color='k')
-
-    if not magempty:
-        protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
-                                   output['vp_x'], output['vp_y'], output['vp_z'],
-                                   output['n_p'], params, output[['Bx', 'By', 'Bz']])
-        ax[2].plot(protons_1d.index.values,
-                   protons_1d / protons_1d.max(), label='Proton fit')
-        alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
-                                  helpers.temp2vth(fit_dict['Ta_par'], m=4),
-                                  fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'],
-                                  fit_dict['n_a'], params, output[['Bx', 'By', 'Bz']],
-                                  moverq=2)
-        ax[2].plot(alphas_1d.index.values,
-                   alphas_1d / (protons_1d.max()), label='Alpha fit')
-        # Formatting
-        ax[2].legend(frameon=False)
-        ax[2].set_yscale('log')
-        ax[2].set_xlabel(r'$|v|$' + ' (km/s)')
-        ax[2].set_ylim(1e-3, 2)
-        ax[2].set_xlim(400, 1600)
-        fig.tight_layout()
-        fig.subplots_adjust(top=0.9)
-
-    plot_xyz_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
-                  alpha_dist['pdf'].values,
-                  ax[4], ax[5])
-    ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
-    ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
-    ax[0].set_ylim(bottom=0)
-    ax[1].set_ylim(bottom=0)
-
-    ax[0].set_xlim(-500, 500)
-    ax[1].set_xlim(-500, 500)
-
-    alpha_dist_rot = alpha_dist.copy()
-    for comp in ['x', 'y', 'z']:
-        alpha_dist_rot['v' + comp] -= fit_dict['va_' + comp]
-    B = output[['Bx', 'By', 'Bz']].values
-    R = helpers.rotationmatrix(B)
-    alpha_dist_rot[['vx', 'vy', 'vz']] = np.dot(R, alpha_dist_rot[['vx', 'vy', 'vz']].values.T).T
-    plot_xyz_cuts(alpha_dist_rot[['vx', 'vy', 'vz']].values,
-                  alpha_dist_rot['pdf'].values,
-                  ax[6], ax[7])
-    ax[6].set_ylabel(r'$v_{\parallel 1}$ (km/s)')
-    ax[6].set_xlabel(r'$v_{\parallel 2}$ (km/s)')
-    ax[7].set_xlabel(r'$v_{\perp}$ (km/s)')
-
-    vth_par = helpers.temp2vth(fit_dict['Ta_par'], 4)
-    vth_perp = helpers.temp2vth(fit_dict['Ta_perp'], 4)
-    ax[6].plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
-    ax[6].plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
-
-    ax[7].plot([-vth_perp / 2, vth_perp / 2], [0, 0], color='k')
-    ax[7].plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
-
-    fig.tight_layout()
-
-
 def bimax_angular_cut(theta, phi, modv, fit_dict, R, m=1):
     vx, vy, vz = helpers.sph2cart(modv, theta, phi)
     vs = np.column_stack((vx, vy, vz))
@@ -374,6 +223,179 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
     ax.set_yscale('log')
     ax.set_ylim(1e-14, 1e-10)
     ax.set_xlim(600, 1600)
+
+
+def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2):
+    """
+    Transform distribution into a perp/par bulk velocity frame, and plot
+    slices.
+    """
+    for i in range(3):
+        vs[:, i] -= v0[i]
+    R = helpers.rotationmatrix(B0)
+    vs = np.dot(R, vs.T).T
+    plot_xyz_cuts(vs, pdf, ax1, ax2)
+    ax1.set_ylabel(r'$v_{\parallel 1}$ (km/s)')
+    ax1.set_xlabel(r'$v_{\parallel 2}$ (km/s)')
+    ax2.set_xlabel(r'$v_{\perp}$ (km/s)')
+
+    ax1.plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
+    ax1.plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
+
+    ax2.plot([-vth_perp / 2, vth_perp / 2], [0, 0], color='k')
+    ax2.plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
+
+
+def plot_xyz_cuts(vs, pdf, ax1, ax2):
+    '''
+    Plot slices of dist on two different axes.
+
+    ax1 is the x-y plane, ax2 is the x-z plane.
+    '''
+    levels = np.linspace(np.log(pdf).min(),
+                         np.log(pdf).max(), 20)
+    x, y, slice_pdf = slice_dist(vs, pdf, 2)
+    plt.sca(ax1)
+    contour2d(y, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
+
+    x, z, slice_pdf = slice_dist(vs, pdf, 1)
+    plt.sca(ax2)
+    contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
+    for a in [ax1, ax2]:
+        a.set_aspect('equal', 'datalim')
+
+
+def plot_dist(time, probe, dist, params, output, I1a, I1b,
+              last_high_ratio=np.nan,
+              alpha_dist=None,
+              fit_dict=None):
+    B = output[['Bx', 'By', 'Bz']].values
+    magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
+    if magempty:
+        raise RuntimeError('No magnetic field present')
+    dist = dist.copy()
+
+    title = 'Helios {} '.format(probe) + str(time)
+    fig = plt.figure(figsize=(12, 10))
+    spec = gridspec.GridSpec(ncols=4, nrows=3)
+    ax1 = fig.add_subplot(spec[0, 0])
+    ax2 = fig.add_subplot(spec[0, 1], sharey=ax1)
+    ax3 = fig.add_subplot(spec[1, 0:2])
+    ax4 = fig.add_subplot(spec[2, 0:2], sharex=ax3)
+    ax5 = fig.add_subplot(spec[0, 2], sharey=ax1)
+    ax6 = fig.add_subplot(spec[0, 3], sharey=ax1)
+    ax7 = fig.add_subplot(spec[1, 2])
+    ax8 = fig.add_subplot(spec[1, 3])
+    ax = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
+
+    # fig.suptitle(title)
+    dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
+    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
+    dist_vcentre = dist.copy()
+    # Distribution is in spacecraft frame, but output velocities are in
+    # solar wind frame, so correct
+    dist_vcentre['vx'] += params['helios_vr']
+    dist_vcentre['vy'] += params['helios_v']
+    alpha_dist['vx'] += params['helios_vr']
+    alpha_dist['vy'] += params['helios_v']
+    sqrt2 = np.sqrt(2)
+    plot_xyz_cuts(dist_vcentre[['vx', 'vy', 'vz']].values,
+                  dist_vcentre['pdf'].values,
+                  ax[0], ax[1])
+    ax[0].set_ylabel(r'$v_{r}$ (km/s)')
+    ax[0].set_xlabel(r'$v_{t}$ (km/s)')
+    ax[1].set_xlabel(r'$v_{n}$ (km/s)')
+    ax[0].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
+    ax[1].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
+    ax[0].scatter(fit_dict['va_y'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
+    ax[1].scatter(fit_dict['va_z'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
+    ax[0].scatter(output['vp_y'], output['vp_x'], marker='x', color='k')
+    ax[1].scatter(output['vp_z'], output['vp_x'], marker='x', color='k')
+
+    Bhat = B / np.linalg.norm(B)
+    print(Bhat)
+    length = 100
+    x0 = -500
+    y0 = 200
+    ax[0].plot([x0, x0 + Bhat[1] * length], [y0, y0 + Bhat[0] * length], color='k')
+    ax[1].plot([x0, x0 + Bhat[2] * length], [y0, y0 + Bhat[0] * length], color='k')
+    for axnum in [0, 1]:
+        circ = mpatch.Circle((x0, y0), length,
+                             edgecolor='0.4', facecolor='none', linewidth=1)
+        ax[axnum].add_patch(circ)
+    print(output)
+    print(fit_dict)
+
+    # Plot formatting
+    ax[1].tick_params(axis='y', labelleft=False, labelright=True,
+                      left=False, right=True)
+
+    # Calculate 1D reduced distribution from data
+    vs = dist['|v|'].groupby(level=['E_bin']).mean()
+    pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
+
+    ax[2].plot(I1a['df'] / I1a['df'].max(),
+               marker='x', label='I1a')
+    ax[2].plot(I1b['df'] / I1b['df'].max(),
+               marker='x', label='I1b')
+
+    for axnum in [0, 1]:
+        circ = mpatch.Circle((0, 0), last_high_ratio,
+                             edgecolor='k', facecolor='none')
+        ax[axnum].add_patch(circ)
+
+    # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
+    #            marker='x', label='I1b interp')
+
+    ax[3].plot(I1a['Ratio'], marker='x')
+    for axnum in [3, ]:
+        ax[axnum].axvline(last_high_ratio, color='k')
+    ax[3].axhline(1, color='k')
+
+    if not magempty:
+        protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
+                                   output['vp_x'], output['vp_y'], output['vp_z'],
+                                   output['n_p'], params, output[['Bx', 'By', 'Bz']])
+        ax[2].plot(protons_1d.index.values,
+                   protons_1d / protons_1d.max(), label='Proton fit')
+        alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
+                                  helpers.temp2vth(fit_dict['Ta_par'], m=4),
+                                  fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'],
+                                  fit_dict['n_a'], params, B,
+                                  moverq=2)
+        ax[2].plot(alphas_1d.index.values,
+                   alphas_1d / (protons_1d.max()), label='Alpha fit')
+        # Formatting
+        ax[2].legend(frameon=False)
+        ax[2].set_yscale('log')
+        ax[2].set_xlabel(r'$|v|$' + ' (km/s)')
+        ax[2].set_ylim(1e-3, 2)
+        ax[2].set_xlim(400, 1600)
+        fig.tight_layout()
+        fig.subplots_adjust(top=0.9)
+
+    plot_xyz_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
+                  alpha_dist['pdf'].values,
+                  ax[4], ax[5])
+    ax[4].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
+    ax[5].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
+    ax[0].set_ylim(bottom=0)
+    ax[1].set_ylim(bottom=0)
+
+    ax[0].set_xlim(-500, 500)
+    ax[1].set_xlim(-500, 500)
+
+    vth_par = helpers.temp2vth(fit_dict['Ta_par'], 4)
+    vth_perp = helpers.temp2vth(fit_dict['Ta_perp'], 4)
+    plot_perp_par_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
+                       alpha_dist['pdf'].values,
+                       np.array([fit_dict['va_x'],
+                                 fit_dict['va_y'],
+                                 fit_dict['va_z']]),
+                       B,
+                       vth_par, vth_perp, ax[6], ax[7])
+
+    fig.tight_layout()
 
 
 if __name__ == '__main__':
