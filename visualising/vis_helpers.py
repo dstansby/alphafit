@@ -61,7 +61,6 @@ def load_alphafit(probe, starttime, endtime, verbose=False):
         doy = starttime.strftime('%j')
         fname = 'h{}_{}_{}_alpha_fits.hdf'.format(probe, year, str(doy).zfill(3))
         saveloc = output_dir / 'helios{}'.format(probe) / 'fits' / str(year) / fname
-        print(saveloc)
         try:
             params = pd.read_hdf(saveloc, 'fits')
         except FileNotFoundError:
