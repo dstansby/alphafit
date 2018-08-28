@@ -213,7 +213,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     # Cut out what we think is the alpha distribution
     # NOTE: this is in the instrument frame of reference and has no alpha
     # particle corrections applied
-    alpha_dist = helpers.dist_cut(dist3D, speed_cut - 1)
+    alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
     if alpha_dist.empty:
         return check_output({}, 6)
     df = alpha_dist['pdf'].values
