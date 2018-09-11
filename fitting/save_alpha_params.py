@@ -15,12 +15,13 @@ from heliopy.data import helios
 import matplotlib.pyplot as plt
 
 from config import get_dirs
+output_dir, corefit_code_dir = get_dirs()
 
 sys.path.append('visualising/')
+
 import helpers_fit as helpers
 import helpers_data
 import vis_helpers
-output_dir, corefit_code_dir = get_dirs()
 
 logger = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
