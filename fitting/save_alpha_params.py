@@ -42,6 +42,7 @@ status_dict = {-1: "Couldn't find time in distparams",
                6: 'No distribution left after cutting',
                7: 'Two distributions found in one file',
                8: 'I1b distribution function corrupted',
+               9: 'Velocity out of range'
                }
 
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
@@ -297,6 +298,11 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         plt.show()
 
     fit_dict = check_output(fit_dict, status)
+    # If the radial component of velocity is lies outside the array of
+    # experimental data, reject the fit as it is probably overfitted in the
+    # radial direction
+    if fit_dict['va_x'] < np.min(vs[:, 0]):
+        return check_output({}, 9)
     return fit_dict
 
 
