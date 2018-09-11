@@ -104,6 +104,7 @@ def find_speed_cut(I1a, I1b, min_speed=0):
         ratios = ratios / ratios[peak_1D_v_idx]
         threshold = 0.8
         good_ratio_idx = (ratios[min_speed_idx:] < threshold) & (ratios[min_speed_idx:] > 0.1)
+    # Get the energy bin number of the speed cut
     ratio_idx = min_speed_idx + np.nanargmax(good_ratio_idx)
     speed_cut = I1a.index.values[ratio_idx]
     return ratios, I1a_I1b, speed_cut, ratio_idx
@@ -197,16 +198,29 @@ def valid_ratio(rs, idx):
 
 
 def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
+    """
+    Fit a single distribution.
+    """
+    # First, find speed at which to cut the distribution
     ratios, I1a_I1b, speed_cut, ratio_idx = find_speed_cut(I1a, I1b)
+    # If the energy bin being cut is >= 30, there will me at most 3 energy bins
+    # and fitting won't work
     if ratio_idx >= 30:
         return check_output({}, 8)
+    # If the mass per charge ratio is not as expected for alphas, assume
+    # something has gone wrong and return
     if not valid_ratio(ratios, ratio_idx):
         return check_output({}, 7)
     logger.info('Un-adjusted speed cut at {} km/s'.format(speed_cut))
+
+    # Check that the speed cut is not too close to the proton core. If it is,
+    # move it up so it is far enough away.
     speed_cut = adjust_speed_cut(speed_cut, I1a, corefit)
     if speed_cut is None:
         return check_output({}, 6)
     logger.info('Adjusted speed cut at {} km/s'.format(speed_cut))
+
+    # Re-iterate the speed cut procedure with a new minimum speed.
     _, _, speed_cut, _ = find_speed_cut(I1a, I1b, min_speed=speed_cut)
     logger.info('Final speed cut at {} km/s'.format(speed_cut))
 
@@ -219,9 +233,10 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
 
-    # Convert to km/s
+    # Convert velocities from m/s to km/s
     vs /= 1e3
-    # Do alpha particle corrections
+    # Do alpha particle corrections on the distibution values, since the values
+    # are dervied assuming protons
     vs, df = helpers.distribution_function_correction(vs, df, 2)
 
     # Rotate velocities into field aligned co-ordinates
@@ -234,25 +249,29 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         R = None
         vprime = vs
 
-    # Initial proton parameter guesses
+    # Initial alpha parameter guesses
     # Take maximum of distribution function for amplitude
     Aa_guess = np.max(df)
     # Take numerical ion velocity moment for v_a
     va_guess = [np.sum(df * vprime[:, 0]) / np.sum(df),
                 np.sum(df * vprime[:, 1]) / np.sum(df),
                 np.sum(df * vprime[:, 2]) / np.sum(df)]
-    # Take proton thermal speeds as guesses for alpha thermal speeds
+    # Take proton thermal speeds as initial guesses for alpha thermal speeds
     vtha_perp_guess = corefit['vth_p_perp']
     vtha_par_guess = corefit['vth_p_par']
     guesses = (Aa_guess, vtha_perp_guess, vtha_par_guess,
                va_guess[0], va_guess[1], va_guess[2])
     logger.info('Initial parameters guesses are {}'.format(guesses))
+
+    # Do fitting
     result = bimaxwellian_fit(vprime, df, guesses)
     fit_dict = {}
     if result is None:
         status = 3
     else:
         popt, pcov = result
+        # Convert the output of the fitting process to a sensible dict with
+        # the alpha parameters.
         fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params,
                                              R, particle_mass=4)
         if magempty:
@@ -260,6 +279,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         else:
             status = 1
 
+    # If requested, visualise the resulting fit and original distributions
     if (args.plot and
             not isinstance(fit_dict, int) and
             status == 1):
