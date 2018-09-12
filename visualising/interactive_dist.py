@@ -23,13 +23,12 @@ class SlicePlotter:
         # Azimuth
         az_levels = self.az_levels
         self.az_slice = get_middle_value(az_levels)
-        self.plot_az_slice(self.az_slice, self.axs[0])
+        self.plot_az_slice()
 
         # Elevation
         el_levels = self.el_levels
         self.el_slice = get_middle_value(el_levels)
-        self.plot_el_slice(self.el_slice, self.axs[1])
-        # fig.colorbar()
+        self.plot_el_slice()
 
     def __call__(self, event):
         key = event.key
@@ -52,8 +51,8 @@ class SlicePlotter:
         for ax in self.axs:
             ax.cla()
 
-        self.plot_az_slice(self.az_slice, self.axs[0])
-        self.plot_el_slice(self.el_slice, self.axs[1])
+        self.plot_az_slice()
+        self.plot_el_slice()
         self.fig.canvas.draw()
 
     @property
@@ -120,29 +119,46 @@ class SlicePlotter:
             if level == current_level:
                 t.set_weight('bold')
 
-    def plot_az_slice(self, n, ax):
+    def add_angle_line(self, angle, ax):
+        ax.plot([0, 1e4 * np.cos(angle)],
+                [0, 1e4 * np.sin(angle)],
+                color='C3')
+
+    def plot_az_slice(self):
+        n = self.az_slice
+        ax = self.axs[0]
         data = self.azimuth_slice(n)
 
         pdf = data['pdf'].values
         theta = data['theta'].values
+        phi = data['phi'].values[0]
         v = data['|v|'].values / 1e3
         self.plot_slice(v, theta, pdf, ax)
         self.add_level_text(self.az_levels, n, ax)
+        self.add_angle_line(phi, self.axs[1])
+
         # Fix axes limits
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vz), np.max(self.vz))
 
-    def plot_el_slice(self, n, ax):
+
+    def plot_el_slice(self):
+        n = self.el_slice
+        ax = self.axs[1]
         data = self.elevation_slice(n)
 
         pdf = data['pdf'].values
         phi = data['phi'].values
+        theta = data['theta'].values[0]
         v = data['|v|'].values / 1e3
         self.plot_slice(v, phi, pdf, ax)
         self.add_level_text(self.el_levels, n, ax)
+        self.add_angle_line(theta, self.axs[0])
+
         # Fix axes limits
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vy), np.max(self.vy))
+
 
 if __name__ == '__main__':
     probe = '2'
