@@ -140,7 +140,8 @@ class SlicePlotter:
         # Fix axes limits
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vz), np.max(self.vz))
-
+        ax.set_xlabel(r'$v_{r}$ (km/s)')
+        ax.set_ylabel(r'$v_{n}$ (km/s)')
 
     def plot_el_slice(self):
         n = self.el_slice
@@ -158,15 +159,17 @@ class SlicePlotter:
         # Fix axes limits
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vy), np.max(self.vy))
+        ax.set_xlabel(r'$v_{r}$ (km/s)')
+        ax.set_ylabel(r'$v_{t}$ (km/s)')
 
 
 if __name__ == '__main__':
     probe = '2'
     year = 1976
-    doy = 109
+    doy = 108
     hour = 0
     minute = 0
-    second = 35
+    second = 29
     df = helios.ion_dist_single(probe, year, doy, hour, minute, second,
                                 remove_advect=False)
     plotter = SlicePlotter(df)
