@@ -11,10 +11,50 @@ def get_middle_value(a):
     return a[a.size // 2]
 
 
-class Distribution:
+class SlicePlotter:
     def __init__(self, df):
+        fig, axs = plt.subplots(ncols=2, figsize=(10, 5))
+        self.fig = fig
+        self.axs = axs
         self.df = df
         self.index = df.index
+        self.cid = self.fig.canvas.mpl_connect('key_press_event', self)
+
+        # Azimuth
+        az_levels = self.az_levels
+        self.az_slice = get_middle_value(az_levels)
+        self.plot_az_slice(self.az_slice, self.axs[0])
+
+        # Elevation
+        el_levels = self.el_levels
+        self.el_slice = get_middle_value(el_levels)
+        self.plot_el_slice(self.el_slice, self.axs[1])
+        # fig.colorbar()
+
+    def __call__(self, event):
+        key = event.key
+        if key not in ('left', 'right', 'up', 'down'):
+            return
+
+        if event.key == 'left':
+            if self.az_slice > np.min(self.az_levels):
+                self.az_slice -= 1
+        elif event.key == 'right':
+            if self.az_slice < np.max(self.az_levels):
+                self.az_slice += 1
+        elif event.key == 'up':
+            if self.el_slice < np.max(self.el_levels):
+                self.el_slice += 1
+        elif event.key == 'down':
+            if self.el_slice > np.min(self.el_levels):
+                self.el_slice -= 1
+
+        for ax in self.axs:
+            ax.cla()
+
+        self.plot_az_slice(self.az_slice, self.axs[0])
+        self.plot_el_slice(self.el_slice, self.axs[1])
+        self.fig.canvas.draw()
 
     @property
     def vx(self):
@@ -69,14 +109,14 @@ class Distribution:
         norm = mcolor.LogNorm()
         ax.tricontourf(vx, vy, pdf, levels=levels, norm=norm)
         ax.tricontour(vx, vy, pdf, levels=levels,
-                      colors='k', linewidths=1, linestyles='-',
+                      colors='k', linewidths=0.5, linestyles='-',
                       )
-        ax.scatter(vx, vy, color='k', s=10, edgecolor='w')
+        ax.scatter(vx, vy, color='k', s=1, alpha=0.5)
 
     def add_level_text(self, levels, current_level, ax):
         for i, level in enumerate(levels):
             t = ax.text(0.7 + 0.05 * i, 1.05, str(level),
-                        transform=ax.transAxes)
+                        transform=ax.transAxes, ha='center')
             if level == current_level:
                 t.set_weight('bold')
 
@@ -104,52 +144,6 @@ class Distribution:
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vy), np.max(self.vy))
 
-
-class SlicePlotter:
-    def __init__(self, df):
-        fig, axs = plt.subplots(ncols=2, figsize=(10, 5))
-        self.fig = fig
-        self.axs = axs
-        self.df = df
-        self.cid = self.fig.canvas.mpl_connect('key_press_event', self)
-
-        # Azimuth
-        az_levels = self.df.az_levels
-        self.az_slice = get_middle_value(az_levels)
-        self.df.plot_az_slice(self.az_slice, self.axs[0])
-
-        # Elevation
-        el_levels = self.df.el_levels
-        self.el_slice = get_middle_value(el_levels)
-        self.df.plot_el_slice(self.el_slice, self.axs[1])
-        # fig.colorbar()
-
-    def __call__(self, event):
-        key = event.key
-        if key not in ('left', 'right', 'up', 'down'):
-            return
-
-        if event.key == 'left':
-            if self.az_slice > np.min(self.df.az_levels):
-                self.az_slice -= 1
-        elif event.key == 'right':
-            if self.az_slice < np.max(self.df.az_levels):
-                self.az_slice += 1
-        elif event.key == 'up':
-            if self.el_slice < np.max(self.df.el_levels):
-                self.el_slice += 1
-        elif event.key == 'down':
-            if self.el_slice > np.min(self.df.el_levels):
-                self.el_slice -= 1
-
-        for ax in self.axs:
-            ax.cla()
-
-        df.plot_az_slice(self.az_slice, self.axs[0])
-        df.plot_el_slice(self.el_slice, self.axs[1])
-        self.fig.canvas.draw()
-
-
 if __name__ == '__main__':
     probe = '2'
     year = 1976
@@ -159,6 +153,5 @@ if __name__ == '__main__':
     second = 35
     df = helios.ion_dist_single(probe, year, doy, hour, minute, second,
                                 remove_advect=False)
-    df = Distribution(df)
     plotter = SlicePlotter(df)
     plt.show()
