@@ -17,6 +17,7 @@ import heliopy.data.helios as helios
 
 import vis_helpers as helpers
 import helpers_fit as fit_helpers
+from interactive_dist import SlicePlotter
 
 
 def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
@@ -235,15 +236,15 @@ def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2):
     R = helpers.rotationmatrix(B0)
     vs = np.dot(R, vs.T).T
     plot_xyz_cuts(vs, pdf, ax1, ax2)
-    ax1.set_ylabel(r'$v_{\parallel 1}$ (km/s)')
-    ax1.set_xlabel(r'$v_{\parallel 2}$ (km/s)')
-    ax2.set_xlabel(r'$v_{\perp}$ (km/s)')
+    ax1.set_ylabel(r'$v_{\perp 1}$ (km/s)')
+    ax1.set_xlabel(r'$v_{\perp 2}$ (km/s)')
+    ax2.set_xlabel(r'$v_{\parallel}$ (km/s)')
 
-    ax1.plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
-    ax1.plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
+    ax1.plot([-vth_perp / 2, vth_perp / 2], [0, 0], color='k')
+    ax1.plot([0, 0], [-vth_perp / 2, vth_perp / 2], color='k')
 
-    ax2.plot([-vth_perp / 2, vth_perp / 2], [0, 0], color='k')
-    ax2.plot([0, 0], [-vth_par / 2, vth_par / 2], color='k')
+    ax2.plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
+    ax2.plot([0, 0], [-vth_perp / 2, vth_perp / 2], color='k')
 
 
 def plot_xyz_cuts(vs, pdf, ax1, ax2):
@@ -256,11 +257,13 @@ def plot_xyz_cuts(vs, pdf, ax1, ax2):
                          np.log(pdf).max(), 20)
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
     plt.sca(ax1)
-    contour2d(y, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
+    if x.size > 3 and y.size > 3:
+        contour2d(y, x, slice_pdf, levels=levels, showbins=False)
 
     x, z, slice_pdf = slice_dist(vs, pdf, 1)
     plt.sca(ax2)
-    contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
+    if x.size > 3 and z.size > 3:
+        contour2d(z, x, slice_pdf, levels=levels, showbins=False)
     for a in [ax1, ax2]:
         a.set_aspect('equal', 'datalim')
 
@@ -355,7 +358,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     if not magempty:
         protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
                                    output['vp_x'], output['vp_y'], output['vp_z'],
-                                   output['n_p'], params, output[['Bx', 'By', 'Bz']])
+                                   output['n_p'], params, B)
         ax[2].plot(protons_1d.index.values,
                    protons_1d / protons_1d.max(), label='Proton fit')
         alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
@@ -396,6 +399,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                        vth_par, vth_perp, ax[6], ax[7])
 
     fig.tight_layout()
+
+    SlicePlotter(alpha_dist)
+    SlicePlotter(dist, min_contour=1e-2)
 
 
 if __name__ == '__main__':
