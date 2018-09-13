@@ -12,12 +12,13 @@ def get_middle_value(a):
 
 
 class SlicePlotter:
-    def __init__(self, df):
+    def __init__(self, df, min_contour=1e-2):
         fig, axs = plt.subplots(ncols=2, figsize=(10, 5))
         self.fig = fig
         self.axs = axs
         self.df = df
         self.index = df.index
+        self.min_contour = min_contour
         self.cid = self.fig.canvas.mpl_connect('key_press_event', self)
 
         # Azimuth
@@ -150,8 +151,8 @@ class SlicePlotter:
         vx = v * np.cos(angles)
         vy = v * np.sin(angles)
 
-        levels = np.logspace(np.log10(np.max(self.pdf)) - 3,
-                             np.log10(np.max(self.pdf)), 10)
+        maxpdf = np.log10(np.max(self.pdf))
+        levels = np.logspace(maxpdf + np.log10(self.min_contour), maxpdf, 15)
         norm = mcolor.LogNorm()
         ax.tricontourf(vx, vy, pdf, levels=levels,
                        norm=norm, cmap='viridis', alpha=0.8)
