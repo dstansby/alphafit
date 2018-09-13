@@ -106,18 +106,12 @@ class SlicePlotter:
         levels = np.logspace(np.log10(np.max(self.pdf)) - 3,
                              np.log10(np.max(self.pdf)), 10)
         norm = mcolor.LogNorm()
-        ax.tricontourf(vx, vy, pdf, levels=levels, norm=norm)
+        ax.tricontourf(vx, vy, pdf, levels=levels,
+                       norm=norm, cmap='viridis', alpha=0.8)
         ax.tricontour(vx, vy, pdf, levels=levels,
                       colors='k', linewidths=0.5, linestyles='-',
                       )
         ax.scatter(vx, vy, color='k', s=1, alpha=0.5)
-
-    def add_level_text(self, levels, current_level, ax):
-        for i, level in enumerate(levels):
-            t = ax.text(0.7 + 0.05 * i, 1.05, str(level),
-                        transform=ax.transAxes, ha='center')
-            if level == current_level:
-                t.set_weight('bold')
 
     def add_angle_line(self, angle, ax):
         ax.plot([0, 1e4 * np.cos(angle)],
@@ -134,10 +128,10 @@ class SlicePlotter:
         phi = data['phi'].values[0]
         v = data['|v|'].values / 1e3
         self.plot_slice(v, theta, pdf, ax)
-        self.add_level_text(self.az_levels, n, ax)
         self.add_angle_line(phi, self.axs[1])
 
         # Fix axes limits
+        ax.set_aspect('equal', adjustable='box')
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vz), np.max(self.vz))
         ax.set_xlabel(r'$v_{r}$ (km/s)')
@@ -153,10 +147,10 @@ class SlicePlotter:
         theta = data['theta'].values[0]
         v = data['|v|'].values / 1e3
         self.plot_slice(v, phi, pdf, ax)
-        self.add_level_text(self.el_levels, n, ax)
         self.add_angle_line(theta, self.axs[0])
 
         # Fix axes limits
+        ax.set_aspect('equal', adjustable='box')
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vy), np.max(self.vy))
         ax.set_xlabel(r'$v_{r}$ (km/s)')
@@ -167,10 +161,11 @@ if __name__ == '__main__':
     probe = '2'
     year = 1976
     doy = 108
-    hour = 0
-    minute = 0
-    second = 29
+    hour = 6
+    minute = 36
+    second = 48
     df = helios.ion_dist_single(probe, year, doy, hour, minute, second,
                                 remove_advect=False)
+    df = df.loc[df['counts'] > 5]
     plotter = SlicePlotter(df)
     plt.show()
