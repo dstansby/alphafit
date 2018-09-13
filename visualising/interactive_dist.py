@@ -18,8 +18,6 @@ class SlicePlotter:
         self.axs = axs
         self.df = df
         self.index = df.index
-
-        self.create_angle_view()
         self.cid = self.fig.canvas.mpl_connect('key_press_event', self)
 
         # Azimuth
@@ -32,29 +30,31 @@ class SlicePlotter:
         self.el_slice = get_middle_value(el_levels)
         self.plot_el_slice()
 
+        self.create_angle_view()
+
     def __call__(self, event):
         key = event.key
         if key not in ('left', 'right', 'up', 'down'):
             return
 
-        if event.key == 'left':
+        if key == 'left':
             if self.az_slice > np.min(self.az_levels):
                 self.az_slice -= 1
-        elif event.key == 'right':
+        elif key == 'right':
             if self.az_slice < np.max(self.az_levels):
                 self.az_slice += 1
-        elif event.key == 'up':
+        elif key == 'up':
             if self.el_slice < np.max(self.el_levels):
                 self.el_slice += 1
-        elif event.key == 'down':
+        elif key == 'down':
             if self.el_slice > np.min(self.el_levels):
                 self.el_slice -= 1
 
         for ax in self.axs:
             ax.cla()
 
-        self.plot_az_slice()
-        self.plot_el_slice()
+        self.update_phi()
+        self.update_theta()
         self.fig.canvas.draw()
 
     @property
@@ -95,6 +95,12 @@ class SlicePlotter:
         """
         return np.unique(self.index.get_level_values('El'))
 
+    def phi_value(self, phi_bin):
+        return np.rad2deg(self.azimuth_slice(phi_bin)['phi'][0])
+
+    def theta_value(self, theta_bin):
+        return np.rad2deg(self.elevation_slice(theta_bin)['theta'][0])
+
     def elevation_slice(self, n):
         '''
         Returns a VDF slice along the elevation bin given by *n*.
@@ -114,6 +120,27 @@ class SlicePlotter:
         ax.set_xlim(np.min(self.phi), np.max(self.phi))
         ax.set_ylim(np.min(self.theta), np.max(self.theta))
         self.angle_ax = ax
+
+        self.phi_line = ax.axvline(self.phi_value(self.az_slice))
+        self.theta_line = ax.axhline(self.theta_value(self.el_slice))
+
+    def update_phi_line(self):
+        phi_value = self.phi_value(self.az_slice)
+        self.phi_line.set_data([[phi_value, phi_value],
+                                [0, 1]])
+
+    def update_theta_line(self):
+        theta_value = self.theta_value(self.el_slice)
+        self.theta_line.set_data([[0, 1],
+                                  [theta_value, theta_value]])
+
+    def update_phi(self):
+        self.plot_az_slice()
+        self.update_phi_line()
+
+    def update_theta(self):
+        self.plot_el_slice()
+        self.update_theta_line()
 
     def plot_slice(self, v, angles, pdf, ax):
         '''
