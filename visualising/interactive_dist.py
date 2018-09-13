@@ -18,6 +18,8 @@ class SlicePlotter:
         self.axs = axs
         self.df = df
         self.index = df.index
+
+        self.create_angle_view()
         self.cid = self.fig.canvas.mpl_connect('key_press_event', self)
 
         # Azimuth
@@ -68,6 +70,14 @@ class SlicePlotter:
         return self.df['vz'].values / 1e3
 
     @property
+    def phi(self):
+        return np.rad2deg(self.df['phi'])
+
+    @property
+    def theta(self):
+        return np.rad2deg(self.df['theta'])
+
+    @property
     def pdf(self):
         return self.df['pdf'].values
 
@@ -98,7 +108,17 @@ class SlicePlotter:
         '''
         return self.df.loc[self.index.get_level_values('Az') == n]
 
+    def create_angle_view(self):
+        ax = self.fig.add_axes([0.1, 0.85, 0.1, 0.1])
+        ax.set_aspect('equal', adjustable='box')
+        ax.set_xlim(np.min(self.phi), np.max(self.phi))
+        ax.set_ylim(np.min(self.theta), np.max(self.theta))
+        self.angle_ax = ax
+
     def plot_slice(self, v, angles, pdf, ax):
+        '''
+        Plot a sliced distribution on an axes
+        '''
         # Transform to cartesian coordinates
         vx = v * np.cos(angles)
         vy = v * np.sin(angles)
@@ -112,6 +132,7 @@ class SlicePlotter:
                       colors='k', linewidths=0.5, linestyles='-',
                       )
         ax.scatter(vx, vy, color='k', s=1, alpha=0.5)
+        ax.set_aspect('equal', adjustable='box')
 
     def add_angle_line(self, angle, ax):
         ax.plot([0, 1e4 * np.cos(angle)],
@@ -131,7 +152,6 @@ class SlicePlotter:
         self.add_angle_line(phi, self.axs[1])
 
         # Fix axes limits
-        ax.set_aspect('equal', adjustable='box')
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vz), np.max(self.vz))
         ax.set_xlabel(r'$v_{r}$ (km/s)')
@@ -150,7 +170,6 @@ class SlicePlotter:
         self.add_angle_line(theta, self.axs[0])
 
         # Fix axes limits
-        ax.set_aspect('equal', adjustable='box')
         ax.set_xlim(np.min(self.vx), np.max(self.vx))
         ax.set_ylim(np.min(self.vy), np.max(self.vy))
         ax.set_xlabel(r'$v_{r}$ (km/s)')
