@@ -1,6 +1,4 @@
 # Methods to plot fitted distribution functions
-#
-# David Stansby 2017
 from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
@@ -11,10 +9,9 @@ import numpy as np
 import pandas as pd
 import sys
 
-sys.path.append('../fitting')
-
 import heliopy.data.helios as helios
 
+sys.path.append('../fitting')
 import vis_helpers as helpers
 import helpers_fit as fit_helpers
 from interactive_dist import SlicePlotter
