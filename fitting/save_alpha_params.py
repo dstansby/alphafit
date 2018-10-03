@@ -105,7 +105,8 @@ def find_speed_cut(I1a, I1b, min_speed=0):
         ratios = I1a_df / I1a_I1b
         ratios = ratios / ratios[peak_1D_v_idx]
         threshold = 0.8
-        good_ratio_idx = (ratios[min_speed_idx:] < threshold) & (ratios[min_speed_idx:] > 0.1)
+        good_ratio_idx = ((ratios[min_speed_idx:] < threshold) &
+                          (ratios[min_speed_idx:] > 0.1))
     # Get the energy bin number of the speed cut
     ratio_idx = min_speed_idx + np.nanargmax(good_ratio_idx)
     speed_cut = I1a.index.values[ratio_idx]
