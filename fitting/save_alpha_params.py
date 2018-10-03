@@ -356,7 +356,7 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
             endtime = starttime + enddelta
 
     try:
-        corefit = helios.corefit(probe, starttime, endtime)
+        corefit = helios.corefit(probe, starttime, endtime).data
     except RuntimeError:
         return
     distparams = helios.distparams(probe, starttime, endtime, verbose=True)
