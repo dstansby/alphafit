@@ -203,6 +203,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     """
     Fit a single distribution.
     """
+    dist3D = dist3D.loc[dist3D['counts'] >= 2]
     # First, find speed at which to cut the distribution
     ratios, I1a_I1b, speed_cut, ratio_idx = find_speed_cut(I1a, I1b)
     # If the energy bin being cut is >= 30, there will me at most 3 energy bins
