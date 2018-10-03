@@ -213,6 +213,6 @@ if __name__ == '__main__':
     second = 48
     df = helios.ion_dist_single(probe, year, doy, hour, minute, second,
                                 remove_advect=False)
-    df = df.loc[df['counts'] > 5]
+    df = df.loc[df['counts'] >= 2]
     plotter = SlicePlotter(df)
     plt.show()
