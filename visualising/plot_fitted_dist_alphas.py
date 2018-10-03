@@ -246,6 +246,16 @@ def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2,
     ax2.plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
     ax2.plot([0, 0], [-vth_perp / 2, vth_perp / 2], color='k')
 
+    # Mangetic field direction annotations
+    ax1.text(0.8, 0.9, 'B ⊗', fontsize=14, transform=ax1.transAxes)
+    arrow = mpatch.FancyArrowPatch((0.6, 0.87), (0.95, 0.87),
+                                   arrowstyle='-|>', mutation_scale=20,
+                                   facecolor='k', transform=ax2.transAxes)
+    ax2.add_patch(arrow)
+    ax2.text(0.73, 0.9,
+             'B', fontsize=14,
+             transform=ax2.transAxes)
+
 
 def plot_xyz_cuts(vs, pdf, ax1, ax2, levels=None):
     '''
@@ -398,11 +408,32 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                                  fit_dict['va_z']]),
                        B,
                        vth_par, vth_perp, ax[6], ax[7])
-
     fig.tight_layout()
 
-    SlicePlotter(alpha_dist)
-    SlicePlotter(dist, min_contour=1e-2)
+    # Plot perp/par cuts for the alphas
+    plt.close('all')
+    fig, axs = plt.subplots(ncols=2, figsize=(6, 3), sharey=True)
+    maxpdf = np.log(alpha_dist['pdf'].max())
+    # Set levels from maximum to 1e-2 the maximum
+    levels = np.linspace(maxpdf - 2, maxpdf, 10)
+    plot_perp_par_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
+                       alpha_dist['pdf'].values,
+                       np.array([fit_dict['va_x'],
+                                 fit_dict['va_y'],
+                                 fit_dict['va_z']]),
+                       B,
+                       vth_par, vth_perp, axs[0], axs[1], levels=levels)
+    # Plot parameters
+    fig.suptitle('Helios {}, {}'.format(probe, str(time)))
+    axs[1].tick_params(axis='y', reset=True)
+    axs[1].yaxis.tick_right()
+    fig.subplots_adjust(top=0.9, bottom=0.2, left=0.14, right=0.89,
+                        hspace=0.2, wspace=0.2)
+    # fig.tight_layout()
+
+    # Interactive slices
+    # SlicePlotter(alpha_dist)
+    # SlicePlotter(dist)
 
 
 if __name__ == '__main__':
