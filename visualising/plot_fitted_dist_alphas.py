@@ -175,7 +175,9 @@ def bimax_angular_cut(theta, phi, modv, fit_dict, R, m=1):
     vx, vy, vz = helpers.sph2cart(modv, theta, phi)
     vs = np.column_stack((vx, vy, vz))
     vprime = np.dot(R, vs.T).T
-    vbulk = np.dot(R, np.array([fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z']]).T)
+    vbulk = np.dot(R, np.array([fit_dict['va_x'],
+                                fit_dict['va_y'],
+                                fit_dict['va_z']]).T)
 
     vth_perp = helpers.temp2vth(fit_dict['Ta_perp'], m=m)
     vth_par = helpers.temp2vth(fit_dict['Ta_par'], m=m)
@@ -208,10 +210,11 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
             phi = az_cut['phi'].iloc[0]
             vs_fit = np.linspace(600, 1600, 100) / np.sqrt(moverq)
             df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, R, m=m)
-            vs_fit, df_fit = fit_helpers.distribution_function_correction(vs_fit, df_fit, 1 / moverq)
+            vs_fit, df_fit = fit_helpers.distribution_function_correction(
+                vs_fit, df_fit, 1 / moverq)
             ax.plot(vs_fit, df_fit, scaley=False)
             ax.text(0.1, 0.1,
-                    '$\\theta$ = {:.1f}\n$\phi$ = {:.1f}'.format(
+                    '$\\theta$ = {:.1f}\n$\\phi$ = {:.1f}'.format(
                         np.rad2deg(theta), np.rad2deg(phi)),
                     transform=ax.transAxes, fontsize=8)
             for exp in range(-14, -9):
