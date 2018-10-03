@@ -1,4 +1,3 @@
-# Methods to plot fitted distribution functions
 from datetime import timedelta as dt
 
 import matplotlib.pyplot as plt
@@ -223,7 +222,8 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
     ax.set_xlim(600, 1600)
 
 
-def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2):
+def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2,
+                       levels=10):
     """
     Transform distribution into a perp/par bulk velocity frame, and plot
     slices.
@@ -232,7 +232,7 @@ def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2):
         vs[:, i] -= v0[i]
     R = helpers.rotationmatrix(B0)
     vs = np.dot(R, vs.T).T
-    plot_xyz_cuts(vs, pdf, ax1, ax2)
+    plot_xyz_cuts(vs, pdf, ax1, ax2, levels=levels)
     ax1.set_ylabel(r'$v_{\perp 1}$ (km/s)')
     ax1.set_xlabel(r'$v_{\perp 2}$ (km/s)')
     ax2.set_xlabel(r'$v_{\parallel}$ (km/s)')
@@ -244,14 +244,15 @@ def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2):
     ax2.plot([0, 0], [-vth_perp / 2, vth_perp / 2], color='k')
 
 
-def plot_xyz_cuts(vs, pdf, ax1, ax2):
+def plot_xyz_cuts(vs, pdf, ax1, ax2, levels=None):
     '''
     Plot slices of dist on two different axes.
 
     ax1 is the x-y plane, ax2 is the x-z plane.
     '''
-    levels = np.linspace(np.log(pdf).min(),
-                         np.log(pdf).max(), 20)
+    if levels is None:
+        levels = np.linspace(np.log(pdf).min(),
+                             np.log(pdf).max(), 20)
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
     plt.sca(ax1)
     if x.size > 3 and y.size > 3:
