@@ -1,6 +1,7 @@
 *__pycache__*
 config.ini
 *.lprof
+*.ipynb_checkpoints
 
 *.DS_Store
 *.log
