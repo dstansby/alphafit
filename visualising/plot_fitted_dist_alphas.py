@@ -162,6 +162,7 @@ def slice_dist(vs, pdf, plane):
         raise ValueError('plane must be 1, 2 or 3')
     pdf = interp.griddata(vs, pdf, np.array(sampling_points).T,
                           method='linear').T
+    pdf[pdf < 0] = np.nan
     dim1 = dim1.ravel()
     dim2 = dim2.ravel()
     pdf = pdf.ravel()
@@ -305,6 +306,13 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # fig.suptitle(title)
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
     alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
+
+    alpha_dist_filled = dist.copy()
+    alpha_dist_filled[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
+    alpha_dist_filled['pdf'] = -1e-10
+    alpha_dist_filled.loc[alpha_dist.index.intersection(dist.index), ['pdf']] = alpha_dist['pdf']
+
+    alpha_dist = alpha_dist_filled
     dist_vcentre = dist.copy()
     # Distribution is in spacecraft frame, but output velocities are in
     # solar wind frame, so correct
