@@ -25,8 +25,10 @@ doys = range(1, 367)
 output_dir, corefit_code_dir = get_dirs()
 
 
-# Method to remove bad data
 def remove_bad_data(data, probe):
+    """
+    Remove data that is manually identified to be bad.
+    """
     # Import keys that need to be set to nan when we manually get rid of
     # bad data
     keys = ions_3D.keys.copy()
@@ -52,7 +54,9 @@ def remove_bad_data(data, probe):
 
 
 def save_fits(fits, probe, year, doy, dim, fdir):
-    # Save fits
+    """
+    Save fit dataframe to file.
+    """
     fname = ('h' + probe + '_' + str(year) + '_' + str(doy).zfill(3) +
              '_' + dim + 'D_fits.h5')
     saveloc = os.path.join(fdir, fname)
@@ -60,6 +64,16 @@ def save_fits(fits, probe, year, doy, dim, fdir):
 
 
 def fit_single_day(year, doy, probe, pltfigs):
+    """
+    Fit a single day of Helios distribution functions.
+
+    Parameters
+    ----------
+    year : int
+    doy : int
+    probe : str
+    pltfigs : bool
+    """
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
@@ -152,6 +166,10 @@ def fit_single_day(year, doy, probe, pltfigs):
 def do_fitting(pltfigs=False):
     '''
     Main method for doing all the fitting.
+
+    Paramters
+    ---------
+    pltfigs : bool, optional
     '''
     # Loop through each probe
     for probe in probes:
