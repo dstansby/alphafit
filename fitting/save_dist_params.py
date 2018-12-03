@@ -83,14 +83,6 @@ def fit_single_day(year, doy, probe, pltfigs):
     if starttime != old_starttime:
         input('Manually setting starttime, press enter to continue')
 
-    # Load magnetic field data
-    mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
-    # If no magnetic field data available
-    if mag4hz is None and mag6s is None:
-        print('No mag data available for '
-              'probe {} year {} doy {}'.format(probe, year, doy))
-        return
-
     # Load a days worth of ion distribution functions
     try:
         dists_3D, I1as, I1bs, distparams = helpers_data.load_dists(
@@ -100,6 +92,14 @@ def fit_single_day(year, doy, probe, pltfigs):
         if 'No data available for times' in str(err):
             return
         raise
+
+    # Load magnetic field data
+    mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
+    # If no magnetic field data available
+    #if mag4hz is None and mag6s is None:
+    #    print('No mag data available for '
+    #          'probe {} year {} doy {}'.format(probe, year, doy))
+    #    return
 
     distparams['vth_i1a'] = helpers.temp2vth(distparams['Tp_i1a'].values)
 
