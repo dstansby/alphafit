@@ -119,8 +119,8 @@ def fit_single_day(year, doy, probe, pltfigs):
 
         if len(params.shape) > 1:
             params = params.iloc[0, :]
-        I1a = I1as.loc[time]
-        I1b = I1bs.loc[time]
+        I1a = I1as.loc[time, :]
+        I1b = I1bs.loc[time, :]
 
         # Do 1D fit
         fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
