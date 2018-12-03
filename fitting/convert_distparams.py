@@ -38,7 +38,8 @@ for probe in ['1', '2']:
 
             # Re-order dataframe
             data = data[['B instrument', 'Bx', 'By', 'Bz', 'sigma B',
-                         'Ion instrument', 'Status', 'Tp_par', 'Tp_perp',
+                         'Ion instrument', 'data_rate', 'Status',
+                         'Tp_par', 'Tp_perp',
                          'carrot', 'r_sun', 'clat', 'clong', 'earth_he_angle',
                          'n_p', 'vp_x', 'vp_y', 'vp_z',
                          'vth_p_par', 'vth_p_perp']]

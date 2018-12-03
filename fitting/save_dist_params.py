@@ -138,7 +138,7 @@ def fit_single_day(year, doy, probe, pltfigs):
 
         # Add orbital information
         for var in ['r_sun', 'clong', 'clat',
-                    'carrot', 'earth_he_angle']:
+                    'carrot', 'earth_he_angle', 'data_rate']:
             fit_3D[var] = params[var]
         fitlist_3D.append(fit_3D)
     # End of a single day, put each day into its own DataFrame
