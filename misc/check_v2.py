@@ -3,6 +3,8 @@ import pathlib
 import os
 
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 old_dir = pathlib.Path('/Users/dstansby/Desktop/old_corefit')
 new_dir = pathlib.Path('/Users/dstansby/Data/helios/new_corefit/csv')
@@ -39,8 +41,22 @@ def check_all_data():
 
 
 def check_single_day(df1, df2):
+    # Check that number of rows is the same
     if df1.shape[0] != df2.shape[0]:
         raise RuntimeError('v1: {}, v2: {}'.format(df1.size, df2.size))
+
+    # Check that new data has 1 extra column
+    if df1.shape[1] != df2.shape[1] - 1:
+        raise RuntimeError('Column mismatch')
+    for key in ['n_p']:
+        if np.sum(~np.isclose(df1[key].values,
+                              df2[key].values,
+                              rtol=1e-3, atol=0, equal_nan=True)) > 5:
+            fig, axs = plt.subplots(nrows=2, sharex=True)
+            axs[0].scatter(df1.index, df1[key])
+            axs[0].scatter(df1.index, df2[key])
+            axs[1].scatter(df1.index, df1[key] - df2[key])
+            plt.show()
 
 
 if __name__ == '__main__':
