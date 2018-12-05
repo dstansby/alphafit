@@ -108,7 +108,6 @@ def fit_single_day(year, doy, probe, pltfigs):
     I1bs['v'] = I1bs.index.get_level_values('v')
 
     # Throw away zero distribution function values
-    I1as, I1bs = helpers_data.clean1D(I1as, I1bs)
     dists_3D = helpers_data.clean3D(dists_3D)
 
     # fitlist_1D = []
@@ -121,6 +120,8 @@ def fit_single_day(year, doy, probe, pltfigs):
             params = params.iloc[0, :]
         I1a = I1as.loc[time, :]
         I1b = I1bs.loc[time, :]
+        # Throw away zero distribution function values
+        I1a, I1b = helpers_data.clean1D(I1a, I1b)
 
         # Do 1D fit
         fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
