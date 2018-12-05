@@ -4,10 +4,10 @@ from heliopy.data import helios
 def get_mag(probe, starttime, endtime):
     try:
         mag4hz = helios.mag_4hz(probe, starttime, endtime,
-                                try_download=True)
+                                try_download=True).data
 
         # The 4Hz data is given in SSE, so flip to get in ~RTN
-        mag6s[['Bx', 'By', 'Bz']] *= -1
+        mag4hz[['Bx', 'By', 'Bz']] *= -1
         # Helios 2 was "upside down" relative to Helios 1, so the spin plane
         # components do not need flipping
         if probe == '2':
@@ -22,7 +22,7 @@ def get_mag(probe, starttime, endtime):
     # Also load 6s data as backup
     try:
         mag6s = helios.mag_ness(probe, starttime, endtime,
-                                verbose=False, try_download=False)
+                                try_download=True).data
         # The 6s data is given in SSE, so flip to get in ~RTN
         mag6s[['Bx', 'By', 'Bz']] *= -1
     except Exception as err:
