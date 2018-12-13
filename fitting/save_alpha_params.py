@@ -33,6 +33,10 @@ args = parser.parse_args()
 if args.verbose:
     logging.basicConfig(level=logging.INFO)
 
+probes = ['2', ]
+years = range(1976, 1977)
+doys = range(1, 366)
+
 # Status dictionary to map status integers to descriptions
 status_dict = {-1: "Couldn't find time in distparams",
                1: 'Fitting successful',
@@ -358,6 +362,10 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
 
     try:
         corefit = helios.corefit(probe, starttime, endtime).data
+        # The first corefit release has a sign error in the magnetic field.
+        # If using v1, correct this
+        if 'data_rate' not in corefit.keys:
+            corefit[['Bx', 'By', 'Bz']] = corefit[['Bx', 'By', 'Bz']] * -1
     except RuntimeError:
         return
     distparams = helios.distparams(probe, starttime, endtime, verbose=True)
@@ -409,9 +417,6 @@ def do_fitting(probes, years, doys, startdelta=None, enddelta=None):
 
 
 if __name__ == '__main__':
-    probes = ['2', ]
-    years = range(1976, 1977)
-    doys = range(1, 366)
     startdelta = None
     # startdelta = timedelta(seconds=1)
     # startdelta = timedelta(minutes=9, seconds=30)
