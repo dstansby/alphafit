@@ -38,8 +38,7 @@ years = range(1976, 1977)
 doys = range(1, 366)
 
 # Status dictionary to map status integers to descriptions
-status_dict = {-1: "Couldn't find time in distparams",
-               1: 'Fitting successful',
+status_dict = {1: 'Fitting successful',
                2: 'No magnetic field available',
                3: 'Curve fitting failed',
                4: 'Low data rate distribution',
@@ -319,10 +318,7 @@ def fit_rows(x):
     fitlist = []
     for [time, row] in time_rows:
         # Only do alpha fitting if high data mode
-        if time not in distparams.index:
-            warnings.warn('Could not find time {} in distparams'.format(time))
-            fit_dict = check_output({}, -1)
-        elif (distparams.loc[time]['data_rate'].size != 1):
+        if (distparams.loc[time]['data_rate'].size != 1):
             fit_dict = check_output({}, 7)
         elif not (distparams.loc[time]['data_rate'] == 1):
             fit_dict = check_output({}, 4)
