@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 from config import get_dirs
 output_dir, corefit_code_dir = get_dirs()
+output_dir = output_dir / 'alphas'
 
 sys.path.append('visualising/')
 
@@ -85,8 +86,8 @@ def save_fits(fits, probe, year, doy, fdir):
     if not os.path.exists(fdir):
         os.makedirs(fdir)
     # Save fits
-    fname = 'h{}_{}_{}_alpha_fits.hdf'.format(probe, year, str(doy).zfill(3))
-    fits.to_hdf(fdir / fname, 'fits', mode='w', format='f')
+    fname = 'h{}_{}_{}_alpha_fits.cdf'.format(probe, year, str(doy).zfill(3))
+    fits.to_csv(fdir / fname, mode='w')
 
 
 def find_speed_cut(I1a, I1b, min_speed=0):
@@ -395,7 +396,7 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     fits = pd.DataFrame(fitlist).set_index('Time', drop=True).sort_index()
     assert fits.shape[0] == corefit.shape[0]
     # Make directory to save fits
-    fdir = output_dir / 'helios{}'.format(probe) / 'fits' / str(year)
+    fdir = output_dir / 'helios{}'.format(probe) / str(year)
     save_fits(fits, probe, year, doy, fdir)
 
 
