@@ -25,8 +25,10 @@ years = range(1976, 1977)
 doys = range(104, 105)
 
 
-# Method to remove bad data
 def remove_bad_data(data, probe):
+    """
+    Remove data that is manually identified to be bad.
+    """
     # Import keys that need to be set to nan when we manually get rid of
     # bad data
     keys = ions_3D.keys.copy()
@@ -52,7 +54,9 @@ def remove_bad_data(data, probe):
 
 
 def save_fits(fits, probe, year, doy, dim, fdir):
-    # Save fits
+    """
+    Save fit dataframe to file.
+    """
     fname = ('h' + probe + '_' + str(year) + '_' + str(doy).zfill(3) +
              '_' + dim + 'D_fits.h5')
     saveloc = os.path.join(fdir, fname)
@@ -60,6 +64,16 @@ def save_fits(fits, probe, year, doy, dim, fdir):
 
 
 def fit_single_day(year, doy, probe, pltfigs):
+    """
+    Fit a single day of Helios distribution functions.
+
+    Parameters
+    ----------
+    year : int
+    doy : int
+    probe : str
+    pltfigs : bool
+    """
     starttime, endtime = helpers.doy2stime_etime(year, doy)
     if starttime.year != year:
         return
@@ -68,14 +82,6 @@ def fit_single_day(year, doy, probe, pltfigs):
     # starttime = starttime + timedelta(hours=23)
     if starttime != old_starttime:
         input('Manually setting starttime, press enter to continue')
-
-    # Load magnetic field data
-    mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
-    # If no magnetic field data available
-    if mag4hz is None and mag6s is None:
-        print('No mag data available for '
-              'probe {} year {} doy {}'.format(probe, year, doy))
-        return
 
     # Load a days worth of ion distribution functions
     try:
@@ -87,6 +93,14 @@ def fit_single_day(year, doy, probe, pltfigs):
             return
         raise
 
+    # Load magnetic field data
+    mag4hz, mag6s = helpers_data.get_mag(probe, starttime, endtime)
+    # If no magnetic field data available
+    #if mag4hz is None and mag6s is None:
+    #    print('No mag data available for '
+    #          'probe {} year {} doy {}'.format(probe, year, doy))
+    #    return
+
     distparams['vth_i1a'] = helpers.temp2vth(distparams['Tp_i1a'].values)
 
     # Add a velocity level to 1D dataframe
@@ -94,7 +108,6 @@ def fit_single_day(year, doy, probe, pltfigs):
     I1bs['v'] = I1bs.index.get_level_values('v')
 
     # Throw away zero distribution function values
-    I1as, I1bs = helpers_data.clean1D(I1as, I1bs)
     dists_3D = helpers_data.clean3D(dists_3D)
 
     # fitlist_1D = []
@@ -105,8 +118,10 @@ def fit_single_day(year, doy, probe, pltfigs):
 
         if len(params.shape) > 1:
             params = params.iloc[0, :]
-        I1a = I1as.loc[time]
-        I1b = I1bs.loc[time]
+        I1a = I1as.loc[time, :]
+        I1b = I1bs.loc[time, :]
+        # Throw away zero distribution function values
+        I1a, I1b = helpers_data.clean1D(I1a, I1b)
 
         # Do 1D fit
         fit_1D = ions_1D.oned_fitting(I1a, I1b, params, time,
@@ -124,7 +139,7 @@ def fit_single_day(year, doy, probe, pltfigs):
 
         # Add orbital information
         for var in ['r_sun', 'clong', 'clat',
-                    'carrot', 'earth_he_angle']:
+                    'carrot', 'earth_he_angle', 'data_rate']:
             fit_3D[var] = params[var]
         fitlist_3D.append(fit_3D)
     # End of a single day, put each day into its own DataFrame
@@ -152,6 +167,10 @@ def fit_single_day(year, doy, probe, pltfigs):
 def do_fitting(pltfigs=False):
     '''
     Main method for doing all the fitting.
+
+    Paramters
+    ---------
+    pltfigs : bool, optional
     '''
     # Loop through each probe
     for probe in probes:
