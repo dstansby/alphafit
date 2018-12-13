@@ -360,7 +360,7 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
         corefit = helios.corefit(probe, starttime, endtime).data
         # The first corefit release has a sign error in the magnetic field.
         # If using v1, correct this
-        if 'data_rate' not in corefit.keys:
+        if 'data_rate' not in corefit.keys():
             corefit[['Bx', 'By', 'Bz']] = corefit[['Bx', 'By', 'Bz']] * -1
     except RuntimeError:
         return
