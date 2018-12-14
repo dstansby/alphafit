@@ -4,8 +4,7 @@ The code is split into three folders, each with it's own README file
 
 - **fitting**: all the code used to generate the data set from original
 distribution source files
-- **visualising**: scripts used to visualise the new data set and compare it
-to the old merged data set
+- **visualising**: scripts used to visualise the data
 - **guide**: contains a user's guide to the data set
 
 
