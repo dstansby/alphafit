@@ -1,4 +1,4 @@
-This repository contains the code used to create the Helios 'corefit' dataset.
+This repository contains the code used to create the Helios 'alphafit' dataset.
 
 The code is split into three folders, each with it's own README file
 
@@ -8,10 +8,14 @@ distribution source files
 to the old merged data set
 - **guide**: contains a user's guide to the data set
 
-### Acknowledgements
-The code was written by myself ([David Stansby](https://davidstansby.com)). I am supported by STFC studentship number ST/N504336/1.
 
-The majority of it was written during a visit to UC Berkeley (USA) hosted by Chadi Salem.
-Thanks to Chadi Salem, Tim Horbury, and Lorenzo Matteini for useful discussions and
-advice concerning distribution functions and the Helios mission.
-Thanks to Steve Schwartz and Tony Allen for help with .cdf files.
+# Documentation
+
+### Acknowledgements
+The code was written by myself ([David Stansby](https://www.davidstansby.com)).
+I am supported by STFC studentship number ST/N504336/1.
+
+The majority of the code was written during a visit to UC Berkeley (USA) hosted
+by Chadi Salem. Thanks to Chadi Salem, Tim Horbury, and Lorenzo Matteini for
+useful discussions and advice concerning distribution functions and the
+Helios mission.
