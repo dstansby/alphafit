@@ -10,7 +10,7 @@ import sys
 
 import heliopy.data.helios as helios
 
-sys.path.append('../fitting')
+sys.path.append('fitting')
 import vis_helpers as helpers
 import helpers_fit as fit_helpers
 from interactive_dist import SlicePlotter
