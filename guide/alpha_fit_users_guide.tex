@@ -1,0 +1,81 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{titling}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+% Change heading fonts
+\renewcommand{\maketitlehooka}{\sffamily}
+\titleformat*{\section}{\Large\bfseries\sffamily}
+\titleformat*{\subsection}{\Large\sffamily}
+\titleformat*{\subsubsection}{\large\sffamily}
+
+% Put lines under figure captions
+\usepackage{caption}
+\DeclareCaptionFormat{myformat}{#1#2#3\hrulefill}
+\captionsetup[table]{format=myformat}
+\captionsetup[figure]{format=myformat}
+
+\begin{document}
+
+\title{Helios \texttt{alphafit} data product user guide}
+\author{David Stansby \\
+\href{mailto:david.stansby14@imperial.ac.uk}{david.stansby14@imperial.ac.uk}}
+\maketitle
+
+%%%%
+\section{Introduction}
+This document describes the Helios \texttt{alphafit} data product. This is a new data set which contains estimates of number density, velocity, and temperatures of the alpha particle population in the solar wind created from systematic fitting of all the original Helios 3D distribution functions.
+%%%%
+%\section{Citing}
+%If you use the data, please cite the  \emph{Solar Physics} paper and add the following text to `Acknowledgements' or `Data' section of your paper:
+
+%%%%
+\section{Data availability and documentation}
+The data set is freely available at \url{http://dx.doi.org/10.5281/zenodo.2358793}.
+\newline
+\newline
+Data are split by probe, year, and day of year. The data are available as ascii \emph{csv} files with data for each day contained in a single file. Table \ref{tab:variables} summarises the variables present in the data product.
+\newline
+\newline
+The timestamps in this dataset are the same as in the \texttt{corefit} dataset; if you want concurrent proton and/or magnetic field values then the data is available at \url{https://zenodo.org/record/1009506}.
+\newline
+\newline
+The original 3D ion distribution function data are available on the Helios archive FTP server at \url{ftp://apollo.ssl.berkeley.edu/pub/helios-data/E1_experiment/helios_raw/}. Detailed information about the plasma instrumentation can be found at \url{https://doi.org/10.5281/zenodo.1240454}. The source code used to read in and fit the distribution functions is available at \url{https://github.com/dstansby/alphafit}. This code can be used to reproduce the dataset from the original distribution function files.
+
+\begin{table}
+	\centering
+	\begin{tabular}{| c | c | c | c |}
+		\hline
+		Parameter 					& Parameter label	& Units			& Note 				\\ \hline \hline
+		Time						 	& Time			& 				& 			\\ \hline
+		Fitting status					& status			& 				& a	\\ \hline
+		Alpha number density 			& n\_a			& $cm^{-3}$		&	\\ \hline
+		Alpha $x$ velocity		 		& va\_x			& $km\cdot s^{-1}$	& \\ \hline
+		Alpha $y$ velocity		 		& va\_y			& $km\cdot s^{-1}$	& \\ \hline
+		Alpha $z$ velocity		 		& va\_z			& $km\cdot s^{-1}$	&\\ \hline
+		Alpha perpendicular temperature	& Ta\_perp		& Kelvin			&	\\ \hline
+		Alpha parallel temperature		& Ta\_par			& Kelvin			&	\\ \hline
+	\end{tabular}
+	\caption{Description of variables present in the \texttt{alphafit} data product.}	
+	\label{tab:variables}
+	\small
+	\begin{enumerate}[label=\alph*.]
+		\item Fitting status flags take the following values: 1: successful fit; 2: no magnetic field values available; 3: failed fit; 4: Low data rate distribution; 5: No proton corefit data available; 6: No alphas present in distribution function; 7: Two distribution functions found in one file; 8: I1b energy spectrum not present or corrupted; 9: Fitted velocity not within distribution function
+	\end{enumerate}
+\end{table}
+
+%%%
+\section{A note on timestamps}
+The timestamps in this data set were taken directly from the timestamps given in the filenames of the individual distribution function files. The distributions were originally recorded with a nominal cadence of 40.5 seconds, but it is believed anything after the decimal point in the timestamp has been dropped. This means that the time difference between consecutive time stamps goes like $0, 40, 81, 121, 162...$, whereas the true time differences were $0, 40.5, 81, 121.5, 162...$.
+%%%%%
+\newpage
+\appendix
+\section{Acknowledgements}
+The work was primarily carried out by David Stansby, in collaboration with Chadi Salem, Lorenzo Matteini, and Tim Horbury. This work would not have been possible without the invaluable contribution and discussions with the team at the University of Kiel: Lars Berger, Jan Steinhagen, Eckart Marsch, and Robert Wimmer-Schweingruber, as well as Rainer Schwenn. We also acknowledge all the contributions made to the Helios mission and its instruments.
+
+David Stansby is supported by STFC studentship ST/N504336/1. Chadi Salem and work at UC Berkeley is supported by NASA Grant NNX14AQ89G. 
+\end{document}
