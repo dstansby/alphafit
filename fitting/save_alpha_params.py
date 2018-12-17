@@ -90,10 +90,13 @@ def check_output(fit_dict, status):
 
 
 def save_fits(fits, probe, year, doy, fdir):
+    """
+    Save fitted paramters to file
+    """
     if not os.path.exists(fdir):
         os.makedirs(fdir)
     # Save fits
-    fname = 'h{}_{}_{}_alpha_fits.cdf'.format(probe, year, str(doy).zfill(3))
+    fname = 'h{}_{}_{}_alpha_fits.csv'.format(probe, year, str(doy).zfill(3))
     fits.to_csv(fdir / fname, mode='w')
 
 
