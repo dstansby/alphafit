@@ -37,9 +37,12 @@ logger = logging.getLogger(__name__)
 if args.verbose:
     logging.basicConfig(level=logging.INFO)
 
-probes = ['2', ]
-years = range(1976, 1977)
-doys = range(1, 366)
+# This file sets the intervals during which fitting is done
+# See 'intervals_example.csv' for an example file
+interval_file = ('/Users/dstansby/github/publication-code/'
+                 '2018-helios-alphas/stream_times.csv')
+# Set input parameters
+days = helpers.read_intervals(interval_file)
 
 # Status dictionary to map status integers to descriptions
 status_dict = {1: 'Fitting successful',
@@ -53,6 +56,7 @@ status_dict = {1: 'Fitting successful',
                9: 'Velocity out of range'
                }
 
+# Expected parameters from the fitting process
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
                        'va_y', 'va_z', 'n_a', 'Status'])
 
@@ -403,17 +407,12 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     save_fits(fits, probe, year, doy, fdir)
 
 
-def do_fitting(probes, years, doys, startdelta=None, enddelta=None):
+def do_fitting(days, startdelta=None, enddelta=None):
     '''
     Main method for doing all the fitting.
     '''
-    # Loop through each probe
-    for probe in probes:
-        # Loop through years
-        for year in years:
-            # Loop through days of the year
-            for doy in doys:
-                fit_single_day(year, doy, probe, startdelta, enddelta)
+    for [probe, year, doy] in days:
+        fit_single_day(year, doy, probe, startdelta, enddelta)
 
 
 if __name__ == '__main__':
@@ -422,4 +421,4 @@ if __name__ == '__main__':
     # startdelta = timedelta(minutes=9, seconds=30)
     enddelta = None
     # enddelta = timedelta(hours=1)
-    do_fitting(probes, years, doys, startdelta, enddelta)
+    do_fitting(days, startdelta, enddelta)
