@@ -4,6 +4,7 @@
 from datetime import datetime, timedelta
 
 import numpy as np
+import pandas as pd
 import astropy.units as u
 import astropy.constants as const
 
@@ -248,6 +249,10 @@ def doy2dtime(y, doy):
     return datetime.strptime(str(y) + '-' + str(doy).zfill(3), '%Y-%j')
 
 
+def dtime2ydoy(dtime):
+    return dtime.year, int(dtime.strftime('%j'))
+
+
 def doy2stime_etime(y, doy):
     '''
     Return start and end of day in datetime form.
@@ -256,3 +261,19 @@ def doy2stime_etime(y, doy):
     endtime = starttime + timedelta(hours=24) -\
         timedelta(microseconds=1)
     return starttime, endtime
+
+
+def read_intervals(f):
+    """
+    Read in a text file with intervals and return a list of tuples giving all
+    the ``(probe, year, doy)`` days of the year contained within the intervals.
+    """
+    df = pd.read_csv(f, parse_dates=[1, 2])
+    out = []
+    for i, row in df.iterrows():
+        stime = row['Start']
+        etime = row['End']
+        while stime < etime:
+            out.append([row['Probe'], *dtime2ydoy(stime)])
+            stime += timedelta(days=1)
+    return out
