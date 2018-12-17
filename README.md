@@ -1,11 +1,10 @@
 This repository contains the code used to create the Helios 'alphafit' dataset.
 
-The code is split into three folders, each with it's own README file
+The code is split into two folders:
 
 - **fitting**: all the code used to generate the data set from original
 distribution source files
 - **visualising**: scripts used to visualise the data
-- **guide**: contains a user's guide to the data set
 
 
 # Re-creating the dataset
