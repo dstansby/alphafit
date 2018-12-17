@@ -15,7 +15,7 @@ from heliopy.data import helios
 import matplotlib.pyplot as plt
 
 from config import get_dirs
-output_dir, corefit_code_dir = get_dirs()
+output_dir, _ = get_dirs()
 output_dir = output_dir / 'alphas'
 
 sys.path.append('visualising/')
