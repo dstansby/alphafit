@@ -1,7 +1,7 @@
 # Helper methods for distribution fitting
 #
 # David Stansby 2017
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 import numpy as np
 import pandas as pd
@@ -273,7 +273,10 @@ def read_intervals(f):
     for i, row in df.iterrows():
         stime = row['Start']
         etime = row['End']
+        stime.time = time.min
+        etime.time = time.min
         while stime < etime:
             out.append([str(row['Probe']), *dtime2ydoy(stime)])
             stime += timedelta(days=1)
+        out.append([str(row['Probe']), *dtime2ydoy(stime)])
     return out
