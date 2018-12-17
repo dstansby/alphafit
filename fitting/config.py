@@ -20,12 +20,12 @@ def get_dirs():
         raise FileNotFoundError('Output directory "{}" specified in '
                                 'config.ini does not exist'.format(output_dir))
 
-    corefit_code_dir = os.path.expanduser(
-        config['data_dirs']['corefit_code_dir'])
-    corefit_code_dir = pathlib.Path(corefit_code_dir)
-    if not os.path.isdir(corefit_code_dir):
-        raise FileNotFoundError('Corefit code directory "{}" specified in '
+    alpha_code_dir = os.path.expanduser(
+        config['data_dirs']['alpha_code_dir'])
+    alpha_code_dir = pathlib.Path(alpha_code_dir)
+    if not os.path.isdir(alpha_code_dir):
+        raise FileNotFoundError('alphafit code directory "{}" specified in '
                                 'config.ini does not exist'.format(
-                                    corefit_code_dir))
+                                    alpha_code_dir))
 
-    return output_dir, corefit_code_dir
+    return output_dir, alpha_code_dir
