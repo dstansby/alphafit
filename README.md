@@ -59,11 +59,13 @@ python fitting/save_alpha_params.py
 
 This will generate the data set in *.csv* files.
 
-### Acknowledgements
+# Acknowledgements
 The code was written by myself ([David Stansby](https://www.davidstansby.com)).
 I am supported by STFC studentship number ST/N504336/1.
 
 The majority of the code was written during a visit to UC Berkeley (USA) hosted
 by Chadi Salem. Thanks to Chadi Salem, Tim Horbury, and Lorenzo Matteini for
 useful discussions and advice concerning distribution functions and the
-Helios mission.
+Helios mission. Thanks also to everyone who contributed to the Helios data
+archive (http://helios-data.ssl.berkeley.edu/), without which this project
+would not have been possible.
