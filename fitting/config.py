@@ -10,8 +10,8 @@ def get_dirs():
     config = configparser.ConfigParser()
     config.read('config.ini')
     if not os.path.isfile('config.ini'):
-        raise FileNotFoundError('Could not find a config.ini file. '
-                                'Try renaming the config.ini.template file to '
+        raise FileNotFoundError('\nCould not find a config.ini file.'
+                                '\nTry renaming the config.ini.template file to '
                                 'config.ini in the current directory')
 
     output_dir = os.path.expanduser(config['data_dirs']['output_dir'])
