@@ -13,21 +13,16 @@ import astropy.constants as const
 from heliopy.data import helios
 
 import vis_helpers as helpers
-from helpers import mplhelp
-from helpers import helioshelp
-from plot_fitted_dist_alphas import plot_dist_time
+import helioshelp
 
-probe = '2'
-starttime = datetime(1976, 4, 14)
+probe = '1'
+starttime = datetime(1976, 3, 14)
 endtime = starttime + timedelta(days=10)
 
 alphas = helpers.load_alphafit(probe, starttime, endtime)
-protons = helios.corefit(probe, starttime, endtime, try_download=False)
+protons = helios.corefit(probe, starttime, endtime, try_download=False).data
 protons = protons.reindex(alphas.index)
 protons = helioshelp.calculate_derived(protons)
-protons['Bphi'] = np.rad2deg(np.arctan2(protons['By'], protons['Bx']))
-protons.loc[protons['Bphi'] < 0, 'Bphi'] += 360
-protons['Btheta'] = np.rad2deg(np.arcsin(protons['Bz'] / protons['|B|']))
 
 alphas[['Bx', 'By', 'Bz', '|B|']] = protons[['Bx', 'By', 'Bz', '|B|']]
 alphas['Beta_par'] = alphas['Ta_par'] * const.k_B.value * alphas['n_a'] * 1e6 / (alphas['|B|']**2 * 1e-18 / (2 * const.mu0))
@@ -79,16 +74,5 @@ ax.plot(protons['r_sun'], color='k')
 ax.set_ylabel('r (AU)')
 
 ax.set_xlim(alphas.index.min(), alphas.index.max())
-
-fig, axs = plt.subplots(ncols=2, sharey=True)
-ax = axs[0]
-ax.scatter(protons['Bphi'], alphas['Ta_par'], s=1, label=r'$T_{\alpha \parallel}$', alpha=0.5)
-ax.scatter(protons['Bphi'], alphas['Ta_perp'], s=1, label=r'$T_{\alpha \perp}$', alpha=0.5)
-ax.set_yscale('log')
-ax.legend()
-
-ax = axs[1]
-ax.scatter(protons['Btheta'], alphas['Ta_par'], s=1, alpha=0.1)
-ax.scatter(protons['Btheta'], alphas['Ta_perp'], s=1, alpha=0.1)
 
 plt.show()

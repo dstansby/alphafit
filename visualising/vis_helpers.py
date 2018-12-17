@@ -59,10 +59,12 @@ def load_alphafit(probe, starttime, endtime, verbose=False):
     while starttime < endtime + timedelta(days=1):
         year = str(starttime.year)
         doy = starttime.strftime('%j')
-        fname = 'h{}_{}_{}_alpha_fits.hdf'.format(probe, year, str(doy).zfill(3))
-        saveloc = output_dir / 'helios{}'.format(probe) / 'fits' / str(year) / fname
+        fname = (output_dir / 'alphas' /
+                 'helios{}'.format(probe) / '{}'.format(year) /
+                  'h{}_{}_{:03d}_alpha_fits.csv'.format(probe, year, int(doy)))
+        print(fname)
         try:
-            params = pd.read_hdf(saveloc, 'fits')
+            params = pd.read_csv(fname, index_col=0, parse_dates=[0])
         except FileNotFoundError:
             starttime += timedelta(days=1)
             if verbose:
