@@ -14,23 +14,26 @@ import pandas as pd
 from heliopy.data import helios
 import matplotlib.pyplot as plt
 
-from config import get_dirs
-output_dir, _ = get_dirs()
-output_dir = output_dir / 'alphas'
-
 sys.path.append('visualising/')
 
 import helpers_fit as helpers
 import helpers_data
 import vis_helpers
 
-logger = logging.getLogger(__name__)
+from config import get_dirs
+output_dir, _ = get_dirs()
+output_dir = output_dir / 'alphas'
+
+# Parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Increase output verbosity",
                     action="store_true")
 parser.add_argument("-p", "--plot", help="Plot figures",
                     action="store_true")
 args = parser.parse_args()
+
+# Set the logger if verbose has been requested
+logger = logging.getLogger(__name__)
 if args.verbose:
     logging.basicConfig(level=logging.INFO)
 
