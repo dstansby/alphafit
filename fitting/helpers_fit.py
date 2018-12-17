@@ -274,6 +274,6 @@ def read_intervals(f):
         stime = row['Start']
         etime = row['End']
         while stime < etime:
-            out.append([row['Probe'], *dtime2ydoy(stime)])
+            out.append([str(row['Probe']), *dtime2ydoy(stime)])
             stime += timedelta(days=1)
     return out
