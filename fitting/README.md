@@ -7,9 +7,11 @@ required dependencies.
 Downloading and installing software
 -----------------------------------
 1. Download a copy of this repository
-2. Install [python](https://www.python.org/)
-3. Install the required python dependencies by running
-`pip install -r requirements.txt` from the `alphafit` directory
+2. Install [conda](https://conda.io/docs/user-guide/install/index.html)
+3. Create a new environment from the provided environment file:
+```bash
+conda env create -f environment.yml
+```
 
 Configuring data output
 -----------------------

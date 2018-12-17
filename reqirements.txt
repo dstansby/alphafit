@@ -1,5 +1,0 @@
-pandas
-numpy
-heliopy>=0.5
-scipy
-astropy
