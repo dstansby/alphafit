@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import sys
 
-import heliopy.data.helios as helios
+from heliopy.data import helios
 
 sys.path.append('fitting')
 import vis_helpers as helpers
@@ -17,6 +17,7 @@ import helpers_fit as fit_helpers
 
 REDTEXT = '\033[1;31m'
 ENDC = '\033[1;m'
+
 
 def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
     """Perform a countour plot of 2D distribution function data."""
@@ -382,7 +383,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     print(REDTEXT + 'Proton parameters' + ENDC)
     print(output)
     print(REDTEXT + 'Alpha parameters' + ENDC)
-    print(fit_dict)
+    print(pd.Series(fit_dict))
 
     # Plot formatting
     ax[1].tick_params(axis='y', labelleft=False, labelright=True,
@@ -391,50 +392,6 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # Calculate 1D reduced distribution from data
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
-
-    # Plot the 1D distribution functions
-    ax[2].plot(I1a['df'] / I1a['df'].max(),
-               marker='x', label='I1a')
-    ax[2].plot(I1b['df'] / I1b['df'].max(),
-               marker='x', label='I1b')
-    # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
-    #            marker='x', label='I1b interp')
-
-    # Plot ratio of 1D distribution functions
-    ax[3].plot(I1a['Ratio'], marker='x')
-    for axnum in [2, 3]:
-        ax[axnum].axvline(last_high_ratio, color='k')
-    ax[3].axhline(1, color='k')
-
-    if not magempty:
-        # Plot the reduced fitted distribution function for protons
-        protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
-                                   output['vp_x'],
-                                   output['vp_y'],
-                                   output['vp_z'],
-                                   output['n_p'], params, B)
-        ax[2].plot(protons_1d.index.values,
-                   protons_1d / protons_1d.max(), label='Proton fit')
-
-        # Plot the reduced fitted distribution function for alphas
-        alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
-                                  helpers.temp2vth(fit_dict['Ta_par'], m=4),
-                                  fit_dict['va_x'],
-                                  fit_dict['va_y'],
-                                  fit_dict['va_z'],
-                                  fit_dict['n_a'], params, B,
-                                  moverq=2)
-        ax[2].plot(alphas_1d.index.values,
-                   alphas_1d / (protons_1d.max()), label='Alpha fit')
-
-        # Formatting
-        ax[2].legend(frameon=False)
-        ax[2].set_yscale('log')
-        ax[2].set_xlabel(r'$|v|$' + ' (km/s)')
-        ax[2].set_ylim(1e-3, 2)
-        ax[2].set_xlim(400, 1600)
-        fig.tight_layout()
-        fig.subplots_adjust(top=0.9)
 
     # Plot cuts of the alpha distribution function
     plot_xyz_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
@@ -477,7 +434,55 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     axs[1].yaxis.tick_right()
     fig.subplots_adjust(top=0.9, bottom=0.2, left=0.14, right=0.89,
                         hspace=0.2, wspace=0.2)
-    # fig.tight_layout()
+
+    fig, onedaxs = plt.subplots(nrows=2, sharex=True)
+    ax = onedaxs[0]
+
+    # Plot the 1D distribution functions
+    ax.plot(I1a['df'] / I1a['df'].max(),
+            marker='x', label='I1a')
+    ax.plot(I1b['df'] / I1b['df'].max(),
+            marker='x', label='I1b')
+    # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
+    #            marker='x', label='I1b interp')
+
+    # Plot the reduced fitted distribution function for protons
+    protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
+                               output['vp_x'],
+                               output['vp_y'],
+                               output['vp_z'],
+                               output['n_p'], params, B)
+    ax.plot(protons_1d.index.values,
+            protons_1d / protons_1d.max(), label='Proton fit')
+
+    # Plot the reduced fitted distribution function for alphas
+    alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
+                              helpers.temp2vth(fit_dict['Ta_par'], m=4),
+                              fit_dict['va_x'],
+                              fit_dict['va_y'],
+                              fit_dict['va_z'],
+                              fit_dict['n_a'], params, B,
+                              moverq=2)
+    ax.plot(alphas_1d.index.values,
+            alphas_1d / (protons_1d.max()), label='Alpha fit')
+
+    # Formatting
+    ax.legend(frameon=False)
+    ax.set_yscale('log')
+    ax.set_xlabel(r'$|v|$' + ' (km/s)')
+    ax.set_ylim(1e-3, 2)
+    ax.set_xlim(400, 1600)
+
+    ax = onedaxs[1]
+    # Plot ratio of 1D distribution functions
+    ax.plot(I1a['Ratio'], marker='x')
+    ax.axhline(1, color='k')
+
+    for ax in onedaxs:
+        ax.axvline(last_high_ratio, color='k')
+
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.9)
 
     # Interactive slices
     # SlicePlotter(alpha_dist)
