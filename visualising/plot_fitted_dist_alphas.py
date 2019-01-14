@@ -162,7 +162,8 @@ def slice_dist(vs, pdf, plane):
         raise ValueError('plane must be 1, 2 or 3')
     pdf = interp.griddata(vs, pdf, np.array(sampling_points).T,
                           method='linear').T
-    pdf[pdf < 0] = np.nan
+    with np.errstate(invalid='ignore'):
+        pdf[pdf < 0] = np.nan
     dim1 = dim1.ravel()
     dim2 = dim2.ravel()
     pdf = pdf.ravel()
@@ -265,8 +266,9 @@ def plot_xyz_cuts(vs, pdf, ax1, ax2, levels=None):
     ax1 is the x-y plane, ax2 is the x-z plane.
     '''
     if levels is None:
-        levels = np.linspace(np.log(pdf).min(),
-                             np.log(pdf).max(), 20)
+        with np.errstate(invalid='ignore'):
+            levels = np.linspace(np.nanmin(np.log(pdf)),
+                                 np.nanmax(np.log(pdf)), 20)
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
     plt.sca(ax1)
     if x.size > 3 and y.size > 3:
