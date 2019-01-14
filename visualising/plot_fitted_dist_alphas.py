@@ -443,15 +443,18 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     axs[1].yaxis.tick_right()
     fig.subplots_adjust(top=0.9, bottom=0.2, left=0.14, right=0.89,
                         hspace=0.2, wspace=0.2)
-
-    fig, onedaxs = plt.subplots(nrows=2, sharex=True)
+    ###
+    # 1D plotting
+    ####
+    fig, onedaxs = plt.subplots(nrows=1, sharex=True)
+    onedaxs = [onedaxs]
     ax = onedaxs[0]
 
     # Plot the 1D distribution functions
     ax.plot(I1a['df'] / I1a['df'].max(),
-            marker='x', label='I1a')
-    ax.plot(I1b['df'] / I1b['df'].max(),
-            marker='x', label='I1b')
+            marker='+', label='Measured', lw=0.5, zorder=10)
+    # ax.plot(I1b['df'] / I1b['df'].max(),
+    #         marker='x', label='I1b')
     # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
     #            marker='x', label='I1b interp')
 
@@ -461,8 +464,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                                output['vp_y'],
                                output['vp_z'],
                                output['n_p'], params, B)
+    protons_1d_norm = protons_1d / protons_1d.max()
     ax.plot(protons_1d.index.values,
-            protons_1d / protons_1d.max(), label='Proton fit')
+            protons_1d_norm, label='Proton fit')
 
     # Plot the reduced fitted distribution function for alphas
     alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
@@ -472,26 +476,64 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                               fit_dict['va_z'],
                               fit_dict['n_a'], params, B,
                               moverq=2)
-    ax.plot(alphas_1d.index.values,
-            alphas_1d / (protons_1d.max()), label='Alpha fit')
+    alphas_1d_norm = alphas_1d / protons_1d.max()
+    ax.plot(alphas_1d.index.values, alphas_1d_norm, label='Alpha fit')
+    # alphas_1d_norm = alphas_1d_norm.reindex(protons_1d.index, method='nearest')
+    # ax.plot(protons_1d.index.values, protons_1d_norm + alphas_1d_norm, label='Proton + alpha fit')
+
+    # Download and plot the distribution function from original alpha params
+    merged = helios.merged(
+        probe, time - dt(seconds=10), time + dt(seconds=10)).data
+    old_na = merged['nal'].values
+    old_va = merged['val'].values
+    old_Ta = merged['Tal'].values
+
+    print(REDTEXT + 'New/old alpha temperatures' + ENDC)
+    old_par_rat = fit_dict['Ta_par'] / old_Ta
+    print(f'par: {old_par_rat}')
+
+    # Everything in the solar wind frame here
+    vs = alphas_1d.index.values
+    old_alpha_dist = maxwellian_1D(vs, old_va, old_Ta, m=4)
+    _, new_alpha_dist = fit_helpers.distribution_function_correction(
+        alphas_1d.index.values, alphas_1d.values, 2)
+    # Factor in front of a 1D maxwellian is proportional to n/T
+    old_alpha_A = old_na / old_Ta
+    new_alpha_A = fit_dict['n_a'] / fit_dict['Ta_par']
+    # Normalise peak to same as new alpha distribution
+    old_alpha_dist *= np.max(new_alpha_dist) / (np.max(old_alpha_dist))
+    old_alpha_dist *= old_alpha_A / new_alpha_A
+
+    # m/q factor is 1/2 here because we are going from real to spacecraft frame
+    vs, old_alpha_dist = fit_helpers.distribution_function_correction(
+        vs, old_alpha_dist, 1 / 2)
+
+    old_alpha_dist /= protons_1d.max()
+    # Take into accoutn different factors out front
+    # ax.plot(vs, old_alpha_dist, label='Maxwellian based on\nold alpha moments')
 
     # Formatting
     ax.legend(frameon=False)
     ax.set_yscale('log')
-    ax.set_xlabel(r'$|v|$' + ' (km/s)')
     ax.set_ylim(1e-3, 2)
     ax.set_xlim(400, 1600)
-
+    ax.set_xlabel(r'$|v_{p}|$' + ' (km/s)')
+    '''
     ax = onedaxs[1]
     # Plot ratio of 1D distribution functions
-    ax.plot(I1a['Ratio'], marker='x')
-    ax.axhline(1, color='k')
+    ax.plot(I1a['Ratio'], marker='+', lw=0.5, zorder=10)
+    ax.axhline(0.5, color='k', linestyle='--', lw=1)
+    ax.axhline(1, color='k', linestyle='--', lw=1)
+    ax.set_ylim(0.2, 1.2)
+    ax.set_ylabel('(particle counts) / (current counts)')'''
 
     for ax in onedaxs:
-        ax.axvline(last_high_ratio, color='k')
+        ax.axvline(last_high_ratio + np.mean(np.diff(I1a.index.values)),
+                   linestyle='--', linewidth=1, color='k', alpha=0.5)
+    ax.set_title(title)
 
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.9)
+    # fig.tight_layout()
+    # fig.subplots_adjust(top=0.9)
 
     # Interactive slices
     # SlicePlotter(alpha_dist)
