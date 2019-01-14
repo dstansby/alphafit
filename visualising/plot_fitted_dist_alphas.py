@@ -15,6 +15,8 @@ import vis_helpers as helpers
 import helpers_fit as fit_helpers
 # from interactive_dist import SlicePlotter
 
+REDTEXT = '\033[1;31m'
+ENDC = '\033[1;m'
 
 def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
     """Perform a countour plot of 2D distribution function data."""
@@ -359,6 +361,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
 
     # Plot a little circle indicating the direction of B
     Bhat = B / np.linalg.norm(B)
+    print(REDTEXT + 'Magnetic field direction' + ENDC)
     print(Bhat)
     length = 100
     x0 = -500
@@ -376,8 +379,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                              edgecolor='k', facecolor='none')
         ax[axnum].add_patch(circ)
 
-
+    print(REDTEXT + 'Proton parameters' + ENDC)
     print(output)
+    print(REDTEXT + 'Alpha parameters' + ENDC)
     print(fit_dict)
 
     # Plot formatting
