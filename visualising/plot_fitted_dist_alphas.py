@@ -101,6 +101,15 @@ def bi_maxwellian_3D(vx, vy, vz, A, vth_perp, vth_z, vbx, vby, vbz):
     return A * np.exp(-exponent)
 
 
+def maxwellian_1D(v, vbulk, T, m=1):
+    """
+    Return distribution function (peak normalised to 1) given speed and
+    temperature.
+    """
+    vth = helpers.temp2vth(T, m=m)
+    return np.exp(-((v - vbulk) / vth)**2)
+
+
 def perp_par_maxwellian(n, wperp, wpar, vperp, vpar):
     out = np.exp(-((vpar / wpar)**2 +
                    (vperp / wperp)**2))
