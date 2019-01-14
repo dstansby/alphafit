@@ -13,7 +13,7 @@ import heliopy.data.helios as helios
 sys.path.append('fitting')
 import vis_helpers as helpers
 import helpers_fit as fit_helpers
-from interactive_dist import SlicePlotter
+# from interactive_dist import SlicePlotter
 
 
 def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
@@ -284,12 +284,24 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
               last_high_ratio=np.nan,
               alpha_dist=None,
               fit_dict=None):
+    """
+    time : datetime.datetime
+    probe : str
+    dist :
+    params :
+    output :
+    I1a :
+    I1b :
+    alpha_dist :
+    fit_dict :
+    """
     B = output[['Bx', 'By', 'Bz']].values
     magempty = np.any(~np.isfinite(output[['Bx', 'By', 'Bz']].values))
     if magempty:
         raise RuntimeError('No magnetic field present')
     dist = dist.copy()
 
+    # Create mega figure
     title = 'Helios {} '.format(probe) + str(time)
     fig = plt.figure(figsize=(12, 10))
     spec = gridspec.GridSpec(ncols=4, nrows=3)
@@ -303,16 +315,20 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax8 = fig.add_subplot(spec[1, 3])
     ax = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]
 
-    # fig.suptitle(title)
     dist[['vx', 'vy', 'vz', '|v|']] /= 1e3
-    alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
+    # alpha_dist[['vx', 'vy', 'vz', '|v|']] /= (np.sqrt(2) * 1e3)
 
+    # Create the alpha distribution by copying the original distribtuion,
+    # setting all the pdf values to a very small number, then copying across
+    # the actaulpdf values above the alpha cut.
     alpha_dist_filled = dist.copy()
     alpha_dist_filled[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
     alpha_dist_filled['pdf'] = -1e-10
     alpha_dist_filled.loc[alpha_dist.index.intersection(dist.index), ['pdf']] = alpha_dist['pdf']
 
     alpha_dist = alpha_dist_filled
+
+    # Create a copy of the distribution to put in the bulk velocity frame
     dist_vcentre = dist.copy()
     # Distribution is in spacecraft frame, but output velocities are in
     # solar wind frame, so correct
@@ -321,19 +337,25 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     alpha_dist['vx'] += params['helios_vr']
     alpha_dist['vy'] += params['helios_v']
     sqrt2 = np.sqrt(2)
+
+    # Plot cuts of the whole distribution function
     plot_xyz_cuts(dist_vcentre[['vx', 'vy', 'vz']].values,
                   dist_vcentre['pdf'].values,
                   ax[0], ax[1])
     ax[0].set_ylabel(r'$v_{r}$ (km/s)')
     ax[0].set_xlabel(r'$v_{t}$ (km/s)')
     ax[1].set_xlabel(r'$v_{n}$ (km/s)')
+
+    # Scatter the true alpha velocity
     ax[0].scatter(fit_dict['va_y'], fit_dict['va_x'], marker='+', color='r')
     ax[1].scatter(fit_dict['va_z'], fit_dict['va_x'], marker='+', color='r')
+    # Scatter the fitted proton and alpha bulk velocities
     ax[0].scatter(fit_dict['va_y'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
     ax[1].scatter(fit_dict['va_z'] * sqrt2, fit_dict['va_x'] * sqrt2, marker='+', color='k')
     ax[0].scatter(output['vp_y'], output['vp_x'], marker='x', color='k')
     ax[1].scatter(output['vp_z'], output['vp_x'], marker='x', color='k')
 
+    # Plot a little circle indicating the direction of B
     Bhat = B / np.linalg.norm(B)
     print(Bhat)
     length = 100
@@ -342,9 +364,17 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax[0].plot([x0, x0 + Bhat[1] * length], [y0, y0 + Bhat[0] * length], color='k')
     ax[1].plot([x0, x0 + Bhat[2] * length], [y0, y0 + Bhat[0] * length], color='k')
     for axnum in [0, 1]:
+        # Magnetic field patch
         circ = mpatch.Circle((x0, y0), length,
                              edgecolor='0.4', facecolor='none', linewidth=1)
         ax[axnum].add_patch(circ)
+
+        # Circle indicating the cut
+        circ = mpatch.Circle((0, 0), last_high_ratio,
+                             edgecolor='k', facecolor='none')
+        ax[axnum].add_patch(circ)
+
+
     print(output)
     print(fit_dict)
 
@@ -356,37 +386,41 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     vs = dist['|v|'].groupby(level=['E_bin']).mean()
     pdf = dist['pdf'].groupby(level=['E_bin']).sum() * vs**2
 
+    # Plot the 1D distribution functions
     ax[2].plot(I1a['df'] / I1a['df'].max(),
                marker='x', label='I1a')
     ax[2].plot(I1b['df'] / I1b['df'].max(),
                marker='x', label='I1b')
-
-    for axnum in [0, 1]:
-        circ = mpatch.Circle((0, 0), last_high_ratio,
-                             edgecolor='k', facecolor='none')
-        ax[axnum].add_patch(circ)
-
     # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
     #            marker='x', label='I1b interp')
 
+    # Plot ratio of 1D distribution functions
     ax[3].plot(I1a['Ratio'], marker='x')
-    for axnum in [3, ]:
+    for axnum in [2, 3]:
         ax[axnum].axvline(last_high_ratio, color='k')
     ax[3].axhline(1, color='k')
 
     if not magempty:
+        # Plot the reduced fitted distribution function for protons
         protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
-                                   output['vp_x'], output['vp_y'], output['vp_z'],
+                                   output['vp_x'],
+                                   output['vp_y'],
+                                   output['vp_z'],
                                    output['n_p'], params, B)
         ax[2].plot(protons_1d.index.values,
                    protons_1d / protons_1d.max(), label='Proton fit')
+
+        # Plot the reduced fitted distribution function for alphas
         alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
                                   helpers.temp2vth(fit_dict['Ta_par'], m=4),
-                                  fit_dict['va_x'], fit_dict['va_y'], fit_dict['va_z'],
+                                  fit_dict['va_x'],
+                                  fit_dict['va_y'],
+                                  fit_dict['va_z'],
                                   fit_dict['n_a'], params, B,
                                   moverq=2)
         ax[2].plot(alphas_1d.index.values,
                    alphas_1d / (protons_1d.max()), label='Alpha fit')
+
         # Formatting
         ax[2].legend(frameon=False)
         ax[2].set_yscale('log')
@@ -396,6 +430,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
+    # Plot cuts of the alpha distribution function
     plot_xyz_cuts(alpha_dist[['vx', 'vy', 'vz']].values,
                   alpha_dist['pdf'].values,
                   ax[4], ax[5])
@@ -419,7 +454,6 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     fig.tight_layout()
 
     # Plot perp/par cuts for the alphas
-    plt.close('all')
     fig, axs = plt.subplots(ncols=2, figsize=(6, 3), sharey=True)
     maxpdf = np.log(alpha_dist['pdf'].max())
     # Set levels from maximum to 1e-2 the maximum
