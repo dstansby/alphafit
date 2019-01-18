@@ -488,9 +488,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     old_va = merged['val'].values
     old_Ta = merged['Tal'].values
 
-    print(REDTEXT + 'New/old alpha temperatures' + ENDC)
-    old_par_rat = fit_dict['Ta_par'] / old_Ta
-    print(f'par: {old_par_rat}')
+    print(REDTEXT + 'Old paramters' + ENDC)
+    print(merged.iloc[0, :])
 
     # Everything in the solar wind frame here
     vs = alphas_1d.index.values
