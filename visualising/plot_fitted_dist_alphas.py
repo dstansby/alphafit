@@ -439,6 +439,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                        vth_par, vth_perp, axs[0], axs[1], levels=levels)
     # Plot parameters
     fig.suptitle('Helios {}, {}'.format(probe, str(time)))
+    axs[0].legend(loc='upper left', frameon=False)
     axs[1].tick_params(axis='y', reset=True)
     axs[1].yaxis.tick_right()
     fig.subplots_adjust(top=0.9, bottom=0.2, left=0.14, right=0.89,
@@ -446,7 +447,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ###
     # 1D plotting
     ####
-    fig, onedaxs = plt.subplots(nrows=1, sharex=True)
+    fig, onedaxs = plt.subplots(nrows=1, sharex=True, figsize=(6, 3))
     onedaxs = [onedaxs]
     ax = onedaxs[0]
 
@@ -529,8 +530,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         ax.axvline(np.sqrt(helpers.vtoEq(last_high_ratio + np.mean(np.diff(I1a.index.values)))),
                    linestyle='--', linewidth=1, color='k', alpha=0.5)
     ax.set_title(title)
-
-    # fig.tight_layout()
+    fig.tight_layout()
     # fig.subplots_adjust(top=0.9)
 
     # Interactive slices
