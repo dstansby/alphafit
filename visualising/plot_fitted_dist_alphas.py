@@ -26,12 +26,15 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
     if type(levels) == int:
         levels = np.linspace(np.nanmin(pdf), np.nanmax(pdf), levels)
     ax.tricontourf(x, y, pdf, levels=levels, cmap='viridis')
-    ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k',
-                  linewidths=0.5, alpha=0.8)
+    # ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k',
+    #               linewidths=0.5, alpha=0.8)
     if add1overe:
-        ax.tricontour(x, y, pdf, levels=[np.nanmax(levels) - 1],
-                      linestyles='-', colors='k',
-                      linewidths=1)
+        kwargs = {'linestyle': '--', 'color': 'black', 'lw': 1.5}
+        ax.tricontour(x, y, pdf, levels=[np.nanmax(pdf) - 1],
+                      linestyles=kwargs['linestyle'],
+                      colors=kwargs['color'],
+                      linewidths=kwargs['lw'])
+        ax.plot(0, 0, label='Data', **kwargs)
     if showbins:
         ax.scatter(x, y, color='k', marker='+', s=4, alpha=0.5)
 
@@ -254,11 +257,11 @@ def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2,
     ax1.set_xlabel(r'$v_{\perp 2}$ (km/s)')
     ax2.set_xlabel(r'$v_{\parallel}$ (km/s)')
 
-    ax1.plot([-vth_perp / 2, vth_perp / 2], [0, 0], color='k')
-    ax1.plot([0, 0], [-vth_perp / 2, vth_perp / 2], color='k')
-
-    ax2.plot([-vth_par / 2, vth_par / 2], [0, 0], color='k')
-    ax2.plot([0, 0], [-vth_perp / 2, vth_perp / 2], color='k')
+    circ_kwargs = {'color': 'tab:red', 'fill': False, 'linewidth': 1.5}
+    ax1.add_patch(mpatch.Ellipse((0, 0), 2 * vth_perp, 2 * vth_perp, **circ_kwargs))
+    ax2.add_patch(mpatch.Ellipse((0, 0), 2 * vth_par, 2 * vth_perp, **circ_kwargs))
+    ax1.plot(0, 0, color=circ_kwargs['color'], label='Fit')
+    ax2.plot(0, 0, color=circ_kwargs['color'], label='Fit')
 
     # Mangetic field direction annotations
     ax1.text(0.8, 0.9, 'B ⊗', fontsize=14, transform=ax1.transAxes)
@@ -284,12 +287,12 @@ def plot_xyz_cuts(vs, pdf, ax1, ax2, levels=None):
     x, y, slice_pdf = slice_dist(vs, pdf, 2)
     plt.sca(ax1)
     if x.size > 3 and y.size > 3:
-        contour2d(y, x, slice_pdf, levels=levels, showbins=False)
+        contour2d(y, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
 
     x, z, slice_pdf = slice_dist(vs, pdf, 1)
     plt.sca(ax2)
     if x.size > 3 and z.size > 3:
-        contour2d(z, x, slice_pdf, levels=levels, showbins=False)
+        contour2d(z, x, slice_pdf, levels=levels, showbins=False, add1overe=True)
     for a in [ax1, ax2]:
         a.set_aspect('equal', 'datalim')
 
