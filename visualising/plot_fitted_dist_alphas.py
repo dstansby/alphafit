@@ -451,7 +451,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax = onedaxs[0]
 
     # Plot the 1D distribution functions
-    ax.plot(I1a['df'] / I1a['df'].max(),
+    ax.plot(np.sqrt(helpers.vtoEq(I1a.index.values)), I1a['df'] / I1a['df'].max(),
             marker='+', label='Measured', lw=0.5, zorder=10)
     # ax.plot(I1b['df'] / I1b['df'].max(),
     #         marker='x', label='I1b')
@@ -465,7 +465,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                                output['vp_z'],
                                output['n_p'], params, B)
     protons_1d_norm = protons_1d / protons_1d.max()
-    ax.plot(protons_1d.index.values,
+    ax.plot(np.sqrt(helpers.vtoEq(protons_1d.index.values)),
             protons_1d_norm, label='Proton fit')
 
     # Plot the reduced fitted distribution function for alphas
@@ -477,7 +477,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
                               fit_dict['n_a'], params, B,
                               moverq=2)
     alphas_1d_norm = alphas_1d / protons_1d.max()
-    ax.plot(alphas_1d.index.values, alphas_1d_norm, label='Alpha fit')
+    ax.plot(np.sqrt(helpers.vtoEq(alphas_1d.index.values)), alphas_1d_norm, label='Alpha fit')
     # alphas_1d_norm = alphas_1d_norm.reindex(protons_1d.index, method='nearest')
     # ax.plot(protons_1d.index.values, protons_1d_norm + alphas_1d_norm, label='Proton + alpha fit')
 
@@ -508,15 +508,14 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         vs, old_alpha_dist, 1 / 2)
 
     old_alpha_dist /= protons_1d.max()
-    # Take into accoutn different factors out front
-    # ax.plot(vs, old_alpha_dist, label='Maxwellian based on\nold alpha moments')
+    ax.plot(np.sqrt(helpers.vtoEq(vs)), old_alpha_dist, label='Maxwellian based on\nold alpha moments')
 
     # Formatting
     ax.legend(frameon=False)
     ax.set_yscale('log')
     ax.set_ylim(1e-3, 2)
-    ax.set_xlim(400, 1600)
-    ax.set_xlabel(r'$|v_{p}|$' + ' (km/s)')
+    ax.set_xlim(1, 4)
+    ax.set_xlabel(r'$\sqrt{\mathrm{E / q}}$ ($\sqrt{\mathrm{keV / q}}$)')
     '''
     ax = onedaxs[1]
     # Plot ratio of 1D distribution functions
@@ -527,7 +526,7 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax.set_ylabel('(particle counts) / (current counts)')'''
 
     for ax in onedaxs:
-        ax.axvline(last_high_ratio + np.mean(np.diff(I1a.index.values)),
+        ax.axvline(np.sqrt(helpers.vtoEq(last_high_ratio + np.mean(np.diff(I1a.index.values)))),
                    linestyle='--', linewidth=1, color='k', alpha=0.5)
     ax.set_title(title)
 

@@ -13,6 +13,10 @@ from config import get_dirs
 output_dir, _ = get_dirs()
 
 
+def vtoEq(v):
+    return (0.5 * const.m_p * (v * u.km / u.s)**2).to(u.eV).value / 1e3
+
+
 def temp2vth(temp, m=1):
     """
     Assumes velocities are floating point numbers in degrees Kelvin.
