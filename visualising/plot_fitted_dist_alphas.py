@@ -337,8 +337,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # the actaulpdf values above the alpha cut.
     alpha_dist_filled = dist.copy()
     alpha_dist_filled[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
-    alpha_dist_filled['pdf'] = -1e-10
-    alpha_dist_filled.loc[alpha_dist.index.intersection(dist.index), ['pdf']] = alpha_dist['pdf']
+    alpha_dist_filled['pdf'] = -1e10
+    alpha_dist_filled.loc[
+        alpha_dist.index.intersection(dist.index), ['pdf']] = alpha_dist['pdf']
 
     alpha_dist = alpha_dist_filled
 
