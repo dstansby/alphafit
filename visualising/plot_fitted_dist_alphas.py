@@ -1,4 +1,6 @@
 from datetime import timedelta as dt
+import matplotlib
+matplotlib.use('qt5agg')
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
