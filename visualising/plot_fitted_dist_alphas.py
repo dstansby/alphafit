@@ -491,9 +491,18 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # Download and plot the distribution function from original alpha params
     merged = helios.merged(
         probe, time - dt(seconds=10), time + dt(seconds=10)).data
-    old_na = merged['nal'].values
-    old_va = merged['val'].values
-    old_Ta = merged['Tal'].values
+    print(type(probe))
+    if probe == '1':
+        nkey = 'N_a'
+        vkey = 'V_a'
+        tkey = 'T_a'
+    else:
+        nkey = 'nal'
+        vkey = 'val'
+        tkey = 'Tal'
+    old_na = merged[nkey].values
+    old_va = merged[vkey].values
+    old_Ta = merged[tkey].values
 
     print(REDTEXT + 'Old paramters' + ENDC)
     print(merged.iloc[0, :])
