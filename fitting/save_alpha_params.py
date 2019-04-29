@@ -39,8 +39,7 @@ if args.verbose:
 
 # This file sets the intervals during which fitting is done
 # See 'intervals_example.csv' for an example file
-interval_file = ('/Users/dstansby/github/publication-code/'
-                 '2018-helios-alphas/stream_times.csv')
+interval_file = ('fitting/intervals_example.csv')
 # Set input parameters
 days = helpers.read_intervals(interval_file)
 
@@ -53,7 +52,8 @@ status_dict = {1: 'Fitting successful',
                6: 'No distribution left after cutting',
                7: 'Two distributions found in one file',
                8: 'I1b distribution function corrupted',
-               9: 'Velocity out of range'
+               9: 'Velocity out of range',
+               10: 'Error on fitted parameters too high'
                }
 
 # Expected parameters from the fitting process
@@ -288,14 +288,21 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         status = 3
     else:
         popt, pcov = result
-        # Convert the output of the fitting process to a sensible dict with
-        # the alpha parameters.
-        fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params,
-                                             R, particle_mass=4)
-        if magempty:
-            status = 2
+        perr = np.sqrt(np.diag(pcov))
+        logger.info(f'Error is {perr}')
+        relerr = np.abs(perr) / popt
+        if np.any(relerr > 1):
+            status = 10
         else:
-            status = 1
+            # Convert the output of the fitting process to a sensible dict with
+            # the alpha parameters.
+            fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params,
+                                                 R, particle_mass=4)
+            logger.info(f'Final parameters are {fit_dict}')
+            if magempty:
+                status = 2
+            else:
+                status = 1
 
     # If requested, visualise the resulting fit and original distributions
     if (args.plot and
