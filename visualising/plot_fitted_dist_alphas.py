@@ -508,7 +508,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     print(REDTEXT + 'Old paramters' + ENDC)
     print(merged.iloc[0, :])
 
+    # Plot Maxwellian based on old parameters
     # Everything in the solar wind frame here
+    '''
     vs = alphas_1d.index.values
     old_alpha_dist = maxwellian_1D(vs, old_va, old_Ta, m=4)
     _, new_alpha_dist = fit_helpers.distribution_function_correction(
@@ -525,7 +527,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
         vs, old_alpha_dist, 1 / 2)
 
     old_alpha_dist /= protons_1d.max()
-    ax.plot(np.sqrt(helpers.vtoEq(vs)), old_alpha_dist, label='Maxwellian based on\nold alpha moments')
+    ax.plot(np.sqrt(helpers.vtoEq(vs)), old_alpha_dist,
+            label='Maxwellian based on\nold alpha moments')
+    '''
 
     # Formatting
     ax.legend(frameon=False)
