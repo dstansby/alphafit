@@ -305,6 +305,13 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
             else:
                 status = 1
 
+    fit_dict = check_output(fit_dict, status)
+    # If the radial component of velocity is lies outside the array of
+    # experimental data, reject the fit as it is probably overfitted in the
+    # radial direction
+    if fit_dict['va_x'] < np.min(vs[:, 0]):
+        return check_output({}, 9)
+
     # If requested, visualise the resulting fit and original distributions
     if (args.plot and
             not isinstance(fit_dict, int) and
@@ -322,12 +329,6 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         # plt.savefig('{}.png'.format(time))
         plt.show()
 
-    fit_dict = check_output(fit_dict, status)
-    # If the radial component of velocity is lies outside the array of
-    # experimental data, reject the fit as it is probably overfitted in the
-    # radial direction
-    if fit_dict['va_x'] < np.min(vs[:, 0]):
-        return check_output({}, 9)
     return fit_dict
 
 
