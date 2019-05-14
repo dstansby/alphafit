@@ -27,7 +27,7 @@ def contour2d(x, y, pdf, showbins=True, levels=10, add1overe=False):
     pdf = np.log(pdf)
     if type(levels) == int:
         levels = np.linspace(np.nanmin(pdf), np.nanmax(pdf), levels)
-    if x.ndim != 2:
+    if np.all(x == x[0]):
         return
     ax.tricontourf(x, y, pdf, levels=levels, cmap='viridis')
     # ax.tricontour(x, y, pdf, levels=levels, linestyles='-', colors='k',
