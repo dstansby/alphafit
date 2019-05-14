@@ -339,8 +339,9 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
 
     # Create the alpha distribution by copying the original distribtuion,
     # setting all the pdf values to a very small number, then copying across
-    # the actaulpdf values above the alpha cut.
+    # the actaul pdf values above the alpha cut.
     alpha_dist_filled = dist.copy()
+    # Correct the alpha velocities
     alpha_dist_filled[['vx', 'vy', 'vz', '|v|']] /= np.sqrt(2)
     alpha_dist_filled['pdf'] = -1e10
     alpha_dist_filled.loc[
