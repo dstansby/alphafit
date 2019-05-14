@@ -72,8 +72,9 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
                    vth_perp * 1e3 *
                    vth_perp * 1e3 *
                    vth_par * 1e3)
-    vx -= params['helios_vr']
-    vy -= params['helios_v']
+    # Add spacecraft abberation to get velocities in spacecraft frame
+    vbx -= params['helios_vr']
+    vby -= params['helios_v']
     vbulkBframe = np.dot(R, np.array([vbx, vby, vbz]))
     df = bi_maxwellian_3D(v[:, 0], v[:, 1], v[:, 2],
                           A, vth_perp, vth_par,
