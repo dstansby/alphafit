@@ -51,7 +51,6 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
     Returns the integrated 1D function in instrument velocities. Use *moverq*
     in terms of proton units to normalise appropriately.
     '''
-    squashing_factor = np.sqrt(moverq)
     R = helpers.rotationmatrix(B)
     vrminlim, vrmaxlim = 200, 1400
     # Calculate reduced 3D fit
@@ -63,8 +62,9 @@ def integrated_1D(vth_perp, vth_par, vbx, vby, vbz, n, params, B, moverq=1):
     thetas = thetas.flatten()
     phis = phis.flatten()
     vx, vy, vz = helpers.sph2cart(modvs, thetas, phis)
+    # This is an array of points at which to sample the distribution function
     v = np.array([vx, vy, vz]).T
-    # Transform into rotated frame
+    # Transform into magnetic field aligned frame
     v = np.dot(R, v.T).T
 
     # Calculate bi-maxwellian parameters in field aligned frame
