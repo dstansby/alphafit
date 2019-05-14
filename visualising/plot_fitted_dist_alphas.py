@@ -230,7 +230,7 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
             # Calculate and plot fits
             theta = az_cut['theta'].iloc[0]
             phi = az_cut['phi'].iloc[0]
-            vs_fit = np.linspace(600, 1600, 100) / np.sqrt(moverq)
+            vs_fit = np.linspace(400, 1600, 100) / np.sqrt(moverq)
             df_fit = bimax_angular_cut(theta, phi, vs_fit, fit_dict, R, m=m)
             vs_fit, df_fit = fit_helpers.distribution_function_correction(
                 vs_fit, df_fit, 1 / moverq)
@@ -243,8 +243,8 @@ def plot_angular_cuts(dist, fit_dict, R, moverq=1, m=1):
                 ax.axhline(10**exp, linewidth=1, alpha=0.5, color='k')
 
     ax.set_yscale('log')
-    ax.set_ylim(1e-14, 1e-10)
-    ax.set_xlim(600, 1600)
+    ax.set_ylim(1e-14, 1e-9)
+    ax.set_xlim(400, 1600)
 
 
 def plot_perp_par_cuts(vs, pdf, v0, B0, vth_par, vth_perp, ax1, ax2,
@@ -537,8 +537,8 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # Formatting
     ax.legend(frameon=False)
     ax.set_yscale('log')
-    ax.set_ylim(1e-3, 2)
-    ax.set_xlim(1, 4)
+    ax.set_ylim(1e-4, 2)
+    ax.set_xlim(0.5, 4)
     ax.set_xlabel(r'$\sqrt{\mathrm{E / q}}$ ($\sqrt{\mathrm{keV / q}}$)')
     '''
     ax = onedaxs[1]
@@ -547,10 +547,11 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     ax.axhline(0.5, color='k', linestyle='--', lw=1)
     ax.axhline(1, color='k', linestyle='--', lw=1)
     ax.set_ylim(0.2, 1.2)
-    ax.set_ylabel('(particle counts) / (current counts)')'''
+    ax.set_ylabel('(particle counts) / (current counts)')
+    '''
 
     for ax in onedaxs:
-        ax.axvline(np.sqrt(helpers.vtoEq(last_high_ratio + np.mean(np.diff(I1a.index.values)))),
+        ax.axvline(np.sqrt(helpers.vtoEq(last_high_ratio)),
                    linestyle='--', linewidth=1, color='k', alpha=0.5)
     ax.set_title(title)
     fig.tight_layout()
