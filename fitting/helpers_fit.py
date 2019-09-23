@@ -81,12 +81,25 @@ def process_fitparams(fitparams, species, dist_vs, magempty, params, R,
     return fit_dict
 
 
-def dist_cut(dist3D, velocity):
+def dist_cut(dist3D, velocity, keep='above'):
     """
     Returns the portion of dist3D that has speeds >= velocity.
+
+    Parameters
+    ----------
+    keep : {'above', 'below'}
+        Whether to keep above or below the *velocity* threshold.
     """
     dist3D = dist3D.copy()
-    return dist3D.loc[dist3D['|v|'] / 1e3 >= velocity]
+    if keep == 'above':
+        tokeep = dist3D['|v|'] / 1e3 >= velocity
+        return dist3D.loc[dist3D['|v|'] / 1e3 >= velocity]
+    elif keep == 'below':
+        tokeep = dist3D['|v|'] / 1e3 <= velocity
+    else:
+        raise ValueError
+
+    return dist3D.loc[tokeep]
 
 
 def maxwellian_1D(v, n, v0, v_th):
