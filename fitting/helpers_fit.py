@@ -9,6 +9,37 @@ import astropy.units as u
 import astropy.constants as const
 
 
+def manual_np(df):
+    """
+    Do a manual numerical integration to estimate the number density.
+    """
+    # Hardcode dtheta and dphi
+    # phis = np.unique(df['phi'].values)
+    # dphis = np.sort(np.diff(phis))
+    dphi = 9.81743247e-02
+    # thetas = np.unique(df['theta'].values)
+    # dthetas = np.sort(np.diff(thetas))
+    dtheta = 8.88372572e-02
+
+    estimate = df['pdf']
+    # Integrate over phi
+    estimate = estimate.groupby(level=['E_bin', 'El']).apply(np.trapz, dx=dphi)
+
+    # Integrate over theta
+    thetas = df['theta'].groupby(level=['E_bin', 'El']).apply(np.median)
+    estimate *= np.cos(thetas)
+    estimate = estimate.groupby(level='E_bin').apply(np.trapz, dx=dtheta)
+
+    # Integrate over v
+    vs = df['|v|'].groupby(level='E_bin').apply(np.median)
+    estimate *= vs**2
+    estimate = np.trapz(estimate.values, x=vs.values)
+
+    # This is in 1/m^{3}, convert to 1/cm^{3}
+    estimate *= 1e-6
+    return estimate
+
+
 def distribution_function_correction(vs, df, moverq):
     '''
     Correct a distribution function for different mass per charge ratios.

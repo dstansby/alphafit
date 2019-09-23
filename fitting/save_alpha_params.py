@@ -312,6 +312,11 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     if fit_dict['va_x'] < np.min(vs[:, 0]):
         return check_output({}, 9)
 
+    # Do a manual esimate of the proton number density
+    proton_dist = helpers.dist_cut(dist3D, speed_cut + 1, 'below')
+    np_estimate = helpers.manual_np(proton_dist)
+    fit_dict['n_p'] = np_estimate
+
     # If requested, visualise the resulting fit and original distributions
     if (args.plot and
             not isinstance(fit_dict, int) and
