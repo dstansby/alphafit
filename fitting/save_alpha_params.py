@@ -290,7 +290,7 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
         popt, pcov = result
         perr = np.sqrt(np.diag(pcov))
         logger.info(f'Absolute error is {perr}')
-        relerr = np.abs(perr) / popt
+        relerr = np.abs(perr / popt)
         logger.info(f'Relative error is {relerr}')
         if np.any(relerr > 1):
             status = 10
