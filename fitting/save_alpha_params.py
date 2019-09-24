@@ -345,13 +345,15 @@ def fit_rows(x):
         # Only do alpha fitting if high data mode
         if (distparams.loc[time]['data_rate'].size != 1):
             fit_dict = check_output({}, 7)
-        elif not (distparams.loc[time]['data_rate'] == 1):
-            fit_dict = check_output({}, 4)
         # Only do alpha fitting if fitting proton core velocity was successful
         elif not np.isfinite(row['vp_x']):
             fit_dict = check_output({}, 5)
+
+        dist3D = dists_3D.loc[time]
+        if not (distparams.loc[time]['data_rate'] == 1):
+            np_estimate = helpers.manual_np(dist3D)
+            fit_dict = check_output({}, 4, np_estimate)
         else:
-            dist3D = dists_3D.loc[time]
             I1a = I1as.loc[time]
             I1b = I1bs.loc[time]
             params = distparams.loc[time]
