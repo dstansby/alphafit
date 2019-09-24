@@ -378,8 +378,9 @@ def fit_single_day(year, doy, probe, startdelta=None, enddelta=None):
     if startdelta is not None:
         starttime += startdelta
         input('Manually setting starttime, press enter to continue')
-        if enddelta is not None:
-            endtime = starttime + enddelta
+    if enddelta is not None:
+        endtime = starttime + enddelta
+        input('Manually setting endtime, press enter to continue')
 
     try:
         corefit = helios.corefit(probe, starttime, endtime).data
