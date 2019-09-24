@@ -58,10 +58,10 @@ status_dict = {1: 'Fitting successful',
 
 # Expected parameters from the fitting process
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
-                       'va_y', 'va_z', 'n_a', 'Status'])
+                       'va_y', 'va_z', 'n_a', 'Status', 'n_p'])
 
 
-def check_output(fit_dict, status):
+def check_output(fit_dict, status, n_proton=np.nan):
     """
     Check the output of the fitting process.
 
@@ -71,6 +71,8 @@ def check_output(fit_dict, status):
         Must be either empty, or contain all expected fields.
     status : int
         See status_dict for information.
+    n_proton : float
+        Caclulated proton number density.
     """
     if status not in status_dict:
         raise RuntimeError('Status must be in the status dictionary')
@@ -85,6 +87,7 @@ def check_output(fit_dict, status):
         for param in expected_params:
             fit_dict[param] = np.nan
     fit_dict['Status'] = status
+    fit_dict['n_p'] = n_proton
     assert set(fit_dict.keys()) == expected_params, 'Keys not as expected: {}'.format(fit_dict.keys())
     return fit_dict
 
@@ -242,12 +245,16 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     _, _, speed_cut, _ = find_speed_cut(I1a, I1b, min_speed=speed_cut)
     logger.info('Final speed cut at {} km/s'.format(speed_cut))
 
+    # Do a manual esimate of the proton number density
+    proton_dist = helpers.dist_cut(dist3D, speed_cut + 1, 'below')
+    np_estimate = helpers.manual_np(proton_dist)  # , I1a)
+
     # Cut out what we think is the alpha distribution
     # NOTE: this is in the instrument frame of reference and has no alpha
     # particle corrections applied
     alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
     if alpha_dist.empty:
-        return check_output({}, 6)
+        return check_output({}, 6, np_estimate)
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
 
@@ -305,16 +312,13 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
             else:
                 status = 1
 
-    fit_dict = check_output(fit_dict, status)
+    fit_dict = check_output(fit_dict, status, np_estimate)
     # If the radial component of velocity is lies outside the array of
     # experimental data, reject the fit as it is probably overfitted in the
     # radial direction
     if fit_dict['va_x'] < np.min(vs[:, 0]):
-        return check_output({}, 9)
+        return check_output({}, 9, np_estimate)
 
-    # Do a manual esimate of the proton number density
-    proton_dist = helpers.dist_cut(dist3D, speed_cut + 1, 'below')
-    np_estimate = helpers.manual_np(proton_dist)
     fit_dict['n_p'] = np_estimate
 
     # If requested, visualise the resulting fit and original distributions
