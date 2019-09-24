@@ -9,29 +9,48 @@ import astropy.units as u
 import astropy.constants as const
 
 
-def manual_np(df):
+def manual_np(df, df_1d=None):
     """
     Do a manual numerical integration to estimate the number density.
+
+    Parameters
+    ----------
+    df_1d :
+        If not ``None`` will perform a visual 1D comparision.
     """
     # Hardcode dtheta and dphi
     # phis = np.unique(df['phi'].values)
     # dphis = np.sort(np.diff(phis))
     dphi = 9.81743247e-02
+    # assert np.allclose(dphis[-1], dphi)
+
     # thetas = np.unique(df['theta'].values)
     # dthetas = np.sort(np.diff(thetas))
     dtheta = 8.88372572e-02
+    # assert np.allclose(dthetas[-1], dtheta)
 
     estimate = df['pdf']
     # Integrate over phi
-    estimate = estimate.groupby(level=['E_bin', 'El']).apply(np.trapz, dx=dphi)
+    estimate = estimate.groupby(level=['E_bin', 'El']).sum() * dphi
 
     # Integrate over theta
     thetas = df['theta'].groupby(level=['E_bin', 'El']).apply(np.median)
     estimate *= np.cos(thetas)
-    estimate = estimate.groupby(level='E_bin').apply(np.trapz, dx=dtheta)
+    estimate = estimate.groupby(level='E_bin').sum() * dtheta
+
+    vs = df['|v|'].groupby(level='E_bin').apply(np.median)
+
+    if df_1d is not None:
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        ax.plot(df_1d / df_1d.max())
+        estimate_1d = estimate * vs**2
+        ax.plot(vs / 1e3, estimate_1d / np.max(estimate_1d))
+        ax.set_yscale('log')
+        plt.show()
+        exit()
 
     # Integrate over v
-    vs = df['|v|'].groupby(level='E_bin').apply(np.median)
     estimate *= vs**2
     estimate = np.trapz(estimate.values, x=vs.values)
 
