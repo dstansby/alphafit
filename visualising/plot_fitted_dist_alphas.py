@@ -2,6 +2,7 @@ from datetime import timedelta as dt
 import matplotlib
 matplotlib.use('qt5agg')
 
+import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.patches as mpatch
@@ -15,6 +16,7 @@ from heliopy.data import helios
 sys.path.append('fitting')
 import vis_helpers as helpers
 import helpers_fit as fit_helpers
+from vis_helpers import BiMax
 # from interactive_dist import SlicePlotter
 
 REDTEXT = '\033[1;31m'
@@ -469,24 +471,32 @@ def plot_dist(time, probe, dist, params, output, I1a, I1b,
     # ax[2].plot(I1a['I1b'] / I1a['I1b'].max(),
     #            marker='x', label='I1b interp')
 
+    proton_bimax = BiMax(label='p',
+                         vth_perp=output['vth_p_perp'] * u.km / u.s,
+                         vth_par=output['vth_p_par'] * u.km / u.s,
+                         vx=output['vp_x'] * u.km / u.s,
+                         vy=output['vp_y'] * u.km / u.s,
+                         vz=output['vp_z'] * u.km / u.s,
+                         n=output['n_p'] * u.cm**-3,
+                         symm_axis=B,
+                         moverq=1)
     # Plot the reduced fitted distribution function for protons
-    protons_1d = integrated_1D(output['vth_p_perp'], output['vth_p_par'],
-                               output['vp_x'],
-                               output['vp_y'],
-                               output['vp_z'],
-                               output['n_p'], params, B)
+    protons_1d = proton_bimax.integrated_1D(params)
     protons_1d_norm = protons_1d / protons_1d.max()
     ax.plot(np.sqrt(helpers.vtoEq(protons_1d.index.values)),
             protons_1d_norm, label='Proton fit')
 
+    alpha_bimax = BiMax(label='a',
+                        vth_perp=helpers.temp2vth(fit_dict['Ta_perp'], m=4) * u.km / u.s,
+                        vth_par=helpers.temp2vth(fit_dict['Ta_par'], m=4) * u.km / u.s,
+                        vx=fit_dict['va_x'] * u.km / u.s,
+                        vy=fit_dict['va_y'] * u.km / u.s,
+                        vz=fit_dict['va_z'] * u.km / u.s,
+                        n=fit_dict['n_a'] * u.cm**-3,
+                        symm_axis=B,
+                        moverq=2)
     # Plot the reduced fitted distribution function for alphas
-    alphas_1d = integrated_1D(helpers.temp2vth(fit_dict['Ta_perp'], m=4),
-                              helpers.temp2vth(fit_dict['Ta_par'], m=4),
-                              fit_dict['va_x'],
-                              fit_dict['va_y'],
-                              fit_dict['va_z'],
-                              fit_dict['n_a'], params, B,
-                              moverq=2)
+    alphas_1d = alpha_bimax.integrated_1D(params)
     alphas_1d_norm = alphas_1d / protons_1d.max()
     ax.plot(np.sqrt(helpers.vtoEq(alphas_1d.index.values)), alphas_1d_norm, label='Alpha fit')
     # alphas_1d_norm = alphas_1d_norm.reindex(protons_1d.index, method='nearest')
