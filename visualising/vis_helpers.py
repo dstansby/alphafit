@@ -1,6 +1,8 @@
 import sys
 import os
 from datetime import timedelta
+from dataclasses import dataclass
+
 import pandas as pd
 import numpy as np
 
@@ -9,8 +11,108 @@ import astropy.units as u
 
 sys.path.append('./fitting')
 from config import get_dirs
+import helpers_fit
 
 output_dir, _ = get_dirs()
+
+
+@dataclass
+class BiMax:
+    n: float
+    vx: float
+    vy: float
+    vz: float
+    vth_perp: float
+    vth_par: float
+    symm_axis: np.array
+    label: str
+    moverq: float
+
+    @property
+    def v(self):
+        return np.array([self.vx, self.vy, self.vz]) * self.vx.unit
+
+    @property
+    def rotation_matrix(self):
+        """
+        Rotation matrix to align with the symmetry axis.
+        """
+        return rotationmatrix(self.symm_axis)
+
+    def sample(self, vx, vy, vz):
+        '''
+        Return distribution function at (vx, vy, vz).
+        '''
+        # Translate to centre of bi-Maxwellian
+        vx = vx - self.vx
+        vy = vy - self.vy
+        vz = vz - self.vz
+        # Rotate to symmetry axis
+        v = np.array([vx, vy, vz]) * vx.unit
+        v = np.dot(self.rotation_matrix, v).T
+        vx = v[:, 0]
+        vy = v[:, 1]
+        vz = v[:, 2]
+
+        A = self.n / (np.power(np.pi, 1.5) *
+                      self.vth_perp *
+                      self.vth_perp *
+                      self.vth_par)
+        exponent = ((vx / self.vth_perp)**2 +
+                    (vy / self.vth_perp)**2 +
+                    (vz / self.vth_par)**2)
+        return A * np.exp(-exponent)
+
+    def integrated_1D(self, params, modvs=None):
+        '''
+        Construct an integrated 1D distribution function from bi-Maxwellian
+        parameters.
+
+        Parameters
+        ----------
+        params
+        modvs : array, optional
+            Speeds at which to sample the distribution. If ``None``, a suitibly
+            fine set of speeds is automatically chosen.
+        '''
+        if modvs is None:
+            vrminlim, vrmaxlim = 200, 1400
+            modvs = np.arange(vrminlim, vrmaxlim, 5.)
+
+        modvs_input = modvs
+        # Calculate 3D grid of sample points
+        nphi, ntheta = 64, 35
+        dphi, dtheta = (2 * np.pi / nphi), (np.pi / ntheta)
+        nv = modvs.size
+        phis_orig = np.linspace(-np.pi, np.pi, nphi)
+        thetas_orig = np.linspace(-np.pi / 2, np.pi / 2, ntheta)
+        modvs, thetas, phis = np.meshgrid(modvs, thetas_orig, phis_orig, indexing='ij')
+        modvs = modvs.flatten() * u.km / u.s
+        thetas = thetas.flatten()
+        phis = phis.flatten()
+        # Array of points at which to sample the distribution function
+        vx, vy, vz = sph2cart(modvs, thetas, phis)
+
+        # Bodge correct for spacecraft aberration
+        vx += params['helios_vr'] * u.km / u.s
+        vy += params['helios_v'] * u.km / u.s
+
+        # Do the full 3D sampling of the distribution function
+        df = self.sample(vx, vy, vz)
+
+        # Take into account different mass per charge ratios, and transform
+        # into the instrument frame of reference
+        modvs_input, df = helpers_fit.distribution_function_correction(
+            modvs_input, df, 1 / self.moverq)
+        # df and modvs are now in the isntrument frame
+        # Mutliply by area element
+        df = df.to(u.s**3 / (u.cm**3 * u.km**3)).value
+        df = df * np.cos(thetas) * modvs.value**2
+        index = pd.MultiIndex.from_product([modvs_input, thetas_orig, phis_orig],
+                                           names=['v', 'theta', 'phi'])
+        df = pd.DataFrame({'Reduced fit': df}, index=index)
+        df = df['Reduced fit'].groupby(level='v').sum() * dphi * dtheta
+        return df
 
 
 def vtoEq(v):
