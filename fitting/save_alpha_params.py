@@ -8,6 +8,7 @@ import os
 import sys
 import warnings
 
+import astropy.units as u
 import scipy.optimize as opt
 import numpy as np
 import pandas as pd
@@ -19,6 +20,7 @@ sys.path.append('visualising/')
 import helpers_fit as helpers
 import helpers_data
 import vis_helpers
+from vis_helpers import BiMax
 
 from config import get_dirs
 output_dir, _ = get_dirs()
@@ -58,10 +60,10 @@ status_dict = {1: 'Fitting successful',
 
 # Expected parameters from the fitting process
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
-                       'va_y', 'va_z', 'n_a', 'Status', 'n_p'])
+                       'va_y', 'va_z', 'n_a', 'Status', 'np_beam'])
 
 
-def check_output(fit_dict, status, n_proton=np.nan):
+def check_output(fit_dict, status, np_beam=np.nan):
     """
     Check the output of the fitting process.
 
@@ -71,8 +73,8 @@ def check_output(fit_dict, status, n_proton=np.nan):
         Must be either empty, or contain all expected fields.
     status : int
         See status_dict for information.
-    n_proton : float
-        Caclulated proton number density.
+    np_beam : float
+        Caclulated proton beam number density.
     """
     if status not in status_dict:
         raise RuntimeError('Status must be in the status dictionary')
@@ -87,7 +89,7 @@ def check_output(fit_dict, status, n_proton=np.nan):
         for param in expected_params:
             fit_dict[param] = np.nan
     fit_dict['Status'] = status
-    fit_dict['n_p'] = n_proton
+    fit_dict['np_beam'] = np_beam
     assert set(fit_dict.keys()) == expected_params, 'Keys not as expected: {}'.format(fit_dict.keys())
     return fit_dict
 
@@ -221,6 +223,15 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
     """
     Fit a single distribution.
     """
+    proton_bimax = BiMax(n=corefit['n_p'] / (u.cm**3),
+                         vx=corefit['vp_x'] * u.km / u.s,
+                         vy=corefit['vp_y'] * u.km / u.s,
+                         vz=corefit['vp_z'] * u.km / u.s,
+                         vth_perp=corefit['vth_p_perp'] * u.km / u.s,
+                         vth_par=corefit['vth_p_par'] * u.km / u.s,
+                         symm_axis=corefit[['Bx', 'By', 'Bz']].values,
+                         label='p',
+                         moverq=1)
     dist3D = dist3D.loc[dist3D['counts'] >= 2]
     # First, find speed at which to cut the distribution
     ratios, I1a_I1b, speed_cut, ratio_idx = find_speed_cut(I1a, I1b)
@@ -247,14 +258,14 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
 
     # Do a manual esimate of the proton number density
     proton_dist = helpers.dist_cut(dist3D, speed_cut + 1, 'below')
-    np_estimate = helpers.manual_np(proton_dist)  # , I1a)
+    np_beam = helpers.manual_nbeam(proton_dist, proton_bimax, params)
 
     # Cut out what we think is the alpha distribution
     # NOTE: this is in the instrument frame of reference and has no alpha
     # particle corrections applied
     alpha_dist = helpers.dist_cut(dist3D, speed_cut + 1)
     if alpha_dist.empty:
-        return check_output({}, 6, np_estimate)
+        return check_output({}, 6, np_beam)
     df = alpha_dist['pdf'].values
     vs = alpha_dist[['vx', 'vy', 'vz']].values
 
@@ -312,14 +323,14 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
             else:
                 status = 1
 
-    fit_dict = check_output(fit_dict, status, np_estimate)
+    fit_dict = check_output(fit_dict, status, np_beam)
     # If the radial component of velocity is lies outside the array of
     # experimental data, reject the fit as it is probably overfitted in the
     # radial direction
     if fit_dict['va_x'] < np.min(vs[:, 0]):
-        return check_output({}, 9, np_estimate)
+        return check_output({}, 9, np_beam)
 
-    fit_dict['n_p'] = np_estimate
+    fit_dict['np_beam'] = np_beam
 
     # If requested, visualise the resulting fit and original distributions
     if (args.plot and
