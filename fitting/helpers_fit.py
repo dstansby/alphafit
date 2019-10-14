@@ -3,20 +3,20 @@
 # David Stansby 2017
 from datetime import datetime, timedelta, time
 
+from scipy.integrate import simps
 import numpy as np
 import pandas as pd
 import astropy.units as u
 import astropy.constants as const
 
 
-def manual_np(df, df_1d=None):
+def manual_nbeam(df, bimax_proton, params):
     """
-    Do a manual numerical integration to estimate the number density.
+    Do a manual numerical integration to estimate the proton beam number
+    density.
 
-    Parameters
-    ----------
-    df_1d :
-        If not ``None`` will perform a visual 1D comparision.
+    bimax_proton : BiMax
+        Proton bi-Maxwellian.
     """
     # Hardcode dtheta and dphi
     # phis = np.unique(df['phi'].values)
@@ -29,34 +29,46 @@ def manual_np(df, df_1d=None):
     dtheta = 8.88372572e-02
     # assert np.allclose(dthetas[-1], dtheta)
 
-    estimate = df['pdf']
-    # Integrate over phi
-    estimate = estimate.groupby(level=['E_bin', 'El']).sum() * dphi
+    # Convet from SI to (km/s)^{-1} cm^{-3}
+    pdf = df['pdf'] * 1e3
+    vs = df['|v|'].groupby(level='E_bin').apply(np.median) / 1e3
+    # Multiply each point by the integration element
+    dist_1d = pdf * np.cos(df['theta']) * (df['|v|'] / 1e3)**2
+    # Integrate (ie. sum)
+    dist_1d = dist_1d.groupby(level=['E_bin']).sum() * dtheta * dphi
 
-    # Integrate over theta
-    thetas = df['theta'].groupby(level=['E_bin', 'El']).apply(np.median)
-    estimate *= np.cos(thetas)
-    estimate = estimate.groupby(level='E_bin').sum() * dtheta
+    # Extract velocities of the 1D distribution
+    vs = df['|v|'].groupby(level='E_bin').apply(np.median) / 1e3
 
-    vs = df['|v|'].groupby(level='E_bin').apply(np.median)
+    # Calculate the bimaxwellian sampled at the same 1D speeds
+    bimax_sampled = bimax_proton.integrated_1D(params, vs.values)
 
-    if df_1d is not None:
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        ax.plot(df_1d / df_1d.max())
-        estimate_1d = estimate * vs**2
-        ax.plot(vs / 1e3, estimate_1d / np.max(estimate_1d))
-        ax.set_yscale('log')
-        plt.show()
-        exit()
+    if dist_1d.size < 1:
+        return np.nan
+    ratio = dist_1d / bimax_sampled.values
+    keep = (ratio > 1) & (dist_1d.index > dist_1d.idxmax())
+    n_beam = np.trapz((dist_1d - bimax_sampled.values) * keep, x=vs)
 
-    # Integrate over v
-    estimate *= vs**2
-    estimate = np.trapz(estimate.values, x=vs.values)
+    """
+    fig, axs = plt.subplots(nrows=2, sharex=True)
+    ax = axs[0]
+    ax.plot(vs, estimate, lw=1, marker='o')
+    ax.plot(vs, bimax_sampled, lw=1, marker='o')
+    ax.set_yscale('log')
+    ax.set_ylim(bottom=1e-3)
 
-    # This is in 1/m^{3}, convert to 1/cm^{3}
-    estimate *= 1e-6
-    return estimate
+    ax = axs[1]
+    print(estimate.shape, bimax_sampled.shape)
+    ax.plot(vs, np.abs(estimate / bimax_sampled.values), lw=1, marker='o')
+    ax.axhline(1, color='k', lw=1, ls='-')
+    ax.axhline(2, color='k', lw=1, ls='--')
+    ax.set_yscale('log')
+    ax.set_ylim(top=1e4)
+    print(np.trapz(estimate - bimax_sampled.values, vs))
+    plt.show()
+    """
+
+    return n_beam
 
 
 def distribution_function_correction(vs, df, moverq):
