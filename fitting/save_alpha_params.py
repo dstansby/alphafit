@@ -60,7 +60,9 @@ status_dict = {1: 'Fitting successful',
 
 # Expected parameters from the fitting process
 expected_params = set(['Ta_perp', 'Ta_par', 'va_x',
-                       'va_y', 'va_z', 'n_a', 'Status', 'np_beam'])
+                       'va_y', 'va_z', 'n_a', 'Status', 'np_beam',
+                       'Ta_perp_err', 'Ta_par_err',
+                       'va_x_err', 'va_y_err', 'va_z_err', 'n_a_err'])
 
 
 def check_output(fit_dict, status, np_beam=np.nan):
@@ -90,7 +92,7 @@ def check_output(fit_dict, status, np_beam=np.nan):
             fit_dict[param] = np.nan
     fit_dict['Status'] = status
     fit_dict['np_beam'] = np_beam
-    assert set(fit_dict.keys()) == expected_params, 'Keys not as expected: {}'.format(fit_dict.keys())
+    assert set(fit_dict.keys()) == expected_params, f'Keys not as expected: {fit_dict.keys()}'
     return fit_dict
 
 
@@ -318,6 +320,8 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
             fit_dict = helpers.process_fitparams(popt, 'a', vs, magempty, params,
                                                  R, particle_mass=4)
             logger.info(f'Final parameters are {fit_dict}')
+            fit_err_dict = helpers.process_fit_errs(relerr, 'a')
+            fit_dict = {**fit_dict, **fit_err_dict}
             if magempty:
                 status = 2
             else:

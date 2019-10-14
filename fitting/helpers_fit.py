@@ -96,6 +96,20 @@ def _columndotproduct(v1, v2):
     return out
 
 
+def process_fit_errs(fiterrs, species):
+    fit_dict = {}
+    # Factor of two to convert from thermal speed error to temperature error
+    fit_dict['T' + species + '_perp_err'] = 2 * fiterrs[1]
+    fit_dict['T' + species + '_par_err'] = 2 * fiterrs[2]
+    fit_dict['n_' + species + '_err'] = np.sqrt(fiterrs[0]**2 +
+                                       2 * fiterrs[1]**2 +
+                                       fiterrs[2]**2)
+    fit_dict['v' + species + '_x_err'] = fiterrs[3]
+    fit_dict['v' + species + '_y_err'] = fiterrs[4]
+    fit_dict['v' + species + '_z_err'] = fiterrs[5]
+    return fit_dict
+
+
 def process_fitparams(fitparams, species, dist_vs, magempty, params, R,
                       particle_mass=1):
     '''
