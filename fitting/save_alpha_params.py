@@ -343,10 +343,10 @@ def fit_single_dist(probe, time, dist3D, I1a, I1b, corefit, params):
                   'fit_dict': fit_dict}
         from plot_fitted_dist_alphas import plot_dist, plot_angular_cuts
         import matplotlib.pyplot as plt
-        plot_angular_cuts(alpha_dist, fit_dict, R, m=4, moverq=2)
+        # plot_angular_cuts(alpha_dist, fit_dict, R, m=4, moverq=2)
         plot_dist(time, probe, dist3D, params, corefit, I1a, I1b,
                   **kwargs)
-        # plt.savefig('{}.png'.format(time))
+        # plt.savefig(f'./figures/{time}.png')
         plt.show()
 
     return fit_dict
@@ -365,11 +365,11 @@ def fit_rows(x):
             fit_dict = check_output({}, 5)
 
         dist3D = dists_3D.loc[time]
+        I1a = I1as.loc[time]
         if not (distparams.loc[time]['data_rate'] == 1):
-            np_estimate = helpers.manual_np(dist3D)
-            fit_dict = check_output({}, 4, np_estimate)
+            # np_beam = helpers.manual_np(dist3D, I1a)
+            fit_dict = check_output({}, 4)  # , np_beam)
         else:
-            I1a = I1as.loc[time]
             I1b = I1bs.loc[time]
             params = distparams.loc[time]
             fit_dict = fit_single_dist(probe, time, dist3D, I1a, I1b,
