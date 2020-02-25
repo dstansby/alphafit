@@ -26,6 +26,9 @@ would like the output data to be saved to
 
 Downloading original data files
 -------------------------------
+If you already have HelioPy installed and configured to look for data files,
+skip to step 3.
+
 1. Create a directory to store all of the original magnetic field and
 distribution function data files.
 2. Configure heliopy to look in this location for the data files. Create
